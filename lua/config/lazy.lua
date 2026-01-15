@@ -32,5 +32,6 @@ require("lazy").setup({
     { import = "plugins.surround" },
     { import = "plugins.sleuth" },
     { import = "plugins.todo-comments" },
+    { import = "plugins.various-textobjs" },
   },
 })

@@ -26,6 +26,7 @@
 | [auto-save.nvim](https://github.com/okuuva/auto-save.nvim) | Auto save |
 | [vim-sleuth](https://github.com/tpope/vim-sleuth) | Auto detect indent |
 | [todo-comments.nvim](https://github.com/folke/todo-comments.nvim) | Highlight TODO comments |
+| [nvim-various-textobjs](https://github.com/chrisgrieser/nvim-various-textobjs) | Additional text objects |
 
 ## Keymaps
 
@@ -96,6 +97,17 @@
 | `]t` | Next TODO |
 | `[t` | Previous TODO |
 
+### Text Objects (various-textobjs)
+
+| Key | Object |
+|-----|--------|
+| `ii`/`ai` | Indentation block |
+| `iS`/`aS` | Subword (camelCase) |
+| `in`/`an` | Number |
+| `iu`/`au` | URL |
+| `ik`/`ak` | Key |
+| `iv`/`av` | Value |
+
 ## Directory Structure
 
 ```
@@ -120,5 +132,6 @@
         ├── telescope.lua
         ├── todo-comments.lua
         ├── treesitter.lua
+        ├── various-textobjs.lua
         └── ufo.lua
 ```
