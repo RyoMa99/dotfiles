@@ -27,6 +27,11 @@
 | [vim-sleuth](https://github.com/tpope/vim-sleuth) | Auto detect indent |
 | [todo-comments.nvim](https://github.com/folke/todo-comments.nvim) | Highlight TODO comments |
 | [nvim-various-textobjs](https://github.com/chrisgrieser/nvim-various-textobjs) | Additional text objects |
+| [mason.nvim](https://github.com/williamboman/mason.nvim) | LSP server installer |
+| [nvim-lspconfig](https://github.com/neovim/nvim-lspconfig) | LSP configuration |
+| [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) | Completion engine |
+| [LuaSnip](https://github.com/L3MON4D3/LuaSnip) | Snippet engine |
+| [fidget.nvim](https://github.com/j-hui/fidget.nvim) | LSP progress UI |
 
 ## Keymaps
 
@@ -108,6 +113,31 @@
 | `ik`/`ak` | Key |
 | `iv`/`av` | Value |
 
+### LSP
+
+| Key | Action |
+|-----|--------|
+| `gd` | Go to definition |
+| `gD` | Go to declaration |
+| `gi` | Go to implementation |
+| `gr` | Go to references |
+| `K` | Hover documentation |
+| `<Space>rn` | Rename symbol |
+| `<Space>ca` | Code action |
+| `<Space>f` | Format |
+| `[d` | Previous diagnostic |
+| `]d` | Next diagnostic |
+
+### Completion
+
+| Key | Action |
+|-----|--------|
+| `<Tab>` | Next item / expand snippet |
+| `<S-Tab>` | Previous item |
+| `<CR>` | Confirm |
+| `<C-Space>` | Trigger completion |
+| `<C-e>` | Abort |
+
 ## Directory Structure
 
 ```
@@ -121,9 +151,13 @@
         ├── autopairs.lua
         ├── autosave.lua
         ├── barbar.lua
+        ├── cmp.lua
         ├── colorscheme.lua
+        ├── fidget.lua
         ├── flash.lua
+        ├── lspconfig.lua
         ├── lualine.lua
+        ├── mason.lua
         ├── nvim-tree.lua
         ├── oil.lua
         ├── sleuth.lua
@@ -132,6 +166,6 @@
         ├── telescope.lua
         ├── todo-comments.lua
         ├── treesitter.lua
-        ├── various-textobjs.lua
-        └── ufo.lua
+        ├── ufo.lua
+        └── various-textobjs.lua
 ```

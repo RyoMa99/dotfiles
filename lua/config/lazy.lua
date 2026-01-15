@@ -33,5 +33,9 @@ require("lazy").setup({
     { import = "plugins.sleuth" },
     { import = "plugins.todo-comments" },
     { import = "plugins.various-textobjs" },
+    { import = "plugins.mason" },
+    { import = "plugins.lspconfig" },
+    { import = "plugins.cmp" },
+    { import = "plugins.fidget" },
   },
 })
