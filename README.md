@@ -24,6 +24,7 @@
 | [nvim-autopairs](https://github.com/windwp/nvim-autopairs) | Auto close brackets |
 | [targets.vim](https://github.com/wellle/targets.vim) | Enhanced text objects |
 | [auto-save.nvim](https://github.com/okuuva/auto-save.nvim) | Auto save |
+| [vim-sleuth](https://github.com/tpope/vim-sleuth) | Auto detect indent |
 
 ## Keymaps
 
@@ -104,6 +105,7 @@
         ├── lualine.lua
         ├── nvim-tree.lua
         ├── oil.lua
+        ├── sleuth.lua
         ├── surround.lua
         ├── targets.lua
         ├── telescope.lua

@@ -30,5 +30,6 @@ require("lazy").setup({
     { import = "plugins.telescope" },
     { import = "plugins.flash" },
     { import = "plugins.surround" },
+    { import = "plugins.sleuth" },
   },
 })
