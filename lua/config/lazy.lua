@@ -37,5 +37,6 @@ require("lazy").setup({
     { import = "plugins.lspconfig" },
     { import = "plugins.cmp" },
     { import = "plugins.fidget" },
+    { import = "plugins.trouble" },
   },
 })

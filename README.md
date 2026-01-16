@@ -32,6 +32,7 @@
 | [nvim-cmp](https://github.com/hrsh7th/nvim-cmp) | Completion engine |
 | [LuaSnip](https://github.com/L3MON4D3/LuaSnip) | Snippet engine |
 | [fidget.nvim](https://github.com/j-hui/fidget.nvim) | LSP progress UI |
+| [trouble.nvim](https://github.com/folke/trouble.nvim) | Diagnostics list |
 
 ## Keymaps
 
@@ -138,6 +139,14 @@
 | `<C-Space>` | Trigger completion |
 | `<C-e>` | Abort |
 
+### Trouble
+
+| Key | Action |
+|-----|--------|
+| `<Space>xx` | Toggle all diagnostics |
+| `<Space>xd` | Toggle buffer diagnostics |
+| `<Space>xq` | Toggle quickfix |
+
 ## Directory Structure
 
 ```
@@ -166,6 +175,7 @@
         ├── telescope.lua
         ├── todo-comments.lua
         ├── treesitter.lua
+        ├── trouble.lua
         ├── ufo.lua
         └── various-textobjs.lua
 ```
