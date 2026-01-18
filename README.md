@@ -8,6 +8,7 @@
 - neovim-remote (for lazygit.nvim integration)
 - gh CLI (for octo.nvim)
 - deno (for peek.nvim)
+- Node.js (for textlint)
 - Nerd Font (for icons)
 
 ## Plugins
@@ -42,6 +43,7 @@
 | [diffview.nvim](https://github.com/sindrets/diffview.nvim) | Git diff / history viewer |
 | [octo.nvim](https://github.com/pwntester/octo.nvim) | GitHub PR / Issue manager |
 | [peek.nvim](https://github.com/toppair/peek.nvim) | Markdown preview |
+| [nvim-lint](https://github.com/mfussenegger/nvim-lint) | Linting (textlint for Japanese) |
 
 ## Keymaps
 
@@ -231,6 +233,7 @@
         ├── flash.lua
         ├── gitsigns.lua
         ├── lazygit.lua
+        ├── lint.lua
         ├── lspconfig.lua
         ├── lualine.lua
         ├── mason.lua

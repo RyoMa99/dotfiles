@@ -43,5 +43,6 @@ require("lazy").setup({
     { import = "plugins.diffview" },
     { import = "plugins.octo" },
     { import = "plugins.peek" },
+    { import = "plugins.lint" },
   },
 })

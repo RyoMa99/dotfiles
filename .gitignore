@@ -16,3 +16,6 @@ session/
 
 # Spell files
 spell/*.add.spl
+
+# Node modules (textlint)
+node_modules/
