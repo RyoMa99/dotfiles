@@ -14,6 +14,8 @@ return {
     { "<A-3>", "<cmd>BufferGoto 3<cr>", desc = "Go to buffer 3" },
     { "<A-4>", "<cmd>BufferGoto 4<cr>", desc = "Go to buffer 4" },
     { "<A-5>", "<cmd>BufferGoto 5<cr>", desc = "Go to buffer 5" },
+    { "<leader>bc", "<cmd>BufferCloseAllButCurrent<cr>", desc = "Close all but current" },
+    { "<leader>ba", "<cmd>BufferCloseAll<cr>", desc = "Close all buffers" },
   },
   opts = {
     animation = false,
