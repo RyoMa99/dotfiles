@@ -47,5 +47,6 @@ require("lazy").setup({
     { import = "plugins.noice" },
     { import = "plugins.claudecode" },
     { import = "plugins.which-key" },
+    { import = "plugins.overlook" },
   },
 })
