@@ -46,5 +46,6 @@ require("lazy").setup({
     { import = "plugins.lint" },
     { import = "plugins.noice" },
     { import = "plugins.claudecode" },
+    { import = "plugins.which-key" },
   },
 })
