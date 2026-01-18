@@ -14,7 +14,7 @@ return {
           peek.open()
         end
       end,
-      desc = "Toggle Markdown preview",
+      desc = "プレビュー切替",
     },
   },
   opts = {},

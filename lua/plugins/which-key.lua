@@ -10,13 +10,13 @@ return {
 
     -- グループのプレフィックス設定
     wk.add({
-      { "<leader>f", group = "Find (Telescope)" },
+      { "<leader>f", group = "検索" },
       { "<leader>g", group = "Git" },
-      { "<leader>x", group = "Diagnostics (Trouble)" },
-      { "<leader>o", group = "GitHub (Octo)" },
-      { "<leader>b", group = "Buffer" },
+      { "<leader>x", group = "診断" },
+      { "<leader>o", group = "GitHub" },
+      { "<leader>b", group = "バッファ" },
       { "<leader>m", group = "Markdown" },
-      { "<leader>a", group = "AI (Claude)" },
+      { "<leader>a", group = "AI" },
     })
   end,
   keys = {
@@ -25,7 +25,7 @@ return {
       function()
         require("which-key").show({ global = false })
       end,
-      desc = "Buffer Keymaps",
+      desc = "キーマップ一覧",
     },
   },
 }

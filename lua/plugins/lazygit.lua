@@ -12,7 +12,7 @@ return {
     "nvim-lua/plenary.nvim",
   },
   keys = {
-    { "<Leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit" },
+    { "<Leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit を開く" },
   },
   config = function()
     vim.g.lazygit_use_neovim_remote = 1

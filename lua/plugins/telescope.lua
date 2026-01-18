@@ -6,11 +6,11 @@ return {
   },
   cmd = "Telescope",
   keys = {
-    { "<Leader>ff", "<cmd>Telescope find_files<cr>", desc = "Find files" },
-    { "<Leader>fg", "<cmd>Telescope live_grep<cr>", desc = "Live grep" },
-    { "<Leader>fb", "<cmd>Telescope buffers<cr>", desc = "Buffers" },
-    { "<Leader>fh", "<cmd>Telescope help_tags<cr>", desc = "Help tags" },
-    { "<Leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "Recent files" },
+    { "<Leader>ff", "<cmd>Telescope find_files<cr>", desc = "ファイル検索" },
+    { "<Leader>fg", "<cmd>Telescope live_grep<cr>", desc = "文字列検索" },
+    { "<Leader>fb", "<cmd>Telescope buffers<cr>", desc = "バッファ一覧" },
+    { "<Leader>fh", "<cmd>Telescope help_tags<cr>", desc = "ヘルプ検索" },
+    { "<Leader>fr", "<cmd>Telescope oldfiles<cr>", desc = "最近のファイル" },
   },
   opts = {
     defaults = {

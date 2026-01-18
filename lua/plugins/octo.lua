@@ -7,9 +7,9 @@ return {
     "nvim-tree/nvim-web-devicons",
   },
   keys = {
-    { "<Leader>op", "<cmd>Octo pr list<cr>", desc = "List PRs" },
-    { "<Leader>oi", "<cmd>Octo issue list<cr>", desc = "List issues" },
-    { "<Leader>or", "<cmd>Octo review start<cr>", desc = "Start review" },
+    { "<Leader>op", "<cmd>Octo pr list<cr>", desc = "PR 一覧" },
+    { "<Leader>oi", "<cmd>Octo issue list<cr>", desc = "Issue 一覧" },
+    { "<Leader>or", "<cmd>Octo review start<cr>", desc = "レビュー開始" },
   },
   opts = {},
 }

@@ -3,7 +3,7 @@ return {
   dependencies = { "nvim-tree/nvim-web-devicons" },
   cmd = "Oil",
   keys = {
-    { "-", "<cmd>Oil<cr>", desc = "Open parent directory" },
+    { "-", "<cmd>Oil<cr>", desc = "親ディレクトリを開く" },
   },
   opts = {
     -- 隠しファイルを表示

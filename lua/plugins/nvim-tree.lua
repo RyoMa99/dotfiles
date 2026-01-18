@@ -2,7 +2,7 @@ return {
   "nvim-tree/nvim-tree.lua",
   dependencies = { "nvim-tree/nvim-web-devicons" },
   keys = {
-    { "<Leader>e", "<cmd>NvimTreeToggle<cr>", desc = "Toggle file explorer" },
+    { "<Leader>e", "<cmd>NvimTreeToggle<cr>", desc = "ファイルツリー切替" },
   },
   config = function()
     local api = require("nvim-tree.api")

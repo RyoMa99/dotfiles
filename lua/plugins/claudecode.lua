@@ -12,9 +12,9 @@ return {
     },
   },
   keys = {
-    { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "Send to Claude" },
-    { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "Add current buffer" },
-    { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "Accept diff" },
-    { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "Deny diff" },
+    { "<leader>as", "<cmd>ClaudeCodeSend<cr>", mode = "v", desc = "選択範囲を送信" },
+    { "<leader>ab", "<cmd>ClaudeCodeAdd %<cr>", desc = "バッファを追加" },
+    { "<leader>aa", "<cmd>ClaudeCodeDiffAccept<cr>", desc = "差分を承認" },
+    { "<leader>ad", "<cmd>ClaudeCodeDiffDeny<cr>", desc = "差分を拒否" },
   },
 }
