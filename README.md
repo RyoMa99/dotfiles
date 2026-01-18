@@ -147,6 +147,17 @@
 | `<Space>xd` | Toggle buffer diagnostics |
 | `<Space>xq` | Toggle quickfix |
 
+#### Inside Trouble panel
+
+| Key | Action |
+|-----|--------|
+| `j` / `k` | Navigate |
+| `Enter` | Jump and close |
+| `o` | Jump (keep open) |
+| `p` | Preview |
+| `q` | Close |
+| `s` | Sort by severity |
+
 ## Directory Structure
 
 ```
