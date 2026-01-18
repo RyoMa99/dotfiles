@@ -38,5 +38,6 @@ require("lazy").setup({
     { import = "plugins.cmp" },
     { import = "plugins.fidget" },
     { import = "plugins.trouble" },
+    { import = "plugins.lazygit" },
   },
 })

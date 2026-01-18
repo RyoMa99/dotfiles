@@ -4,6 +4,7 @@
 
 - Neovim >= 0.9
 - ripgrep (for telescope live_grep)
+- lazygit (for lazygit.nvim)
 - Nerd Font (for icons)
 
 ## Plugins
@@ -33,6 +34,7 @@
 | [LuaSnip](https://github.com/L3MON4D3/LuaSnip) | Snippet engine |
 | [fidget.nvim](https://github.com/j-hui/fidget.nvim) | LSP progress UI |
 | [trouble.nvim](https://github.com/folke/trouble.nvim) | Diagnostics list |
+| [lazygit.nvim](https://github.com/kdheepak/lazygit.nvim) | Git UI |
 
 ## Keymaps
 
@@ -158,6 +160,12 @@
 | `q` | Close |
 | `s` | Sort by severity |
 
+### Git
+
+| Key | Action |
+|-----|--------|
+| `<Space>gg` | Open LazyGit |
+
 ## Directory Structure
 
 ```
@@ -175,6 +183,7 @@
         ├── colorscheme.lua
         ├── fidget.lua
         ├── flash.lua
+        ├── lazygit.lua
         ├── lspconfig.lua
         ├── lualine.lua
         ├── mason.lua
