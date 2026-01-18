@@ -6,6 +6,7 @@
 - ripgrep (for telescope live_grep)
 - lazygit (for lazygit.nvim)
 - neovim-remote (for lazygit.nvim integration)
+- gh CLI (for octo.nvim)
 - Nerd Font (for icons)
 
 ## Plugins
@@ -38,6 +39,7 @@
 | [lazygit.nvim](https://github.com/kdheepak/lazygit.nvim) | Git UI |
 | [gitsigns.nvim](https://github.com/lewis6991/gitsigns.nvim) | Git signs / blame |
 | [diffview.nvim](https://github.com/sindrets/diffview.nvim) | Git diff / history viewer |
+| [octo.nvim](https://github.com/pwntester/octo.nvim) | GitHub PR / Issue manager |
 
 ## Keymaps
 
@@ -193,6 +195,14 @@
 | `<Space>gh` | File history |
 | `<Space>gH` | Branch history |
 
+### GitHub (octo)
+
+| Key | Action |
+|-----|--------|
+| `<Space>op` | List PRs |
+| `<Space>oi` | List issues |
+| `<Space>or` | Start review |
+
 ## Directory Structure
 
 ```
@@ -217,6 +227,7 @@
         ├── lualine.lua
         ├── mason.lua
         ├── nvim-tree.lua
+        ├── octo.lua
         ├── oil.lua
         ├── sleuth.lua
         ├── surround.lua

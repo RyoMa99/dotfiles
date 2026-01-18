@@ -41,5 +41,6 @@ require("lazy").setup({
     { import = "plugins.lazygit" },
     { import = "plugins.gitsigns" },
     { import = "plugins.diffview" },
+    { import = "plugins.octo" },
   },
 })
