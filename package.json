@@ -2,9 +2,6 @@
   "name": "nvim-tools",
   "private": true,
   "devDependencies": {
-    "@biomejs/biome": "^1.9.0",
-    "eslint": "^9.0.0",
-    "prettier": "^3.0.0",
     "textlint": "^14.0.0",
     "textlint-rule-preset-japanese": "^10.0.0",
     "textlint-rule-preset-ja-technical-writing": "^10.0.0",
