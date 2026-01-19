@@ -70,6 +70,15 @@ return {
     }
     vim.lsp.enable("gopls")
 
+    local nvim_dir = vim.fn.expand("~/.config/nvim")
+    vim.lsp.config.ts_ls = {
+      cmd = { nvim_dir .. "/node_modules/.bin/typescript-language-server", "--stdio" },
+      filetypes = { "typescript", "typescriptreact", "typescript.tsx", "javascript", "javascriptreact", "javascript.jsx" },
+      root_markers = { "tsconfig.json", "jsconfig.json", "package.json", ".git" },
+      capabilities = capabilities,
+    }
+    vim.lsp.enable("ts_ls")
+
     -- Go: 保存時に goimports + format を実行
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.go",
