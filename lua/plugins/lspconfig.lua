@@ -17,7 +17,6 @@ return {
         vim.keymap.set("n", "gD", vim.lsp.buf.declaration, opts)
         vim.keymap.set("n", "gi", vim.lsp.buf.implementation, opts)
         vim.keymap.set("n", "gr", vim.lsp.buf.references, opts)
-        vim.keymap.set("n", "K", vim.lsp.buf.hover, opts)
         vim.keymap.set("n", "<Leader>rn", vim.lsp.buf.rename, opts)
         vim.keymap.set("n", "<Leader>ca", vim.lsp.buf.code_action, opts)
         vim.keymap.set("n", "<Leader>f", function()
@@ -78,6 +77,29 @@ return {
       capabilities = capabilities,
     }
     vim.lsp.enable("ts_ls")
+
+    vim.lsp.config.tailwindcss = {
+      cmd = { "tailwindcss-language-server", "--stdio" },
+      filetypes = { "html", "css", "scss", "javascript", "javascriptreact", "typescript", "typescriptreact" },
+      root_markers = { "tailwind.config.js", "tailwind.config.cjs", "tailwind.config.mjs", "tailwind.config.ts", "postcss.config.js", "postcss.config.cjs", "postcss.config.mjs", "postcss.config.ts" },
+      capabilities = capabilities,
+      settings = {
+        tailwindCSS = {
+          classAttributes = { "class", "className", "classList", "ngClass" },
+          lint = {
+            cssConflict = "warning",
+            invalidApply = "error",
+            invalidScreen = "error",
+            invalidVariant = "error",
+            invalidConfigPath = "error",
+            invalidTailwindDirective = "error",
+            recommendedVariantOrder = "warning",
+          },
+          validate = true,
+        },
+      },
+    }
+    vim.lsp.enable("tailwindcss")
 
     -- Go: 保存時に goimports + format を実行
     vim.api.nvim_create_autocmd("BufWritePre", {

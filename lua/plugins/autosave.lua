@@ -12,13 +12,5 @@ return {
   },
   config = function(_, opts)
     require("auto-save").setup(opts)
-
-    -- 保存時にメッセージを表示（カスタム実装）
-    vim.api.nvim_create_autocmd("User", {
-      pattern = "AutoSaveWritePost",
-      callback = function()
-        vim.notify("AutoSave: saved at " .. vim.fn.strftime("%H:%M:%S"), vim.log.levels.INFO)
-      end,
-    })
   end,
 }

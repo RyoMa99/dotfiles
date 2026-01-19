@@ -22,8 +22,9 @@ return {
         "yaml",
         "markdown",
         "markdown_inline",
-       "html",
+        "html",
         "css",
+        "tsx",
       },
 
       -- 自動インストールを有効化

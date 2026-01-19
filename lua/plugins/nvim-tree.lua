@@ -5,14 +5,7 @@ return {
     { "<Leader>e", "<cmd>NvimTreeToggle<cr>", desc = "ファイルツリー切替" },
   },
   config = function()
-    local api = require("nvim-tree.api")
-
-    local function on_attach(bufnr)
-      api.config.mappings.default_on_attach(bufnr)
-    end
-
     require("nvim-tree").setup({
-      on_attach = on_attach,
       filters = {
         dotfiles = false,
       },

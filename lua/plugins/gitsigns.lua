@@ -21,7 +21,7 @@ return {
         else
           gitsigns.nav_hunk("next")
         end
-      end, opts)
+      end, { buffer = bufnr, desc = "次の変更へ" })
 
       vim.keymap.set("n", "[c", function()
         if vim.wo.diff then
@@ -29,7 +29,7 @@ return {
         else
           gitsigns.nav_hunk("prev")
         end
-      end, opts)
+      end, { buffer = bufnr, desc = "前の変更へ" })
 
       -- Actions
       vim.keymap.set("n", "<Leader>gs", gitsigns.stage_hunk, { buffer = bufnr, desc = "変更をステージ" })

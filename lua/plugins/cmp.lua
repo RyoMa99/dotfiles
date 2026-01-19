@@ -8,6 +8,7 @@ return {
     "hrsh7th/cmp-cmdline",
     "L3MON4D3/LuaSnip",
     "saadparwaiz1/cmp_luasnip",
+    "roobert/tailwindcss-colorizer-cmp.nvim",
   },
   config = function()
     local cmp = require("cmp")
@@ -51,6 +52,20 @@ return {
         { name = "buffer" },
         { name = "path" },
       }),
+      formatting = {
+        format = function(entry, vim_item)
+          vim_item.menu = ({
+            nvim_lsp = "[LSP]",
+            luasnip = "[Snippet]",
+            buffer = "[Buffer]",
+            path = "[Path]",
+          })[entry.source.name]
+          return require("tailwindcss-colorizer-cmp").formatter(entry, vim_item)
+        end,
+      },
+      experimental = {
+        ghost_text = true,
+      },
     })
 
     -- `/` 検索補完

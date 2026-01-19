@@ -17,6 +17,9 @@ return {
       { "<leader>b", group = "バッファ" },
       { "<leader>m", group = "Markdown" },
       { "<leader>a", group = "AI" },
+      { "<leader>c", group = "コード" },
+      { "<leader>r", group = "リファクタ" },
+      { "<leader>t", group = "トグル" },
     })
   end,
   keys = {

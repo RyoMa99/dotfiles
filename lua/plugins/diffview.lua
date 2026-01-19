@@ -9,10 +9,10 @@ return {
   opts = {
     keymaps = {
       view = {
-        { "n", "<leader>e", "<cmd>DiffviewToggleFiles<cr>", { desc = "ファイルパネル切替" } },
+        { "n", "<leader>E", "<cmd>DiffviewToggleFiles<cr>", { desc = "ファイルパネル切替" } },
       },
       file_panel = {
-        { "n", "<leader>e", "<cmd>DiffviewToggleFiles<cr>", { desc = "ファイルパネル切替" } },
+        { "n", "<leader>E", "<cmd>DiffviewToggleFiles<cr>", { desc = "ファイルパネル切替" } },
       },
     },
   },
