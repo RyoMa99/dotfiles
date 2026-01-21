@@ -65,4 +65,3 @@ vim.keymap.set("n", "<Leader>tw", "<cmd>set wrap!<cr>", { desc = "折り返し�
 
 -- lazy.nvim
 require("config.lazy")
-
