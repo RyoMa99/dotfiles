@@ -13,6 +13,7 @@ return {
   },
   keys = {
     { "<Leader>gg", "<cmd>LazyGit<cr>", desc = "LazyGit を開く" },
+    { "<Leader>gf", "<cmd>!git fetch --all<cr>", desc = "Git fetch all" },
   },
   config = function()
     vim.g.lazygit_use_neovim_remote = 1
