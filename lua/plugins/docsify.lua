@@ -78,7 +78,8 @@ return {
         end
 
         local file_path = vim.fn.expand("%:p")
-        local relative = file_path:gsub(git_root .. "/", "")        local port = get_port(git_root)
+        local relative = file_path:gsub(git_root .. "/", "")
+        local port = get_port(git_root)
 
         vim.fn.jobstart({ "open", "http://localhost:" .. port .. "/#/" .. relative }, { detach = true })
       end,
