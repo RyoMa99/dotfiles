@@ -49,5 +49,7 @@ require("lazy").setup({
     { import = "plugins.claudecode" },
     { import = "plugins.which-key" },
     { import = "plugins.overlook" },
+    { import = "plugins.gitlinker" },
+    { import = "plugins.docsify" },
   },
 })
