@@ -58,10 +58,12 @@ return {
         end
 
         local port = get_port(git_root)
+        local file_path = vim.fn.expand("%:p")
+        local relative = file_path:gsub(git_root .. "/", ""):gsub("%.md$", "")
 
         vim.fn.jobstart({ docsify_bin, "serve", git_root, "--port", tostring(port), "--index-name", "docsify.html" })
         vim.defer_fn(function()
-          vim.fn.jobstart({ "open", "http://localhost:" .. port }, { detach = true })
+          vim.fn.jobstart({ "open", "http://localhost:" .. port .. "/#/" .. relative }, { detach = true })
         end, 1000)
         vim.notify("Docsify started on port " .. port, vim.log.levels.INFO)
       end,
