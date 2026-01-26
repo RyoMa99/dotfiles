@@ -186,17 +186,33 @@ return {
         local filename = vim.api.nvim_buf_get_name(bufnr)
         local bin
 
+        -- 現在のバッファ内容を一時ファイルに書き出してフォーマット
+        local lines = vim.api.nvim_buf_get_lines(bufnr, 0, -1, false)
+        local content = table.concat(lines, "\n")
+
         if has_biome() then
           bin = find_bin("biome", { "biome.json", "biome.jsonc" })
           if bin then
-            vim.fn.system(bin .. " format --write " .. vim.fn.shellescape(filename))
-            vim.cmd("edit!")
+            local formatted = vim.fn.system(bin .. " format --stdin-file-path=" .. vim.fn.shellescape(filename), content)
+            if vim.v.shell_error == 0 then
+              local new_lines = vim.split(formatted, "\n", { plain = true })
+              if new_lines[#new_lines] == "" then
+                table.remove(new_lines)
+              end
+              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
+            end
           end
         elseif has_prettier() then
           bin = find_bin("prettier", { ".prettierrc", ".prettierrc.js", ".prettierrc.cjs", ".prettierrc.json", ".prettierrc.yml", "prettier.config.js", "prettier.config.cjs" })
           if bin then
-            vim.fn.system(bin .. " --write " .. vim.fn.shellescape(filename))
-            vim.cmd("edit!")
+            local formatted = vim.fn.system(bin .. " --stdin-filepath " .. vim.fn.shellescape(filename), content)
+            if vim.v.shell_error == 0 then
+              local new_lines = vim.split(formatted, "\n", { plain = true })
+              if new_lines[#new_lines] == "" then
+                table.remove(new_lines)
+              end
+              vim.api.nvim_buf_set_lines(bufnr, 0, -1, false, new_lines)
+            end
           end
         end
       end,

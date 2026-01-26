@@ -9,7 +9,7 @@ return {
   keys = {
     { "<Leader>op", "<cmd>Octo pr search review-requested:@me is:open<cr>", desc = "レビュー依頼PR一覧" },
     { "<Leader>oc", "<cmd>Octo pr create<cr>", desc = "PR 作成" },
-    { "<Leader>oo", "<cmd>Octo pr search review-requested:@me is:open<cr>", desc = "レビュー依頼PR checkout" },
+    { "<Leader>ok", "<cmd>Octo pr checkout<cr>", desc = "PRブランチにチェックアウト" },
     { "<Leader>oi", "<cmd>Octo issue list<cr>", desc = "Issue 一覧" },
     { "<Leader>or", "<cmd>Octo review start<cr>", desc = "レビュー開始" },
     { "<Leader>oR", "<cmd>Octo review resume<cr>", desc = "レビュー再開" },
