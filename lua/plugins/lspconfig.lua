@@ -100,6 +100,22 @@ return {
     }
     vim.lsp.enable("tailwindcss")
 
+    vim.lsp.config.terraformls = {
+      cmd = { "terraform-ls", "serve" },
+      filetypes = { "terraform", "terraform-vars" },
+      root_markers = { ".terraform", "*.tf", ".git" },
+      capabilities = capabilities,
+    }
+    vim.lsp.enable("terraformls")
+
+    -- Terraform: 保存時に terraform fmt を実行
+    vim.api.nvim_create_autocmd("BufWritePre", {
+      pattern = { "*.tf", "*.tfvars" },
+      callback = function()
+        vim.lsp.buf.format({ async = false })
+      end,
+    })
+
     -- Go: 保存時に goimports + format を実行
     vim.api.nvim_create_autocmd("BufWritePre", {
       pattern = "*.go",
