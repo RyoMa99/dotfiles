@@ -13,7 +13,7 @@ return {
         end
         local nvim_dir = vim.fn.expand("~/.config/nvim")
         local docsify_bin = nvim_dir .. "/node_modules/.bin/docsify"
-        local index_html = git_root .. "/index.html"
+        local index_html = git_root .. "/docsify.html"
 
         -- ディレクトリパスからポート番号を生成（3000-3999の範囲）
         local function get_port(path)
@@ -52,7 +52,7 @@ return {
 
         local port = get_port(git_root)
 
-        vim.fn.jobstart({ docsify_bin, "serve", git_root, "--port", tostring(port) }, { detach = true })
+        vim.fn.jobstart({ docsify_bin, "serve", git_root, "--port", tostring(port), "--index-name", "docsify.html" }, { detach = true })
         vim.defer_fn(function()
           vim.fn.jobstart({ "open", "http://localhost:" .. port }, { detach = true })
         end, 1000)
