@@ -52,7 +52,7 @@ return {
 
         local port = get_port(git_root)
 
-        vim.fn.jobstart({ docsify_bin, "serve", git_root, "--port", tostring(port), "--index-name", "docsify.html" }, { detach = true })
+        vim.fn.jobstart({ docsify_bin, "serve", git_root, "--port", tostring(port), "--index-name", "docsify.html" })
         vim.defer_fn(function()
           vim.fn.jobstart({ "open", "http://localhost:" .. port }, { detach = true })
         end, 1000)
