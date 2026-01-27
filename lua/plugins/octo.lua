@@ -62,9 +62,9 @@ return {
           open_in_browser = { lhs = "<Leader>ob", desc = "ブラウザで開く" },
         },
         submit_win = {
-          approve_review = { lhs = "<C-a>", desc = "Approve" },
-          comment_review = { lhs = "<C-m>", desc = "Comment のみ" },
-          request_changes = { lhs = "<C-r>", desc = "Request changes" },
+          approve_review = { lhs = "<C-a>", desc = "承認" },
+          comment_review = { lhs = "<C-m>", desc = "コメントのみ" },
+          request_changes = { lhs = "<C-r>", desc = "変更を要求" },
         },
       },
     })

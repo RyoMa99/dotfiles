@@ -20,6 +20,10 @@ return {
       { "<leader>c", group = "コード" },
       { "<leader>r", group = "リファクタ" },
       { "<leader>t", group = "トグル" },
+      { "g", group = "移動/定義" },
+      { "z", group = "折りたたみ" },
+      { "[", group = "前へ移動" },
+      { "]", group = "次へ移動" },
     })
   end,
   keys = {
@@ -29,6 +33,11 @@ return {
         require("which-key").show({ global = false })
       end,
       desc = "キーマップ一覧",
+    },
+    {
+      "<leader>k",
+      "<cmd>WhichKey<cr>",
+      desc = "全キーマップ表示",
     },
   },
 }
