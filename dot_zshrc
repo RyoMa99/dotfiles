@@ -38,15 +38,16 @@ function history-selection() {
 zle -N history-selection
 bindkey "^R" history-selection
 
+## Homebrew prefix (cache to avoid repeated subprocess calls)
+BREW_PREFIX="$(brew --prefix)"
+
 ## auto suggestions
 ## cf. https://github.com/zsh-users/zsh-autosuggestions
-source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+source "$BREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
 
 ## completions
 ## cf. https://github.com/zsh-users/zsh-completions
-if type brew &>/dev/null; then
-	FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-fi
+FPATH="$BREW_PREFIX/share/zsh-completions:$FPATH"
 fpath=(${HOME}/.docker/completions $fpath)
 autoload bashcompinit && bashcompinit
 autoload -Uz compinit && compinit
@@ -133,5 +134,5 @@ alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行�
 
 ## syntax highlight (must be at the end of .zshrc)
 ## cf. https://github.com/zsh-users/zsh-syntax-highlighting
-source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
