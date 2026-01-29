@@ -124,10 +124,12 @@ ghcr() {
 ## cf. https://azukiazusa.dev/blog/enable-claude-code-tool-search-to-reduce-mcp-token-usage/
 export ENABLE_TOOL_SEARCH=true
 
-## clipboard
-alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
+## iterm2
 ## cf. https://github.com/mozumasu/dotfiles/blob/main/.config/wezterm/keymaps.lua#L222
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
+
+## clipboard
+alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
 alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
 
 ## java (JAVA_HOME is set via ~/.config/mise/config.toml)
