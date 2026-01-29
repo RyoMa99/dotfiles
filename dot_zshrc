@@ -46,10 +46,11 @@ source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
 ## cf. https://github.com/zsh-users/zsh-completions
 if type brew &>/dev/null; then
 	FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
-	autoload bashcompinit && bashcompinit
-	autoload -Uz compinit && compinit
-	complete -C "$(mise where awscli)/bin/aws_completer" aws
 fi
+fpath=(${HOME}/.docker/completions $fpath)
+autoload bashcompinit && bashcompinit
+autoload -Uz compinit && compinit
+complete -C "$(mise where awscli)/bin/aws_completer" aws
 
 
 # better cd
@@ -128,11 +129,6 @@ alias cb='pbcopy'                           # パイプでコピー: echo "test"
 ## cf. https://github.com/mozumasu/dotfiles/blob/main/.config/wezterm/keymaps.lua#L222
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
 alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
-
-# The following lines have been added by Docker Desktop to enable Docker CLI completions.
-fpath=(/Users/rym/.docker/completions $fpath)
-autoload -Uz compinit
-compinit
 
 ## java (JAVA_HOME is set via ~/.config/mise/config.toml)
 
