@@ -1,0 +1,46 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git:*)",
+      "Bash(gh:*)",
+      "Bash(npm run:*)",
+      "Bash(pnpm:*)",
+      "Bash(npx:*)"
+    ],
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(rm --recursive --force:*)"
+    ]
+  },
+  "hooks": {
+    "Stop": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/rym/.claude/hooks/iterate-stop-hook.sh"
+          }
+        ]
+      }
+    ],
+    "UserPromptSubmit": [
+      {
+        "matcher": "",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "/Users/rym/.claude/hooks/skill-eval-hook.sh"
+          }
+        ]
+      }
+    ]
+  },
+  "mcpServers": {
+    "context7": {
+      "type": "stdio",
+      "command": "npx",
+      "args": ["-y", "@upstash/context7-mcp"]
+    }
+  }
+}
