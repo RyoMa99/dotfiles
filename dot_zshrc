@@ -67,7 +67,6 @@ eval "$(starship init zsh)"
 # mise
 # cf. https://mise.jdx.dev/getting-started.html
 eval "$(mise activate zsh)"              # フック・自動バージョン切替を有効化
-[[ -n $CLAUDECODE ]] && unalias cd     # Claude Code内では組み込みcdを使用
 
 # set GOPATH
 export GOPATH=$(go env GOROOT)/..
