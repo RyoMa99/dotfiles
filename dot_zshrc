@@ -69,10 +69,9 @@ eval "$(starship init zsh)"
 # cf. https://mise.jdx.dev/getting-started.html
 eval "$(mise activate zsh)"              # フック・自動バージョン切替を有効化
 
-# set GOPATH
-export GOPATH=$(go env GOROOT)/..
-## set go command
-export PATH="$(go env GOPATH)/bin:$PATH"
+# Go
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
 
 # alias
 ## git
