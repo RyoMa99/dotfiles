@@ -1,0 +1,64 @@
+format = """
+$directory\
+$fill\
+$git_branch\
+$git_status\
+$git_state\
+\n$character\
+"""
+
+# aws
+# terraform
+# docker
+right_format = """
+$golang\
+$nodejs\
+"""
+
+continuation_prompt = '[/](fg:cyan)'
+
+[directory]
+home_symbol = ' ~'
+truncation_length = 5
+truncation_symbol = '.../ '
+truncate_to_repo = false
+read_only = " 󰌾"
+format = '[$path](fg:cyan)[$read_only](fg:red) '
+
+[character]
+success_symbol = "[\\$](green)"
+error_symbol = "[\\$](red)"
+
+[fill]
+symbol = '─'
+style = 'cyan'
+
+[git_branch]
+truncation_length = 30
+truncation_symbol = '…'
+format = ' [\[$symbol$branch(:$remote_branch)\]](fg:blue)'
+
+[git_status]
+conflicted = '[󱃞](fg:red)'
+stashed = '[](fg:yellow)'
+deleted = '[󰺝](fg:yellow)'
+renamed = '[](fg:yellow)'
+modified = '[󰲶](fg:yellow)'
+staged = '[++\($count\)](fg:cyan)'
+untracked = '[󰢤](fg:yellow)'
+ahead = ' [⇡${count}](fg:cyan)'
+behind = ' [⇣${count}](fg:red)'
+up_to_date = ' [✓](fg:green)'
+style = 'fg:blue'
+
+[git_state]
+format = '[\[$state($progress_current/$progress_total)\]](fg:yellow)'
+
+[golang]
+format = '[$symbol $version](fg:cyan)'
+symbol = ''
+
+[nodejs]
+style = "fg:green"
+format = " [$symbol$version]($style)"
+

@@ -1,0 +1,7 @@
+[ghq]
+  root = ~/repo
+[user]
+	email = hatanakaryoma.130@gmail.com
+	name = rym49
+[fetch]
+	prune = true
