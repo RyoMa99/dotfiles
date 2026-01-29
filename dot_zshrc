@@ -1,0 +1,143 @@
+# zsh customize
+setopt nobeep                 # ビープ音を鳴らさない
+setopt auto_param_keys        # カッコを自動補完
+setopt auto_param_slash       # ディレクトリ名の補完で末尾の / を自動的に付加し、次の補完に備える
+setopt mark_dirs              # ファイル名の展開でディレクトリにマッチした場合 末尾に / を付加
+setopt correct                # スペルミス訂正
+setopt interactive_comments   # コマンドラインでも # 以降をコメントと見なす
+setopt magic_equal_subst      # コマンドラインの引数で --prefix=/usr などの = 以降でも補完できる
+
+## history
+## cf. https://zenn.dev/shota1995m/scraps/6ab5ee50a32cdb
+HISTFILE=~/.zsh_history
+HISTSIZE=10000 #メモリ上に保存する履歴の数
+SAVEHIST=10000 #履歴ファイルに保存されるイベントの最大数
+setopt share_history          # ヒストリの読み出しと書き込みを同時に行う
+setopt extended_history       # ヒストリにコマンド実行時間を含める
+setopt hist_expire_dups_first # ヒストリが削られる場合、以前入力した同じものを先に削除する
+setopt hist_ignore_dups       # 直前のコマンドと同じコマンドはヒストリに保存しない
+setopt hist_ignore_all_dups   # 以前と同じコマンドはヒストリに保存しない
+setopt hist_find_no_dups      # ヒストリ検索時に以前見たものを2度は表示しない
+setopt hist_save_no_dups      # ヒストリファイルに書き出すときに以前のコマンドと同じものを除去する
+
+### 履歴補完 
+### cf. https://zenn.dev/naoki_oshiumi/articles/c8a9a727b3e784
+autoload history-search-end
+zle -N history-beginning-search-backward-end history-search-end
+zle -N history-beginning-search-forward-end history-search-end
+bindkey "^[k" history-beginning-search-backward-end
+bindkey "^[j" history-beginning-search-forward-end
+
+### 履歴検索
+### cf. https://qiita.com/chatrate/items/02ad97b604722c6a8551
+function history-selection() {
+    BUFFER=`history -n 1 | tail -r  | awk '!a[$0]++' | fzf`
+    CURSOR=$#BUFFER
+    zle reset-prompt
+}
+zle -N history-selection
+bindkey "^R" history-selection
+
+## auto suggestions
+## cf. https://github.com/zsh-users/zsh-autosuggestions
+source $(brew --prefix)/share/zsh-autosuggestions/zsh-autosuggestions.zsh
+
+## completions
+## cf. https://github.com/zsh-users/zsh-completions
+if type brew &>/dev/null; then
+	FPATH=$(brew --prefix)/share/zsh-completions:$FPATH
+	autoload bashcompinit && bashcompinit
+	autoload -Uz compinit && compinit
+	complete -C "$(mise where awscli)/bin/aws_completer" aws
+fi
+
+
+# better cd
+# cf. https://github.com/ajeetdsouza/zoxide
+eval "$(zoxide init zsh)"
+alias cd='z'
+alias cdi='zi'
+[[ -n $CLAUDECODE ]] && unalias cd  # Claude Code内では組み込みcdを使用
+
+
+# prompt
+# cf. https://starship.rs/ja-JP/
+eval "$(starship init zsh)"
+
+# mise
+# cf. https://mise.jdx.dev/getting-started.html
+eval "$(mise activate zsh)"              # フック・自動バージョン切替を有効化
+[[ -n $CLAUDECODE ]] && unalias cd     # Claude Code内では組み込みcdを使用
+
+# set GOPATH
+export GOPATH=$(go env GOROOT)/..
+## set go command
+export PATH="$(go env GOPATH)/bin:$PATH"
+
+# alias
+## git
+alias g='git'
+alias gf='git fetch'
+alias gw='git switch'
+alias gwc='git switch -c'
+alias gww='branch=$(git branch | fzf | sed "s/^[* ] //"); [ -n $branch ] && git switch $branch'
+alias gbr="git branch -vv | grep ': gone]' | awk '{print \$1}' | xargs git branch -D"
+alias gpl='git pull'
+alias gp='git push origin head'
+alias ga='git add'
+alias gaa='git add --all'
+alias gs='git status'
+alias gsh='git show'
+alias gd='git diff HEAD'
+alias gds='git diff --cached'
+alias gc='git commit -m'
+alias gt='git stash'
+alias gtp='git stash pop'
+alias gl='git log --all --oneline'
+alias glg='git log --graph --all --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset"'
+alias gwt='git worktree'
+alias gwtl='git worktree list'
+
+## ファイル検索
+alias l='nnn'
+
+## リポジトリ移動
+alias repo='repo=$(ghq list | ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo"'
+alias dev='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo" && code .'
+alias view='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && gh repo view "$repo" --web'
+ghcr() {
+  local visibility="--public"
+  local repo_name=""
+
+  for arg in "$@"; do
+    case "$arg" in
+      --private) visibility="--private" ;;
+      --public)  visibility="--public" ;;
+      *)         repo_name="$arg" ;;
+    esac
+  done
+
+  [ -n "$repo_name" ] && gh repo create "$repo_name" $visibility && ghq get https://github.com/RyoMa99/"$repo_name".git
+}
+
+## claude
+## cf. https://azukiazusa.dev/blog/enable-claude-code-tool-search-to-reduce-mcp-token-usage/
+export ENABLE_TOOL_SEARCH=true
+
+## clipboard
+alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
+## cf. https://github.com/mozumasu/dotfiles/blob/main/.config/wezterm/keymaps.lua#L222
+test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
+alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
+
+# The following lines have been added by Docker Desktop to enable Docker CLI completions.
+fpath=(/Users/rym/.docker/completions $fpath)
+autoload -Uz compinit
+compinit
+
+## java (JAVA_HOME is set via ~/.config/mise/config.toml)
+
+## syntax highlight (must be at the end of .zshrc)
+## cf. https://github.com/zsh-users/zsh-syntax-highlighting
+source /opt/homebrew/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh
+
