@@ -1,0 +1,2 @@
+[env]
+JAVA_HOME = "{{exec(command='mise where java')}}"
