@@ -132,8 +132,6 @@ test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell
 alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
 alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
 
-## java (JAVA_HOME is set via ~/.config/mise/config.toml)
-
 ## syntax highlight (must be at the end of .zshrc)
 ## cf. https://github.com/zsh-users/zsh-syntax-highlighting
 source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
