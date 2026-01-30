@@ -4,6 +4,11 @@
 
 set -euo pipefail
 
+if ! command -v lazygit &>/dev/null; then
+    echo "lazygit not found, skipping symlink setup" >&2
+    exit 0
+fi
+
 SOURCE="$HOME/.config/lazygit/config.yml"
 TARGET_DIR="$(lazygit -cd)"
 TARGET="$TARGET_DIR/config.yml"
