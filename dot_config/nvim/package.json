@@ -1,0 +1,10 @@
+{
+  "name": "nvim-tools",
+  "private": true,
+  "devDependencies": {
+    "docsify-cli": "^4.4.4",
+    "textlint": "^14.0.0",
+    "textlint-rule-preset-ja-technical-writing": "^10.0.0",
+    "textlint-rule-preset-japanese": "^10.0.0"
+  }
+}

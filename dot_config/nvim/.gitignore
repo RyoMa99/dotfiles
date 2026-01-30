@@ -1,0 +1,21 @@
+# Neovim cache and state
+.luarc.json
+
+# Undo files
+undo/
+
+# Session files
+session/
+
+# Swap files (usually in ~/.local/state/nvim/swap)
+*.swp
+*.swo
+
+# macOS
+.DS_Store
+
+# Spell files
+spell/*.add.spl
+
+# Node modules (textlint)
+node_modules/
