@@ -2,11 +2,13 @@
 
 ## 作業フロー
 
-1. **計画**: 作業を始める前に `/planning` で計画を立てる
-2. **タスク登録**: 計画をTaskCreate/TaskUpdateでタスク管理システムに登録
-3. **承認**: ユーザーの承認を得てから実装開始
-4. **実装**: `/TDD` でRED-GREEN-REFACTORサイクルを実行
-5. **検証**: 完了前に `superpowers:verification-before-completion` で品質チェック
+1. **設計**: `superpowers:brainstorming` でアイデアを設計に変換
+2. **調査**: 既存プロジェクトの場合、`/planning` でコードベース調査（Serena + grepai）
+3. **計画**: `superpowers:writing-plans` で実装計画を作成
+4. **承認**: ユーザーの承認を得てから実装開始
+5. **実装**: `superpowers:subagent-driven-development` または `/TDD` で実装
+6. **検証**: 完了前に `superpowers:verification-before-completion` で品質チェック
+7. **完了**: `superpowers:finishing-a-development-branch` でマージ/PR
 
 ## コード品質
 

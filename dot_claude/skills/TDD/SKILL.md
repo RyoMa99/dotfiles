@@ -1,6 +1,6 @@
 ---
 name: TDD
-description: TDDで開発を進める。RED-GREEN-REFACTORサイクルを厳格に適用し、コンテキスト汚染を防止。
+description: TDDで開発を進める。RED-GREEN-REFACTORサイクルを厳格に適用し、コンテキスト汚染を防止。superpowers:test-driven-development の補完。
 disable-model-invocation: true
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 ---
@@ -9,6 +9,11 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 
 テスト駆動開発（TDD）のワークフローを厳格にガイドするスキル。
 
+**superpowers:test-driven-development** の鉄の法則に従いつつ、以下を追加で提供する：
+- VERIFY ループ（型チェック・リント・テストの自動検証、最大3回）
+- コミットルール（test/feat/refactor の分離）
+- t_wada のテスト原則との統合
+
 詳細なテスト原則は @reference.md と @~/.claude/rules/testing.md を参照。
 
 ## When to Use This Skill
@@ -16,9 +21,13 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 Trigger when user:
 - `/TDD` コマンドを実行
 - 「TDDで開発して」「テスト駆動で」と依頼
-- `/planning` 完了後の実装フェーズ
+- `superpowers:subagent-driven-development` 内で個別タスクをTDDで実装する場合
 
 ## 核心原則
+
+### 鉄の法則（superpowers:test-driven-development と共通）
+
+> **失敗するテストなしに、プロダクションコードを書かない**
 
 ### TDDの目的（t_wada）
 
@@ -40,25 +49,11 @@ Trigger when user:
 
 **対策**: テストは**要件**に基づいて書く、実装を見ない
 
-### RED-GREEN-REFACTOR サイクル
-
-```
-RED: テストを書く → 失敗を確認（必須）
-  ↓
-GREEN: 最小限の実装 → 成功を確認
-  ↓
-REFACTOR: リファクタ → 成功を維持
-  ↓
-次のテストへ（繰り返し）
-```
-
 ---
 
 ## 実装フロー
 
 ### Phase 0: 終了条件の明確化
-
-**⚠️ 必須: TDDサイクルを開始する前に、終了条件を明確にする**
 
 ```markdown
 ## 終了条件
@@ -97,41 +92,22 @@ So that サービスを利用できる
 - [ ] 空文字でfalseを返すこと
 ```
 
-**⚠️ 重要: 実装の詳細ではなく、ユーザーが見える動作をテストする**
+**重要: 実装の詳細ではなく、ユーザーが見える動作をテストする**
 
 #### 1.3 テストファイルの準備
 
-テストリスト（1.2のチェックリスト）をもとに、空の `describe` ブロックだけ作成する。
+テストリストをもとに、空の `describe` ブロックだけ作成する。
 `it.skip` でテストを先に全部コード化しない — テストは1つずつREDフェーズで書く。
-
-```typescript
-describe('validateEmail', () => {
-  // テストリストから1つずつ RED-GREEN-REFACTOR で追加していく
-});
-```
 
 ### Phase 2: RED-GREEN-REFACTOR（1テストずつ）
 
 #### 2.1 RED: テストを書く
 
-```typescript
-it('有効なメールアドレスの場合にtrueを返すこと', () => {
-  const result = validateEmail('test@example.com');
-  expect(result).toBe(true);
-});
-```
-
-**必須**: テスト実行、**失敗を確認**
+テストを書き、実行して**失敗を確認**する（必須）。
 
 #### 2.2 GREEN: 最小限の実装
 
-```typescript
-function validateEmail(email: string): boolean {
-  return email.includes('@');
-}
-```
-
-**必須**: テスト実行、**成功を確認**
+最小限のコードでテストを通す。実行して**成功を確認**する（必須）。
 
 #### 2.3 VERIFY: 自動検証ループ（GREEN後に必須）
 
@@ -149,18 +125,6 @@ GREEN成功 → 検証実行 → 失敗 → 修正 → 検証 → ...（最大3�
 - 型チェック（`tsc --noEmit` など）
 - リント（`eslint` など）
 - 関連テストの実行
-
-**iteration limit**: 3回（無限ループ防止）
-
-```markdown
-## 検証ループ状態
-
-| 試行 | 結果 | 対応 |
-|------|------|------|
-| 1回目 | ❌ lint error | 修正して再実行 |
-| 2回目 | ❌ type error | 修正して再実行 |
-| 3回目 | ✅ 成功 | REFACTORへ進む |
-```
 
 **3回失敗時**:
 ```
@@ -185,57 +149,30 @@ GREEN成功 → 検証実行 → 失敗 → 修正 → 検証 → ...（最大3�
 
 #### 2.5 コミット
 
-各サイクル完了後にコミット
+各サイクル完了後にコミット。
 
 ### Phase 3: 繰り返し
 
-テストリスト（Phase 1.2）から次のケースを選び、Phase 2 を繰り返す。
+テストリストから次のケースを選び、Phase 2 を繰り返す。
 
 ### Phase 4: 最終検証
 
-**⚠️ タスク完了前に `superpowers:verification-before-completion` に従い、ビルド・型・リント・全テストを実行して証拠を示す**
-
-### Phase 5: タスク完了
-
-**全ての終了条件を満たした場合のみ**：
-
-1. `TaskUpdate` で status を `completed` に更新
-2. 成功マーカーを出力：
-
-```
-<tdd-success/>
-```
+`superpowers:verification-before-completion` に従い、ビルド・型・リント・全テストを実行して証拠を示す。
 
 ---
 
-## チェックリスト
-
-- [ ] REDフェーズ: テストが失敗することを確認したか？
-- [ ] GREENフェーズ: 最小限の実装か？（先取りしていないか）
-- [ ] VERIFYフェーズ: 型・リント・テストが通過したか？（最大3回）
-- [ ] REFACTORフェーズ: テストが成功を維持しているか？
-- [ ] 検証: `superpowers:verification-before-completion` に従い証拠を示したか？
-
 ## コミットルール
 
-- **prefix**:
-  - `test` - テストの追加（REDフェーズ）
-  - `feat` - 機能実装（GREENフェーズ）
-  - `refactor` - リファクタ（REFACTORフェーズ）
+- `test` - テストの追加（REDフェーズ）
+- `feat` - 機能実装（GREENフェーズ）
+- `refactor` - リファクタ（REFACTORフェーズ）
 
 ## エラー時の対応
-
-### 2回以上連続でテスト失敗
-
-1. 現状を整理
-2. ユーザーに確認
-3. 必要に応じてテストケースを見直し
 
 ### テストが最初から成功する（REDで失敗しない）
 
 既存の実装がテストを満たしている場合:
-- **テストが既存の振る舞いを検証しているだけ** → テストを修正し、未実装の振る舞いをテストする
+- テストを修正し、未実装の振る舞いをテストする
 
 実装を先に書いてしまった場合:
 - **実装を削除し、テストから書き直す** — 参考にすることも禁止
-- 「参考として残す」「少し調整する」は実装先行と同じ。削除は削除
