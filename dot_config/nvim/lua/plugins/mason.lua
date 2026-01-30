@@ -16,7 +16,7 @@ return {
         "ts_ls",
         "dockerls",
         "yamlls",
-        "terraform_ls",
+        "terraformls",
         "intelephense",
       },
     },
