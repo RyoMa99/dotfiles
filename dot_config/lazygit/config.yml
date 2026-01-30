@@ -1,0 +1,7 @@
+# Ref: https://zenn.dev/rikson/articles/2024-05-26_rikson_lazygit-nvim-remote-integration
+# Note: macOSではlazygitの設定ディレクトリは ~/Library/Application Support/lazygit/
+#   ln -s ~/.config/lazygit ~/Library/Application\ Support/lazygit
+
+os:
+  edit: "sh -c 'echo \"{{filename}}\" > /tmp/lazygit_edit_file && nvr --remote-tab-wait-silent \"{{filename}}\"'"
+  editAtLine: "sh -c 'echo \"{{filename}}\" > /tmp/lazygit_edit_file && nvr --remote-tab-wait-silent +{{line}} \"{{filename}}\"'"
