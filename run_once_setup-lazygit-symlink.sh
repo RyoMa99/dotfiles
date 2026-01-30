@@ -5,7 +5,7 @@
 set -euo pipefail
 
 SOURCE="$HOME/.config/lazygit/config.yml"
-TARGET_DIR="$HOME/Library/Application Support/lazygit"
+TARGET_DIR="$(lazygit -cd)"
 TARGET="$TARGET_DIR/config.yml"
 
 mkdir -p "$TARGET_DIR"
