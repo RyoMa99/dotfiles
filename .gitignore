@@ -1,0 +1,10 @@
+# nvim
+dot_config/nvim/node_modules/
+dot_config/nvim/.luarc.json
+dot_config/nvim/undo/
+dot_config/nvim/session/
+dot_config/nvim/spell/*.add.spl
+dot_config/nvim/.claude/
+dot_config/nvim/*.swp
+dot_config/nvim/*.swo
+.DS_Store
