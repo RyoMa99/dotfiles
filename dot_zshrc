@@ -56,6 +56,9 @@ complete -C "$(mise where awscli)/bin/aws_completer" aws
 
 # better cd
 # cf. https://github.com/ajeetdsouza/zoxide
+## fzf
+export FZF_DEFAULT_OPTS='--bind alt-j:down,alt-k:up'
+
 eval "$(zoxide init zsh)"
 alias cd='z'
 alias cdi='zi'
