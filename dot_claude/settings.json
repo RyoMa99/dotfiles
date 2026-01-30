@@ -13,17 +13,6 @@
     ]
   },
   "hooks": {
-    "Stop": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/rym/.claude/hooks/iterate-stop-hook.sh"
-          }
-        ]
-      }
-    ],
     "UserPromptSubmit": [
       {
         "matcher": "",
@@ -43,7 +32,17 @@
     "php-lsp@claude-plugins-official": true,
     "lua-lsp@claude-plugins-official": true,
     "context7@claude-plugins-official": true,
-    "serena@claude-plugins-official": true
+    "serena@claude-plugins-official": true,
+    "ralph-loop@claude-plugins-official": true,
+    "vercel@claude-plugins-official": true,
+    "commit-commands@claude-plugins-official": true,
+    "security-guidance@claude-plugins-official": true,
+    "pr-review-toolkit@claude-plugins-official": true,
+    "figma@claude-plugins-official": true,
+    "superpowers@claude-plugins-official": true,
+    "sentry@claude-plugins-official": true,
+    "slack@claude-plugins-official": true,
+    "claude-md-management@claude-plugins-official": true
   },
   "mcpServers": {
     "context7": {
@@ -53,6 +52,16 @@
         "-y",
         "@upstash/context7-mcp"
       ]
+    },
+    "awslabs.aws-iac-mcp-server": {
+      "type": "stdio",
+      "command": "uvx",
+      "args": [
+        "awslabs.aws-iac-mcp-server@latest"
+      ],
+      "env": {
+        "FASTMCP_LOG_LEVEL": "ERROR"
+      }
     }
   }
 }
