@@ -22,7 +22,7 @@ brew "neovim"
 brew "nginx"
 brew "nnn"
 brew "ollama"
-brew "parquet-cli", restart_service: :changed
+brew "parquet-cli"
 brew "ripgrep"
 brew "starship"
 brew "tree"
