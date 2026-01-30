@@ -220,7 +220,7 @@ description: 簡潔な説明
 - diff確認 → 型チェック → テスト確認 → セキュリティ確認
 
 提案:
-~/.claude/skills/pr-review/SKILL.md を作成
+pr-review-toolkit plugin を活用（既にインストール済み）
 ```
 
 ### 例3: TypeScriptエラー解決 → Rule

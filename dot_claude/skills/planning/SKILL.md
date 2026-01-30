@@ -271,12 +271,12 @@ activeForm: 進行中の表示文（現在進行形）
 │  1. TaskList でブロックされていないタスクを確認             │
 │  2. TaskUpdate で status: "in_progress" に更新              │
 │  3. /TDD スキルを呼び出し、RED-GREEN-REFACTORで実装        │
-│  4. /verify full で品質検証                                 │
+│  4. superpowers:verification-before-completion で品質検証     │
 │  5. TaskUpdate で status: "completed" に更新                │
 │  6. 次のタスクへ                                            │
 │                                                             │
 │  全タスク完了後:                                            │
-│  7. /verify full で最終検証                                 │
+│  7. superpowers:verification-before-completion で最終検証     │
 │  8. PR作成                                                  │
 └─────────────────────────────────────────────────────────────┘
 ```
@@ -288,11 +288,11 @@ activeForm: 進行中の表示文（現在進行形）
     ↓
 /TDD (各タスク)
     ↓
-/verify full (タスク完了前)
+superpowers:verification-before-completion (タスク完了前)
     ↓
 全タスク完了
     ↓
-/verify full (最終検証)
+superpowers:verification-before-completion (最終検証)
     ↓
 PR作成
 ```

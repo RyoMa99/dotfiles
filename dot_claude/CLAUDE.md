@@ -6,7 +6,7 @@
 2. **タスク登録**: 計画をTaskCreate/TaskUpdateでタスク管理システムに登録
 3. **承認**: ユーザーの承認を得てから実装開始
 4. **実装**: `/TDD` でRED-GREEN-REFACTORサイクルを実行
-5. **検証**: 完了前に `/verification-loop` で品質チェック
+5. **検証**: 完了前に `superpowers:verification-before-completion` で品質チェック
 
 ## コード品質
 
