@@ -1,0 +1,6 @@
+[".claude/skills/notebooklm"]
+    type = "git-repo"
+    url = "https://github.com/PleasePrompto/notebooklm-skill"
+    refreshPeriod = "168h"
+    [".claude/skills/notebooklm".pull]
+        args = ["--ff-only"]
