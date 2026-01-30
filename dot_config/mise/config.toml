@@ -1,2 +1,5 @@
 [env]
 JAVA_HOME = "{{exec(command='mise where java')}}"
+
+[tools]
+"pipx:neovim-remote" = "latest"
