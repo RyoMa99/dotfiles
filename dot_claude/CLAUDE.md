@@ -17,6 +17,11 @@
 - @~/.claude/rules/testing.md - テストの原則
 - @~/.claude/rules/security.md - セキュリティルール
 
+## コミット規約
+
+- コミットメッセージは日本語で書く
+- 末尾に `Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>` を付ける
+
 ## コミュニケーション
 
 - 日本語で応答
