@@ -63,5 +63,29 @@ vim.keymap.set('v', 'jk', '<Esc>')
 -- 折り返しトグル
 vim.keymap.set("n", "<Leader>tw", "<cmd>set wrap!<cr>", { desc = "折り返し切替" })
 
+-- カーソル行のMarkdownリンクをブラウザで開く
+vim.keymap.set("n", "gx", function()
+  local line = vim.api.nvim_get_current_line()
+  local col = vim.api.nvim_win_get_cursor(0)[2] + 1
+
+  -- カーソル位置を含む [text](url) を探す
+  local start = 1
+  while start <= #line do
+    local ms, me, url = line:find("%[.-%]%((.-)%)", start)
+    if not ms then break end
+    if col >= ms and col <= me then
+      vim.ui.open(url)
+      return
+    end
+    start = me + 1
+  end
+
+  -- 見つからなければカーソル下のURLを開く（デフォルト動作）
+  local url = vim.fn.expand("<cfile>")
+  if url:match("^https?://") then
+    vim.ui.open(url)
+  end
+end, { desc = "リンクをブラウザで開く" })
+
 -- lazy.nvim
 require("config.lazy")
