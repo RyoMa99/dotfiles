@@ -88,14 +88,29 @@ config.term = "xterm-256color"
 
 -- キーバインド（iTerm2から移植）
 config.keys = {
-  -- ペイン分割
-  { key = "h", mods = "CMD|CTRL", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-  { key = "v", mods = "CMD|CTRL", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-  -- ペイン移動
-  { key = "j", mods = "CMD", action = wezterm.action.ActivatePaneDirection("Down") },
-  { key = "k", mods = "CMD", action = wezterm.action.ActivatePaneDirection("Up") },
-  { key = "l", mods = "CMD|CTRL", action = wezterm.action.ActivatePaneDirection("Right") },
-  { key = "h", mods = "CMD", action = wezterm.action.ActivatePaneDirection("Left") },
+  -- ペイン分割（Cmd+D: 縦分割、Cmd+Shift+D: 横分割）
+  { key = "d", mods = "CMD", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
+  { key = "d", mods = "CMD|SHIFT", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
+  -- ペイン選択（Alt+Cmd+hjkl）
+  { key = "h", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Left") },
+  { key = "j", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Down") },
+  { key = "k", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Up") },
+  { key = "l", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Right") },
+  -- スクロール（Cmd+j/k）
+  { key = "j", mods = "CMD", action = wezterm.action.ScrollByLine(1) },
+  { key = "k", mods = "CMD", action = wezterm.action.ScrollByLine(-1) },
+  -- ペイン入れ替え
+  { key = "s", mods = "CMD", action = wezterm.action.PaneSelect({ mode = "SwapWithActive" }) },
+  -- Send Hex / Escape Sequences
+  { key = "$", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x05") },  -- Ctrl+E（行末）
+  { key = "0", mods = "ALT", action = wezterm.action.SendString("\x01") },  -- Ctrl+A（行頭）
+  { key = "b", mods = "ALT", action = wezterm.action.SendString("\x1bb") },  -- 単語後退
+  { key = "w", mods = "ALT", action = wezterm.action.SendString("\x1bf") },  -- 単語前進
+  -- ペインを閉じる（Cmd+W）
+  { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = false }) },
+  -- デフォルトキーバインド無効化（OS/Raycastに委譲）
+  { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
+  { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
 }
 
 return config
