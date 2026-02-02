@@ -63,29 +63,38 @@ vim.keymap.set('v', 'jk', '<Esc>')
 -- 折り返しトグル
 vim.keymap.set("n", "<Leader>tw", "<cmd>set wrap!<cr>", { desc = "折り返し切替" })
 
--- カーソル行のMarkdownリンクをブラウザで開く
-vim.keymap.set("n", "gx", function()
+-- カーソル位置のURLを取得
+local function get_url_at_cursor()
   local line = vim.api.nvim_get_current_line()
   local col = vim.api.nvim_win_get_cursor(0)[2] + 1
 
-  -- カーソル位置を含む [text](url) を探す
   local start = 1
   while start <= #line do
     local ms, me, url = line:find("%[.-%]%((.-)%)", start)
     if not ms then break end
-    if col >= ms and col <= me then
-      vim.ui.open(url)
-      return
-    end
+    if col >= ms and col <= me then return url end
     start = me + 1
   end
 
-  -- 見つからなければカーソル下のURLを開く（デフォルト動作）
-  local url = vim.fn.expand("<cfile>")
-  if url:match("^https?://") then
-    vim.ui.open(url)
-  end
+  local cfile = vim.fn.expand("<cfile>")
+  if cfile:match("^https?://") then return cfile end
+  return nil
+end
+
+-- カーソル位置のリンクをブラウザで開く
+vim.keymap.set("n", "gx", function()
+  local url = get_url_at_cursor()
+  if url then vim.ui.open(url) end
 end, { desc = "リンクをブラウザで開く" })
+
+-- カーソル位置のリンクをクリップボードにコピー
+vim.keymap.set("n", "gy", function()
+  local url = get_url_at_cursor()
+  if url then
+    vim.fn.setreg("+", url)
+    vim.notify("Copied: " .. url, vim.log.levels.INFO)
+  end
+end, { desc = "リンクURLをコピー" })
 
 -- lazy.nvim
 require("config.lazy")
