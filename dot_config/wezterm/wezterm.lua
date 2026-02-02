@@ -2,7 +2,10 @@ local wezterm = require("wezterm")
 local config = wezterm.config_builder()
 
 -- フォント
-config.font = wezterm.font("Hack Nerd Font Mono")
+config.font = wezterm.font_with_fallback({
+  "Hack Nerd Font Mono",
+  "Hiragino Kaku Gothic ProN",
+})
 config.font_size = 16.0
 
 -- カラースキーム（Light/Dark自動切替）
