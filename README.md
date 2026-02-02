@@ -24,7 +24,7 @@ Raycast のキーバインドは plist に保存されるため chezmoi で管�
 | Google Chrome | `^ ⇧ G` |
 | Obsidian | `^ ⇧ O` |
 | TradingView | `^ ⇧ E` |
-| iTerm | `^ ⇧ Q` |
+| WezTerm | `^ ⇧ Q` |
 | アプリ | `^ ⇧ Z` |
 | システム設定 | `^ ⇧ ,` |
 
