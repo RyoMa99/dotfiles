@@ -6,18 +6,24 @@
 
 ---
 
-## ~/.claude/ 配下の変更
+## 基本: chezmoi add を使う
 
-skills、rules、CLAUDE.md、settings.json 等を変更した場合：
+ファイルの追加・変更は `chezmoi add` で反映する：
 
-1. 変更・追加したファイルをコピー
-   ```bash
-   cp <変更ファイル> ~/.local/share/chezmoi/dot_claude/<対応パス>
-   ```
-2. 削除した場合はchezmoi側も削除
-   ```bash
-   rm -r ~/.local/share/chezmoi/dot_claude/skills/<削除したskill>/
-   ```
+```bash
+chezmoi add <変更ファイルのパス>
+```
+
+例：
+```bash
+chezmoi add ~/.config/wezterm/wezterm.lua
+chezmoi add ~/.claude/CLAUDE.md
+```
+
+削除した場合は chezmoi 側も削除：
+```bash
+chezmoi forget <パス>
+```
 
 ## brew install/uninstall 実行後
 
@@ -25,15 +31,6 @@ Brewfile（`~/.Brewfile` → chezmoi: `dot_Brewfile`）を更新する：
 
 1. `dot_Brewfile` に `brew "パッケージ名"` または `cask "アプリ名"` を追加/削除
 2. tap が必要な場合は `tap "タップ名"` も追加
-
-## .tool-versions の変更
-
-mise（旧asdf）で管理するツールを追加/変更した場合：
-
-1. `dot_tool-versions` にコピー
-   ```bash
-   cp ~/.tool-versions ~/.local/share/chezmoi/dot_tool-versions
-   ```
 
 ## 共通: コミット & プッシュ
 
