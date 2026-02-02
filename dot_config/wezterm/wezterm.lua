@@ -114,6 +114,8 @@ config.keys = {
   -- デフォルトキーバインド無効化（OS/Raycastに委譲）
   { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
   { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
+  -- Alt+Enterの全画面トグルを無効化（Claude Codeの改行に使用）
+  { key = "Enter", mods = "ALT", action = wezterm.action.SendKey({ key = "Enter", mods = "ALT" }) },
 }
 
 return config
