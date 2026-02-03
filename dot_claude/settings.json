@@ -12,19 +12,7 @@
       "Bash(rm --recursive --force:*)"
     ]
   },
-  "hooks": {
-    "UserPromptSubmit": [
-      {
-        "matcher": "",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "/Users/rym/.claude/hooks/skill-eval-hook.sh"
-          }
-        ]
-      }
-    ]
-  },
+  "hooks": {},
   "enabledPlugins": {
     "code-simplifier@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
