@@ -142,3 +142,4 @@ alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行�
 ## cf. https://github.com/zsh-users/zsh-syntax-highlighting
 source "$BREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
 
+export PATH="/opt/homebrew/opt/php@8.3/bin:$PATH"
