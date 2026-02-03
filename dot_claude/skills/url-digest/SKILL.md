@@ -37,7 +37,7 @@ $ARGUMENTS からURLを抽出する（改行区切りまたはスペース区切
 
 ### 出力
 
-リポジトリ: `$(ghq root)/github.com/RyoMa99/ideas/`
+リポジトリ: `!`ghq root`/github.com/RyoMa99/ideas/`
 
 パス: `daily/YYYYMMDD/{概要}.md`
 - YYYYMMDD: 今日の日付

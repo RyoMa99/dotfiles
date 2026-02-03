@@ -99,7 +99,7 @@ OSS/個人開発系:
 
 **まず「ネタ収集完了。」と返してから、ファイルに保存する。**
 
-リポジトリ: `$(ghq root)/github.com/RyoMa99/ideas/`
+リポジトリ: `!`ghq root`/github.com/RyoMa99/ideas/`
 パス: `daily/YYYYMMDD/trends.md`
 
 フォーマット:
