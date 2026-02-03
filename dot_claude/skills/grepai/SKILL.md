@@ -105,9 +105,9 @@ grepai watch             # インデックス開始（バックグラウンド�
 ```yaml
 embedder:
   provider: ollama
-  model: mxbai-embed-large
+  model: mxbai-embed-large  # デフォルトのnomic-embed-textより高精度
   endpoint: http://localhost:11434
-  dimensions: 1024
+  dimensions: 1024          # mxbai-embed-largeの次元数
 ```
 
 ## 使用例
