@@ -12,7 +12,14 @@
       "Bash(rm --recursive --force:*)"
     ]
   },
-  "hooks": {},
+  "hooks": {
+    "PostToolUse": [
+      {
+        "matcher": "Edit",
+        "command": "pnpm lint --fix 2>/dev/null || true"
+      }
+    ]
+  },
   "enabledPlugins": {
     "code-simplifier@claude-plugins-official": true,
     "typescript-lsp@claude-plugins-official": true,
