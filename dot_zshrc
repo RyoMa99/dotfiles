@@ -106,7 +106,6 @@ alias l='nnn'
 
 ## リポジトリ移動
 alias repo='repo=$(ghq list | ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo"'
-alias dev='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo" && code .'
 alias view='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && gh repo view "$repo" --web'
 ghcr() {
   local visibility="--public"
