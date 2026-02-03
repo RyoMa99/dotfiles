@@ -84,8 +84,8 @@ config.native_macos_fullscreen_mode = true
 
 -- 非アクティブペインの視覚的区別
 config.inactive_pane_hsb = {
-  saturation = 0.7,
-  brightness = 0.6,
+  saturation = 0.5,
+  brightness = 0.4,
 }
 
 -- Option Key を Alt として使用（Esc+ 送信）
