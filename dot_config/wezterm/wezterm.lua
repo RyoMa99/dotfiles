@@ -82,6 +82,12 @@ config.scrollback_lines = 5000
 -- ウィンドウ
 config.native_macos_fullscreen_mode = true
 
+-- 非アクティブペインの視覚的区別
+config.inactive_pane_hsb = {
+  saturation = 0.7,
+  brightness = 0.6,
+}
+
 -- Option Key を Alt として使用（Esc+ 送信）
 config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = false
