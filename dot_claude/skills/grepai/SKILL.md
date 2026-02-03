@@ -81,8 +81,12 @@ grepai mcp-serve
 
 ## 検索フロー
 
+**重要: クエリは必ず英語に翻訳してから渡すこと。** embeddingモデルは英語で最も精度が高い。
+
 ```
 ユーザー: 「認証処理はどこにある？」
+    ↓
+日本語 → 英語に翻訳
     ↓
 grepai search "authentication handling"
     ↓
@@ -90,6 +94,16 @@ grepai search "authentication handling"
     ↓
 必要に応じてSerenaでシンボル詳細を取得
 ```
+
+### クエリ翻訳の例
+
+| ユーザーの日本語 | grepaiに渡す英語クエリ |
+|---|---|
+| 再納品の処理 | `"re-upload redelivery flow"` |
+| エラーハンドリング | `"error handling patterns"` |
+| ファイルアップロード | `"file upload processing"` |
+| 認証・ログイン処理 | `"authentication login flow"` |
+| バリデーション | `"input validation"` |
 
 ## 初回セットアップ（プロジェクトごと）
 
