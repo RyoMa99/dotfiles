@@ -41,7 +41,6 @@
     "figma@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "sentry@claude-plugins-official": true,
-    "slack@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
   "mcpServers": {
