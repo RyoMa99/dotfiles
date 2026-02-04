@@ -120,6 +120,51 @@ app.use('/api/', limiter);
 
 本番環境では常にHTTPSを使用。HTTPへのリダイレクトを設定。
 
+### 9. Cookie属性
+
+認証Cookieには以下の属性を必ず設定：
+
+```typescript
+res.cookie('session', token, {
+  httpOnly: true,    // JavaScriptからアクセス不可（XSS対策）
+  secure: true,      // HTTPS接続時のみ送信
+  sameSite: 'lax',   // CSRF対策（'strict'はUX影響あり）
+  // domain: 不必要に設定しない（サブドメイン間の脆弱性波及を防ぐ）
+});
+```
+
+### 10. セキュリティヘッダ
+
+レスポンスヘッダで追加の保護を設定：
+
+```typescript
+// helmet等を使用
+app.use(helmet({
+  contentSecurityPolicy: true,
+  xssFilter: true,
+  noSniff: true,
+  frameguard: { action: 'deny' },
+}));
+```
+
+主要なヘッダ：
+- `X-Content-Type-Options: nosniff` - MIMEタイプスニッフィング防止
+- `X-Frame-Options: DENY` - クリックジャッキング防止
+- `Content-Security-Policy` - インラインスクリプト制限
+
+### 11. ユーザー名のリザーブド文字列
+
+ユーザーが選択できるハンドルネームから除外すべき文字列：
+
+```typescript
+const RESERVED_USERNAMES = [
+  'admin', 'administrator', 'root', 'system',
+  'api', 'www', 'mail', 'ftp', 'support',
+  'help', 'info', 'security', 'abuse',
+  'null', 'undefined', 'true', 'false',
+];
+```
+
 ---
 
 ## 問題発見時のフロー
