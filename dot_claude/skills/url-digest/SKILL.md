@@ -2,7 +2,6 @@
 name: url-digest
 description: 複数のURLを読み取り、コアメッセージがわかるように要約してideasリポジトリに保存する
 argument-hint: "[URLs]"
-disable-model-invocation: true
 user-invocable: true
 ---
 
