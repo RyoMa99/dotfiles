@@ -1,8 +1,8 @@
 ---
 name: record-business-knowledge
-description: 業務知識をbusiness_knowledgeリポジトリに記録する。フォルダ構造、命名規則、業務フロー、議事録、スクリーンショットなど様々な形式の知見を整理・蓄積。
+description: 業務知識をbusiness_knowledgeリポジトリに記録する。再納品、写真アップロードなどビジネスドメイン単位で整理。議事録、スクリーンショットなど様々な形式に対応。
 user-invocable: true
-argument-hint: "[プロジェクト名] [トピック]"
+argument-hint: "[ドメイン名] [トピック]"
 ---
 
 # 業務知識の記録
@@ -27,26 +27,25 @@ $(ghq root)/github.com/h-rym/business_knowledge
 
 ## ディレクトリ構造（提案）
 
+**ビジネスドメイン単位**で整理する（リポジトリ単位ではない）。
+
 ```
 business_knowledge/
-├── projects/                    # プロジェクト別
-│   ├── 8122_core/
-│   │   ├── specs/              # 仕様・業務ルール
-│   │   │   ├── reupload.md     # 再納品の仕様
-│   │   │   └── photo-upload.md
-│   │   ├── architecture/       # 設計・アーキテクチャ
-│   │   ├── meetings/           # 議事録
-│   │   ├── notes/              # メモ・調査記録
-│   │   └── assets/             # 画像・PDF等
-│   │       ├── images/
-│   │       └── docs/
-│   └── 8122-ec/
-│       └── ...
-├── domains/                     # 技術ドメイン（プロジェクト横断）
-│   ├── backend/
-│   ├── frontend/
-│   └── infrastructure/
-└── shared/                      # 会社共通の知識
+├── reupload/                    # 再納品ドメイン
+│   ├── specs/                   # 仕様・業務ルール
+│   │   └── folder-structure.md  # フォルダ構造の仕様
+│   ├── meetings/                # 議事録
+│   ├── notes/                   # メモ・調査記録
+│   └── assets/                  # 画像・PDF等
+│       ├── images/
+│       └── docs/
+├── photo-upload/                # 写真アップロードドメイン
+│   └── ...
+├── event-management/            # イベント管理ドメイン
+│   └── ...
+├── partner-integration/         # パートナー連携ドメイン
+│   └── ...
+└── shared/                      # ドメイン横断の共通知識
     └── ...
 ```
 
@@ -58,15 +57,15 @@ business_knowledge/
 
 以下を特定する（不明な場合はユーザーに質問）：
 
-1. **プロジェクト**: どのプロジェクトに関する知識か
-2. **カテゴリ**: specs / architecture / meetings / notes / assets
-3. **トピック**: 具体的な内容（例: 再納品、認証フロー）
+1. **ドメイン**: どのビジネスドメインに関する知識か（例: 再納品、写真アップロード）
+2. **カテゴリ**: specs / meetings / notes / assets
+3. **トピック**: 具体的な内容（例: フォルダ構造、命名規則）
 
 ```
 質問例:
-- 「これは8122_coreの仕様として記録しますか？」
+- 「これは再納品ドメインの仕様として記録しますか？」
 - 「議事録として保存しますか、それとも仕様としてまとめますか？」
-- 「プロジェクト横断の知識ですか？」
+- 「新しいドメインを作成しますか？既存のドメインに追加しますか？」
 ```
 
 ### Step 2: 既存構造の確認
@@ -83,8 +82,9 @@ ls -la "$REPO"
 
 ```
 「この情報は以下のどちらに配置するのが適切でしょうか？
-A) projects/8122_core/specs/reupload.md（プロジェクト固有の仕様）
-B) domains/backend/file-naming.md（プロジェクト横断の命名規則）」
+A) reupload/specs/folder-structure.md（再納品の仕様）
+B) photo-upload/specs/folder-structure.md（写真アップロードの仕様）
+C) 新しいドメインを作成」
 ```
 
 ### Step 4: ファイルの作成/更新
@@ -135,22 +135,23 @@ B) domains/backend/file-naming.md（プロジェクト横断の命名規則）�
 REPO="$(ghq root)/github.com/h-rym/business_knowledge"
 cd "$REPO" && \
 git add . && \
-git commit -m "[プロジェクト/カテゴリ] トピックを追加" && \
+git commit -m "[ドメイン] トピックを追加" && \
 git push
 ```
 
 ## 整理の原則
 
-1. **プロジェクト固有 vs 横断**
-   - 特定プロジェクトでしか使わない → `projects/[プロジェクト名]/`
-   - 複数プロジェクトで共通 → `domains/` または `shared/`
+1. **ビジネスドメイン単位**
+   - リポジトリ（8122_core等）ではなく、業務概念（再納品、写真アップロード等）で分類
+   - 複数リポジトリにまたがる知識も1つのドメインにまとめる
 
 2. **粒度**
    - 1トピック = 1ファイル（原則）
    - 関連が強いものはまとめてもOK
 
 3. **命名**
-   - ファイル名: `kebab-case.md`（例: `reupload-folder-structure.md`）
+   - ディレクトリ名: `kebab-case`（例: `photo-upload`）
+   - ファイル名: `kebab-case.md`（例: `folder-structure.md`）
    - 日本語OK（内容は日本語推奨）
 
 4. **機密情報の除外**
