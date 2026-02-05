@@ -1,6 +1,7 @@
 ---
 name: katana-links
 description: URLを渡してkatanaでリンクを全列挙し、結果をクリップボードにコピーする。
+allowed-tools: ["Bash", "AskUserQuestion"]
 ---
 
 # Katana Links Skill
