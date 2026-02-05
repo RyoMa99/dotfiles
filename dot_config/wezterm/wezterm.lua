@@ -116,7 +116,7 @@ config.keys = {
   { key = "b", mods = "ALT", action = wezterm.action.SendString("\x1bb") },  -- 単語後退
   { key = "w", mods = "ALT", action = wezterm.action.SendString("\x1bf") },  -- 単語前進
   -- ペインを閉じる（Cmd+W）
-  { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = true }) },
+  { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = false }) },
   -- デフォルトキーバインド無効化（OS/Raycastに委譲）
   { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
   { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
