@@ -122,6 +122,8 @@ config.keys = {
   { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
   -- Alt+Enterの全画面トグルを無効化（Claude Codeの改行に使用）
   { key = "Enter", mods = "ALT", action = wezterm.action.SendKey({ key = "Enter", mods = "ALT" }) },
+  -- スクロールバッククリア（入力行を上部に移動）
+  { key = "l", mods = "ALT", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
 }
 
 return config
