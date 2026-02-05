@@ -3,6 +3,7 @@ name: url-digest
 description: 複数のURLを読み取り、コアメッセージがわかるように要約してideasリポジトリに保存する
 argument-hint: "[URLs]"
 user-invocable: true
+allowed-tools: ["Bash", "Write", "WebFetch"]
 ---
 
 ## URL要約

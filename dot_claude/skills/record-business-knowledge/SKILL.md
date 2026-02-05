@@ -3,6 +3,7 @@ name: record-business-knowledge
 description: 業務知識をbusiness_knowledgeリポジトリに記録する。ビジネスドメイン単位で整理。議事録、スクリーンショットなど様々な形式に対応。
 user-invocable: true
 argument-hint: "[ドメイン名] [トピック]"
+allowed-tools: ["Bash", "Read", "Write", "AskUserQuestion"]
 ---
 
 # 業務知識の記録

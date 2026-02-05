@@ -1,6 +1,7 @@
 ---
 name: sync-knowledge
 description: プロジェクトの学習内容をグローバルなナレッジベース（~/.claude/rules/）に同期する。プロジェクト完了時や重要な学びがあった時に使用。
+allowed-tools: ["Glob", "Grep", "Read", "Edit", "AskUserQuestion"]
 ---
 
 # Sync Knowledge Skill
