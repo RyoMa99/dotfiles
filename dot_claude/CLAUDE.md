@@ -6,11 +6,9 @@
 
 @~/.claude/rules/plan-mode.md に従う（意図の明確化 → コードベース調査 → 計画策定）
 
-### 実装以降
+### 実装・完了
 
-1. **実装**: `superpowers:subagent-driven-development` または `/TDD` で実装
-2. **検証**: 完了前に `superpowers:verification-before-completion` で品質チェック
-3. **完了**: `superpowers:finishing-a-development-branch` でマージ/PR
+@~/.claude/rules/implementation.md に従う（ガードレール先行 → タスク単位実装 → 検証 → 完了）
 
 ## コード品質
 
