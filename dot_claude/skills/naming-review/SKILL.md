@@ -2,7 +2,7 @@
 name: naming-review
 description: コードの命名を7段階プロセスに沿ってレビューし、改善提案を行う。
 argument-hint: "[file-or-directory]"
-disable-model-invocation: true
+disable-model-invocation: false
 allowed-tools: ["Glob", "Grep", "Read", "Task"]
 ---
 
