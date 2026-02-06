@@ -1,9 +1,6 @@
----
-name: terraform-guidelines
-description: Terraformで新規AWSリソースを作成・追加する際のガイドライン。Terraformコードを書く時、AWSリソースを追加する時、IaCを実装する時に自動で適用する。
----
+# Terraform 新規リソース作成ガイドライン
 
-# Terraform新規リソース作成時の注意事項
+Terraform コードを書く時、AWS リソースを追加する時に適用する。
 
 このスキルは新規リソース作成時のガイドラインです。既存リソースを無理やり変更する必要はありません。
 
