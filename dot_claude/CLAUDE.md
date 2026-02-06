@@ -20,7 +20,7 @@
 ## コミット規約
 
 - コミットメッセージは日本語で書く
-- 末尾に `Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>` を付ける
+- 末尾に `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` を付ける
 
 ## コミュニケーション
 
