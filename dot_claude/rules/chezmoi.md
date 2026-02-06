@@ -1,3 +1,11 @@
+---
+paths:
+  - "**/.claude/**"
+  - "**/.config/**"
+  - "**/.local/share/chezmoi/**"
+  - "**/dot_*"
+---
+
 # chezmoi管理ファイルの変更ルール
 
 **対象**: chezmoi で管理されているファイルを変更した場合すべて

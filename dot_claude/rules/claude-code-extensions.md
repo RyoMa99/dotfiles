@@ -1,3 +1,10 @@
+---
+paths:
+  - "**/.claude/**"
+  - "**/SKILL.md"
+  - "**/CLAUDE.md"
+---
+
 # Claude Code 拡張作成ガイドライン
 
 rules、skills、hooks を作成・修正する際のベストプラクティス。

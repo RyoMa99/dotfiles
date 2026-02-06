@@ -1,3 +1,11 @@
+---
+paths:
+  - "**/*.ts"
+  - "**/*.tsx"
+  - "**/*.js"
+  - "**/*.jsx"
+---
+
 # ドメインモデリング
 
 「Domain Modeling Made Functional」に基づくドメイン記述手法。kawasima氏による解説を参考。
