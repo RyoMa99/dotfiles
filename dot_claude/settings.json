@@ -22,24 +22,6 @@
             "command": "command -v pnpm >/dev/null && [ -f package.json ] && grep -q '\"fix\"' package.json && pnpm fix 2>/dev/null || true"
           }
         ]
-      },
-      {
-        "matcher": "Edit",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if echo \"$TOOL_INPUT\" | grep -q '\\.claude/'; then echo '[chezmoi] .claude/ 配下が変更されました。完了後に chezmoi add → commit → push を忘れずに。'; fi"
-          }
-        ]
-      },
-      {
-        "matcher": "Write",
-        "hooks": [
-          {
-            "type": "command",
-            "command": "if echo \"$TOOL_INPUT\" | grep -q '\\.claude/'; then echo '[chezmoi] .claude/ 配下が変更されました。完了後に chezmoi add → commit → push を忘れずに。'; fi"
-          }
-        ]
       }
     ]
   },
