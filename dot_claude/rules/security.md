@@ -230,6 +230,103 @@ const RESERVED_USERNAMES = [
 
 ---
 
+## フロントエンド認証・認可
+
+関連: @~/.claude/rules/web-frontend.md
+
+### OIDC認証方式の比較
+
+フロントエンドアプリケーションでOIDC（OpenID Connect）を使用する際の3つの方式：
+
+| 方式 | トークン保存場所 | セキュリティ | 実装複雑度 | 適用場面 |
+|------|----------------|-------------|-----------|---------|
+| **BFF（Backend for Frontend）Cookie** | サーバー側（Cookie経由） | 最高 | 中 | **推奨**。本番サービス |
+| **サーバー経由 JWT** | サーバーでトークン管理、フロントにJWT返却 | 高 | 高 | マイクロサービス間連携 |
+| **フロント直接** | ブラウザ（メモリ / sessionStorage） | 中 | 低 | 社内ツール、PoC |
+
+### 推奨: BFF パターン
+
+```
+ブラウザ → BFF（Cookie認証）→ IdP / APIサーバー
+```
+
+- トークンはサーバー側で管理、フロントには露出しない
+- Cookie は `httpOnly` + `secure` + `sameSite`
+- XSS でトークンが漏洩するリスクを排除
+
+```typescript
+// BFF 側: Cookie にセッションを設定
+app.get('/auth/callback', async (req, res) => {
+  const tokens = await exchangeCodeForTokens(req.query.code);
+  // トークンはサーバー側のセッションストアに保存
+  req.session.accessToken = tokens.accessToken;
+  req.session.refreshToken = tokens.refreshToken;
+
+  res.cookie('session_id', req.sessionID, {
+    httpOnly: true,
+    secure: true,
+    sameSite: 'lax',
+  });
+  res.redirect('/');
+});
+
+// BFF 側: API プロキシ
+app.get('/api/:path(*)', async (req, res) => {
+  const token = req.session.accessToken;
+  const response = await fetch(`${API_BASE}/${req.params.path}`, {
+    headers: { Authorization: `Bearer ${token}` },
+  });
+  res.json(await response.json());
+});
+```
+
+### フロントエンド認可 = UXのみ
+
+> フロントエンドの認可チェックは**UX目的**であり、セキュリティではない。
+> セキュリティの担保は**バックエンド**が行う。
+
+```typescript
+// フロントエンド: UX として非表示にする（バイパス可能）
+{user.role === 'admin' && <AdminPanel />}
+
+// バックエンド: セキュリティとして検証する（バイパス不可）
+app.get('/api/admin/users', requireRole('admin'), (req, res) => {
+  // ...
+});
+```
+
+**理由**:
+- フロントエンドのコードはブラウザの DevTools で改変可能
+- API リクエストは直接送信可能（UI をバイパス）
+- フロントエンドの条件分岐を信頼してはならない
+
+### トークン保存場所の選定基準
+
+| 保存場所 | XSS耐性 | CSRF耐性 | 持続性 | 備考 |
+|---------|---------|---------|--------|------|
+| **httpOnly Cookie** | 高（JSからアクセス不可） | `sameSite` で対策 | セッション～永続 | **推奨** |
+| **メモリ（変数）** | 高（DOMに露出しない） | 高 | リロードで消失 | SPA で BFF 使用時 |
+| **sessionStorage** | 低（XSSで読取可能） | 高 | タブ内のみ | 非推奨 |
+| **localStorage** | 低（XSSで読取可能） | 高 | 永続 | **非推奨** |
+
+```typescript
+// ❌ NEVER: localStorage にトークンを保存
+localStorage.setItem('token', accessToken);
+
+// ✅ BFF 使用時: Cookie で自動送信
+fetch('/api/users', { credentials: 'include' });
+
+// ✅ やむを得ずフロントで保持する場合: メモリのみ
+// （リロード時は再認証 or サイレントリフレッシュ）
+let accessToken: string | null = null;
+
+function setToken(token: string) {
+  accessToken = token;
+}
+```
+
+---
+
 ## 問題発見時のフロー
 
 セキュリティ問題を検出した場合：

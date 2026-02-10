@@ -43,7 +43,83 @@ https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/comm
 - アニメーション（prefers-reduced-motion対応）
 - ナビゲーション（URL状態同期、確認ダイアログ）
 
-### Step 3: ビジュアルデザインチェック
+### Step 3: アクセシビリティ詳細チェック
+
+#### disabled ボタンのアンチパターン
+
+disabled ボタンはスクリーンリーダーに読み上げられず、なぜ操作できないのか理由が伝わらない。
+
+```typescript
+// BAD: disabled で操作不能にするだけ
+<button disabled={!isValid}>送信</button>
+
+// GOOD: aria-disabled + 理由の説明
+<button
+  aria-disabled={!isValid}
+  onClick={!isValid ? undefined : handleSubmit}
+  aria-describedby={!isValid ? "submit-hint" : undefined}
+>
+  送信
+</button>
+{!isValid && (
+  <p id="submit-hint" className="text-sm text-muted">
+    すべての必須項目を入力してください
+  </p>
+)}
+```
+
+**判断基準**:
+- `disabled`: ユーザーに操作不可の理由を伝える必要がない場合（例: ローディング中の一時的な無効化）
+- `aria-disabled` + 説明: フォームの未入力など、ユーザーが対処できる場合
+
+#### フォーム a11y パターン
+
+```typescript
+// 必須のフォームフィールド
+<div>
+  <label htmlFor="email">
+    メールアドレス
+    <span aria-hidden="true"> *</span>
+  </label>
+  <input
+    id="email"
+    type="email"
+    required
+    aria-required="true"
+    aria-invalid={!!errors.email}
+    aria-describedby={errors.email ? "email-error" : undefined}
+  />
+  {errors.email && (
+    <p id="email-error" role="alert">
+      {errors.email.message}
+    </p>
+  )}
+</div>
+```
+
+**チェック項目**:
+- `<label>` と `<input>` が `htmlFor` / `id` で紐づいているか
+- エラーメッセージが `aria-describedby` で関連付けられているか
+- エラー表示時に `role="alert"` でスクリーンリーダーに通知されるか
+- 必須フィールドに `aria-required="true"` が設定されているか
+- 入力エラー時に `aria-invalid="true"` が設定されているか
+
+#### axe-core 自動テストの提案
+
+a11y チェックでCritical項目が検出された場合、自動テストの導入を提案する：
+
+```
+💡 提案: このコンポーネントに axe-core テストを追加すると、
+   a11y 違反を CI で自動検出できます。
+
+   import { axe, toHaveNoViolations } from 'jest-axe';
+   expect.extend(toHaveNoViolations);
+
+   const { container } = render(<YourComponent />);
+   expect(await axe(container)).toHaveNoViolations();
+```
+
+### Step 4: ビジュアルデザインチェック
 
 #### スペーシング（8ptグリッド）
 ```
@@ -74,7 +150,7 @@ https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/comm
 - アライメントの一貫性
 - 重要な要素はサイズ・色・位置で強調
 
-### Step 4: 結果レポート
+### Step 5: 結果レポート
 
 優先度別に分類して出力:
 

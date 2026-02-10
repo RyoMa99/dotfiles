@@ -429,6 +429,171 @@ generateId(() => 0.5); // 決定的な結果
 
 ---
 
+## フロントエンドテスト
+
+バックエンドのテストピラミッドとは異なり、フロントエンドでは**テストトロフィー**モデルを採用する。
+
+関連: @~/.claude/rules/web-frontend.md
+
+### テストトロフィー
+
+```
+        /\
+       /  \  E2E（少）
+      /----\
+     /      \  Integration（最多）← フロントエンドの主戦場
+    /--------\
+   /          \  Unit（中）
+  --------------
+  Static（型チェック・lint）
+```
+
+**バックエンドのテストピラミッドとの違い**:
+- バックエンド: Unit テストが最多（ドメインロジック中心）
+- フロントエンド: Integration テストが最多（コンポーネント結合の振る舞い中心）
+
+### Integration テスト = コンポーネントテスト
+
+フロントエンドの Integration テストは、複数のコンポーネントが結合した状態でユーザー操作をシミュレートするテスト。
+
+#### Testing Library のユーザー視点アプローチ
+
+```typescript
+// BAD: 実装の詳細をテスト
+it('setStateが呼ばれる', () => {
+  const wrapper = shallow(<LoginForm />);
+  wrapper.find('input').simulate('change', { target: { value: 'user@example.com' } });
+  expect(wrapper.state('email')).toBe('user@example.com');
+});
+
+// GOOD: ユーザーの視点でテスト（Testing Library）
+it('メールアドレスを入力してログインできる', async () => {
+  const user = userEvent.setup();
+  render(<LoginForm onSubmit={mockSubmit} />);
+
+  await user.type(screen.getByLabelText('メールアドレス'), 'user@example.com');
+  await user.type(screen.getByLabelText('パスワード'), 'password123');
+  await user.click(screen.getByRole('button', { name: 'ログイン' }));
+
+  expect(mockSubmit).toHaveBeenCalledWith({
+    email: 'user@example.com',
+    password: 'password123',
+  });
+});
+```
+
+#### クエリの優先順位
+
+Testing Library のクエリは以下の優先順位で選択する（アクセシビリティに基づく）：
+
+| 優先度 | クエリ | 用途 |
+|--------|--------|------|
+| 1（推奨） | `getByRole` | ボタン、リンク、フォーム要素 |
+| 2 | `getByLabelText` | フォームフィールド |
+| 3 | `getByPlaceholderText` | label がない場合のフォールバック |
+| 4 | `getByText` | テキスト表示要素 |
+| 5（最終手段） | `getByTestId` | 他のクエリで特定できない場合のみ |
+
+```typescript
+// BAD: data-testid への依存
+screen.getByTestId('submit-button');
+
+// GOOD: ロールで取得（スクリーンリーダーと同じアクセス方法）
+screen.getByRole('button', { name: '送信' });
+```
+
+### アクセシビリティテスト
+
+#### axe-core 統合
+
+自動テストに axe-core を組み込み、a11y 違反を検出する。
+
+```typescript
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+it('アクセシビリティ違反がない', async () => {
+  const { container } = render(<OrderForm />);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+#### a11y テストで検出できるもの
+
+- label の欠落
+- コントラスト比不足
+- aria 属性の不正使用
+- 見出しレベルのスキップ
+- 画像の alt テキスト欠落
+
+#### a11y テストで検出できないもの
+
+- キーボード操作の実際の使い勝手
+- スクリーンリーダーでの読み上げ順序の妥当性
+- 認知的負荷の高さ
+
+→ 自動テストは**最低限の品質担保**。手動テストも併用する。
+
+### フロントエンドテスト観点マトリクス
+
+| テスト対象 | テスト種類 | ツール | 確認内容 |
+|-----------|-----------|--------|---------|
+| ユーティリティ関数 | Unit | Vitest / Jest | 入出力の正しさ |
+| カスタム hooks | Unit | renderHook | 状態遷移、副作用 |
+| 単一コンポーネント | Integration | Testing Library | 表示・操作・a11y |
+| フォーム | Integration | Testing Library | バリデーション・送信・エラー表示 |
+| ページ（複数コンポーネント結合） | Integration | Testing Library + MSW | データ取得・表示・操作の統合 |
+| ユーザーフロー | E2E | Playwright / Cypress | 画面遷移を含む一連の操作 |
+| ビジュアル | Visual Regression | Chromatic / Percy | UIの意図しない変更検出 |
+
+### MSW（Mock Service Worker）の活用
+
+API モックは MSW で統一し、テストとローカル開発で共有する。
+
+```typescript
+// handlers.ts: API モックの定義
+export const handlers = [
+  http.get('/api/users', () => {
+    return HttpResponse.json([
+      { id: 1, name: 'Alice' },
+      { id: 2, name: 'Bob' },
+    ]);
+  }),
+
+  http.post('/api/orders', async ({ request }) => {
+    const body = await request.json();
+    return HttpResponse.json({ id: 1, ...body }, { status: 201 });
+  }),
+];
+
+// テストで使用
+beforeAll(() => server.listen());
+afterEach(() => server.resetHandlers());
+afterAll(() => server.close());
+
+it('ユーザー一覧を表示する', async () => {
+  render(<UserList />);
+  expect(await screen.findByText('Alice')).toBeInTheDocument();
+  expect(screen.getByText('Bob')).toBeInTheDocument();
+});
+
+// エラーケースのテスト
+it('API エラー時にエラーメッセージを表示する', async () => {
+  server.use(
+    http.get('/api/users', () => {
+      return HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 });
+    }),
+  );
+
+  render(<UserList />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('データの取得に失敗しました');
+});
+```
+
+---
+
 ## 参考資料
 
 - [kawasima - Writing effective tests](https://scrapbox.io/kawasima/Writing_effective_tests)
@@ -441,3 +606,6 @@ generateId(() => 0.5); // 決定的な結果
 - [Google Testing Blog - Testing State vs. Testing Interactions](https://testing.googleblog.com/2013/03/testing-on-toilet-testing-state-vs.html)
 - [Google Testing Blog - Risk-Driven Testing](https://testing.googleblog.com/2014/05/testing-on-toilet-risk-driven-testing.html)
 - [Google Testing Blog - Change-Detector Tests Considered Harmful](https://testing.googleblog.com/2015/01/testing-on-toilet-change-detector-tests.html)
+- [Kent C. Dodds - Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
+- [Testing Library - Guiding Principles](https://testing-library.com/docs/guiding-principles)
+- [MSW - Mock Service Worker](https://mswjs.io/)
