@@ -95,9 +95,9 @@ grepai watch             # インデックス開始（バックグラウンド�
 ```yaml
 embedder:
   provider: ollama
-  model: mxbai-embed-large  # デフォルトのnomic-embed-textより高精度
+  model: qwen3-embedding:0.6b  # MTEB多言語対応、コード検索にも強い
   endpoint: http://localhost:11434
-  dimensions: 1024          # mxbai-embed-largeの次元数
+  dimensions: 1024              # qwen3-embedding:0.6bの次元数
 ```
 
 ## 使用例
