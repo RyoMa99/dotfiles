@@ -152,6 +152,69 @@ app.use(helmet({
 - `X-Frame-Options: DENY` - クリックジャッキング防止
 - `Content-Security-Policy` - インラインスクリプト制限
 
+#### Strict CSP（Content Security Policy）
+
+CSP はインラインスクリプトや外部スクリプトの実行を制限し、XSS の影響を緩和する。
+`nonce` または `hash` を使い、許可されたスクリプトのみ実行を認める。
+
+```typescript
+// Next.js の場合（middleware.ts）
+import { NextResponse } from 'next/server';
+import crypto from 'crypto';
+
+export function middleware(request: Request) {
+  const nonce = crypto.randomBytes(16).toString('base64');
+  const csp = [
+    `default-src 'self'`,
+    `script-src 'self' 'nonce-${nonce}'`,  // nonce付きスクリプトのみ許可
+    `style-src 'self' 'unsafe-inline'`,     // CSSは許可（Tailwind等）
+    `img-src 'self' data: https:`,
+    `connect-src 'self' https://api.example.com`,
+    `frame-ancestors 'none'`,               // クリックジャッキング防止
+  ].join('; ');
+
+  const response = NextResponse.next();
+  response.headers.set('Content-Security-Policy', csp);
+  return response;
+}
+```
+
+**❌ NEVER:**
+```
+script-src 'unsafe-inline' 'unsafe-eval'  // XSS対策が無効化される
+```
+
+#### CORS（Cross-Origin Resource Sharing）
+
+**❌ NEVER（本番環境）:**
+```typescript
+// ワイルドカードは開発環境のみ
+app.use(cors({ origin: '*' }));
+
+// credentials と * の組み合わせは動作しない
+app.use(cors({ origin: '*', credentials: true }));
+```
+
+**✅ ALWAYS:**
+```typescript
+// 明示的に信頼するオリジンを指定
+const ALLOWED_ORIGINS = [
+  'https://app.example.com',
+  'https://admin.example.com',
+];
+
+app.use(cors({
+  origin: (origin, callback) => {
+    if (!origin || ALLOWED_ORIGINS.includes(origin)) {
+      callback(null, true);
+    } else {
+      callback(new Error('Not allowed by CORS'));
+    }
+  },
+  credentials: true,
+}));
+```
+
 ### 11. ユーザー名のリザーブド文字列
 
 ユーザーが選択できるハンドルネームから除外すべき文字列：

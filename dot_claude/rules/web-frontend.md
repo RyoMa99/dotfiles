@@ -323,38 +323,344 @@ const virtualizer = useVirtualizer({
 
 ### モバイルファースト
 
-```css
-/* BAD: デスクトップファーストで書いてモバイル対応 */
-.container { width: 1200px; }
-@media (max-width: 768px) { .container { width: 100%; } }
+Tailwind はモバイルファースト設計。プレフィックスなしがベース（モバイル）、`md:` 以上で拡張する。
 
-/* GOOD: モバイルファーストで書いてデスクトップ拡張 */
-.container { width: 100%; }
-@media (min-width: 768px) { .container { max-width: 1200px; } }
+```tsx
+// BAD: デスクトップ前提で書いてモバイル対応を後付け
+<div className="w-[1200px] md:w-full">  // ← 逆
+
+// GOOD: モバイルファーストで書いてデスクトップ拡張
+<div className="w-full md:max-w-5xl">
 ```
 
 ### ブレークポイント
 
-プロジェクトで統一されたブレークポイントを定義する。Tailwind CSS のデフォルト値が一般的：
+Tailwind CSS のデフォルトブレークポイント（`min-width` ベース）：
 
-| 名前 | 値 | 対象 |
-|------|-----|------|
-| `sm` | 640px | スマートフォン横向き |
-| `md` | 768px | タブレット |
-| `lg` | 1024px | デスクトップ |
-| `xl` | 1280px | 大画面 |
+| プレフィックス | 値 | 対象 |
+|--------------|-----|------|
+| なし | 0px〜 | モバイル（ベース） |
+| `sm:` | 640px〜 | スマートフォン横向き |
+| `md:` | 768px〜 | タブレット |
+| `lg:` | 1024px〜 | デスクトップ |
+| `xl:` | 1280px〜 | 大画面 |
 
 ### コンテナクエリ
 
-親要素のサイズに応じたスタイル変更（コンポーネントの再利用性向上）：
+画面幅ではなく**親要素の幅**に応じてスタイルを変える。コンポーネントの再利用性が向上する。
+
+```tsx
+// 親要素をコンテナとして定義
+<div className="@container">
+  {/* コンテナ幅400px以上で横並び */}
+  <div className="flex flex-col @md:flex-row gap-4">
+    <Sidebar />
+    <Main />
+  </div>
+</div>
+```
+
+> メディアクエリ（画面幅）よりコンテナクエリ（親要素幅）を優先する。
+> コンポーネントが「どこに配置されるか」に依存しない設計になる。
+
+---
+
+## CSSレイアウト設計（Tailwind）
+
+『Every Layout』のレイアウトプリミティブをTailwindで実装する。
+メディアクエリに頼らず、コンテンツとコンテナのサイズに自動適応するレイアウトを構築する。
+
+### 設計思想: コンポジション
+
+巨大なコンポーネントにスタイルを詰め込むのではなく、**単一責任のレイアウトプリミティブを組み合わせる**。
+
+```tsx
+// BAD: 1つのコンポーネントにレイアウト・装飾・余白を混在
+<div className="flex flex-col md:flex-row gap-4 p-6 bg-white rounded-lg shadow-md border">
+  {/* すべてが1つのdivに依存 */}
+</div>
+
+// GOOD: レイアウト（配置）と装飾（見た目）を分離
+<Stack gap={6}>           {/* 余白管理 */}
+  <Card>                  {/* 装飾 */}
+    <Cluster gap={4}>     {/* 水平配置 */}
+      <Tag>React</Tag>
+      <Tag>TypeScript</Tag>
+    </Cluster>
+  </Card>
+</Stack>
+```
+
+### 余白管理の原則
+
+> 要素自身にマージンを持たせず、**親（レイアウトプリミティブ）が子の間隔を管理する**。
+
+```tsx
+// BAD: 各要素が自分のマージンを持つ（コンテキストで破綻する）
+<h2 className="mb-4">見出し</h2>
+<p className="mb-4">本文</p>
+<p className="mb-4">本文</p>  {/* 最後の要素にも不要なマージン */}
+
+// GOOD: 親が子の間隔を管理（space-y / gap）
+<div className="space-y-4">
+  <h2>見出し</h2>
+  <p>本文</p>
+  <p>本文</p>
+</div>
+```
+
+### Every Layout パターン
+
+#### Stack: 垂直方向の配置
+
+要素を縦に積み重ね、間隔を均一に管理する。最も基本的なパターン。
+
+```tsx
+<div className="flex flex-col gap-4">
+  <Header />
+  <Main />
+  <Footer />
+</div>
+
+{/* Tailwind の space-y でも同等 */}
+<div className="space-y-4">
+  <h2>タイトル</h2>
+  <p>本文</p>
+  <p>本文</p>
+</div>
+```
+
+#### Cluster: 水平方向の配置と折り返し
+
+タグクラウドやボタン群など、**幅が足りなければ自動で折り返す**。
+
+```tsx
+<div className="flex flex-wrap gap-2">
+  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">React</span>
+  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">TypeScript</span>
+  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">Tailwind</span>
+</div>
+```
+
+#### Sidebar: メイン・サブの2カラム
+
+**メディアクエリなし**で、幅が狭くなったら自動で縦並びに切り替わる。
+
+```tsx
+{/* サイドバー固定幅 + メインが残りを埋める */}
+<div className="flex flex-wrap gap-4">
+  <aside className="w-64 shrink-0 grow-0">サイドバー</aside>
+  <main className="min-w-[50%] grow">メインコンテンツ</main>
+</div>
+```
+
+`min-w-[50%]` がポイント: メインコンテンツの幅が50%を下回ると折り返す。
+
+#### Switcher: 閾値による水平↔垂直の切り替え
+
+**コンテナ幅**がある閾値より狭くなったら、水平→垂直に自動切り替え。
+
+```tsx
+{/* コンテナクエリで閾値ベースの切り替え */}
+<div className="@container">
+  <div className="flex flex-col @md:flex-row gap-4">
+    <div className="flex-1">カード1</div>
+    <div className="flex-1">カード2</div>
+    <div className="flex-1">カード3</div>
+  </div>
+</div>
+
+{/* または CSS Grid の auto-fit で自動カラム調整 */}
+<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
+  <div>カード1</div>
+  <div>カード2</div>
+  <div>カード3</div>
+</div>
+```
+
+#### Cover: 垂直方向の中央揃え
+
+ファーストビューや全画面セクションで、メインコンテンツを中央に配置する。
+
+```tsx
+<div className="flex min-h-screen flex-col">
+  <header>ヘッダー</header>
+  <main className="flex flex-1 items-center justify-center">
+    <h1>中央に表示されるコンテンツ</h1>
+  </main>
+  <footer>フッター</footer>
+</div>
+```
+
+#### Grid: レスポンシブグリッド
+
+`auto-fit` + `minmax` で、**メディアクエリなし**にカラム数を自動調整。
+
+```tsx
+{/* 各カードが最低250px、余白があれば自動で列を増やす */}
+<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
+  {items.map(item => <Card key={item.id} {...item} />)}
+</div>
+```
+
+### 内在的Webデザイン
+
+固定値を避け、コンテンツに基づいてサイズが決まる設計。
+
+```tsx
+// BAD: 固定幅・固定高さ
+<div className="w-[800px] h-[600px]">
+
+// GOOD: 最大幅で制約し、高さはコンテンツに任せる
+<div className="max-w-3xl">
+
+// GOOD: 読みやすい行幅（約60〜70文字）を ch 単位で制限
+<p className="max-w-[65ch]">本文テキスト...</p>
+```
+
+| 指針 | BAD | GOOD |
+|------|-----|------|
+| 幅 | `w-[800px]` | `max-w-3xl` |
+| 高さ | `h-[600px]` | 指定なし（コンテンツに任せる） |
+| テキスト幅 | `max-w-2xl` | `max-w-[65ch]`（文字数ベース） |
+| 単位 | `px` ベース | `rem` / `ch` ベース |
+
+---
+
+## Design Tokens
+
+### モジュラースケール（タイポグラフィ）
+
+任意のピクセル値ではなく、**数学的な比率**に基づくフォントサイズ体系を使用する。
+Tailwind のデフォルトスケールは良い出発点だが、プロジェクトに合わせてカスタマイズする。
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    fontSize: {
+      xs:   ['0.75rem',  { lineHeight: '1rem' }],    // 12px
+      sm:   ['0.875rem', { lineHeight: '1.25rem' }],  // 14px
+      base: ['1rem',     { lineHeight: '1.5rem' }],    // 16px（基準）
+      lg:   ['1.125rem', { lineHeight: '1.75rem' }],   // 18px
+      xl:   ['1.25rem',  { lineHeight: '1.75rem' }],   // 20px
+      '2xl': ['1.5rem',  { lineHeight: '2rem' }],      // 24px
+      '3xl': ['1.875rem',{ lineHeight: '2.25rem' }],   // 30px
+    },
+  },
+};
+```
+
+**原則**:
+- `rem` を使用し、ユーザーのブラウザ設定（フォントサイズ変更）を尊重する
+- 見出しのジャンプ率（サイズ差）を十分に確保し、視覚的な階層を明確にする
+- 本文の `line-height` は `1.5` 〜 `1.7` を目安にする
+
+### 機能的カラー命名
+
+色の見た目ではなく、**役割**で命名する。テーマ切り替え（ダークモード等）で名前を変えずに済む。
+
+```typescript
+// tailwind.config.ts
+export default {
+  theme: {
+    colors: {
+      // BAD: 見た目で命名（ダークモードで破綻する）
+      // blue: '#3b82f6',
+      // red: '#ef4444',
+
+      // GOOD: 役割で命名
+      primary:    'var(--color-primary)',     // ブランドカラー
+      accent:     'var(--color-accent)',      // 強調・アクション
+      destructive:'var(--color-destructive)', // 危険操作
+      background: 'var(--color-background)', // 背景
+      foreground: 'var(--color-foreground)', // テキスト
+      muted:      'var(--color-muted)',      // 補足テキスト
+      border:     'var(--color-border)',      // ボーダー
+    },
+  },
+};
+```
 
 ```css
-.card-container { container-type: inline-size; }
+/* globals.css */
+:root {
+  --color-primary: #3b82f6;
+  --color-background: #ffffff;
+  --color-foreground: #0f172a;
+}
 
-@container (min-width: 400px) {
-  .card { display: flex; flex-direction: row; }
+.dark {
+  --color-primary: #60a5fa;
+  --color-background: #0f172a;
+  --color-foreground: #f8fafc;
 }
 ```
+
+---
+
+## Storybook 活用
+
+### コンポーネントカタログ
+
+共通UIコンポーネントをStorybookで管理し、**アプリケーションコードから独立して開発・確認**する。
+
+```typescript
+// Button.stories.tsx
+import type { Meta, StoryObj } from '@storybook/react';
+import { Button } from './Button';
+
+const meta: Meta<typeof Button> = {
+  component: Button,
+  argTypes: {
+    variant: { control: 'select', options: ['primary', 'secondary', 'ghost'] },
+    size: { control: 'select', options: ['sm', 'md', 'lg'] },
+  },
+};
+export default meta;
+
+type Story = StoryObj<typeof Button>;
+
+export const Primary: Story = {
+  args: { variant: 'primary', children: 'ボタン' },
+};
+
+export const AllVariants: Story = {
+  render: () => (
+    <div className="flex gap-4">
+      <Button variant="primary">Primary</Button>
+      <Button variant="secondary">Secondary</Button>
+      <Button variant="ghost">Ghost</Button>
+    </div>
+  ),
+};
+```
+
+### Interaction Testing
+
+`play` 関数でユーザー操作をスクリプト化し、**視覚的に確認しながら**テストする。
+
+```typescript
+import { within, userEvent, expect } from '@storybook/test';
+
+export const WithValidation: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+    await userEvent.click(canvas.getByRole('button', { name: '送信' }));
+    await expect(canvas.getByText('入力してください')).toBeInTheDocument();
+  },
+};
+```
+
+### ストーリー設計のガイドライン
+
+| ストーリー | 目的 |
+|-----------|------|
+| Default | デフォルト状態 |
+| AllVariants | variant の一覧表示 |
+| WithLongText | 長いテキストでの表示崩れ確認 |
+| Loading / Error | 非同期状態の表示 |
+| Interactive | `play` 関数による操作テスト |
 
 ---
 
@@ -382,9 +688,23 @@ const virtualizer = useVirtualizer({
 - [ ] 長いリストに仮想化を適用しているか
 - [ ] 画像に適切なフォーマット・サイズを使用しているか
 
+### CSSレイアウト
+- [ ] 余白は親要素（`gap` / `space-y`）で管理し、子要素にマージンを持たせていないか
+- [ ] 固定幅・固定高さを避け、`max-w` やコンテンツベースのサイズを使っているか
+- [ ] メディアクエリの代わりにコンテナクエリや `auto-fit` を検討したか
+- [ ] テキスト幅を `max-w-[65ch]` 等で読みやすく制限しているか
+
 ### レスポンシブ
-- [ ] モバイルファーストで実装しているか
+- [ ] モバイルファーストで実装しているか（プレフィックスなし = モバイル）
 - [ ] ブレークポイントがプロジェクト全体で統一されているか
+
+### Design Tokens
+- [ ] カラーは役割ベースで命名しているか（`primary`, `destructive` 等）
+- [ ] フォントサイズは `rem` ベースのスケールを使用しているか
+
+### Storybook
+- [ ] 共通UIコンポーネントのストーリーを作成しているか
+- [ ] 主要なバリエーション（状態、サイズ、エラー等）をカバーしているか
 
 ---
 
@@ -393,3 +713,5 @@ const virtualizer = useVirtualizer({
 - [Future Architect - Webフロントエンド設計ガイドライン](https://future-architect.github.io/coding-standards/documents/forFrontend/design_guidelines.html)
 - [Bulletproof React](https://github.com/alan2207/bulletproof-react)
 - [TanStack Query - Practical React Query](https://tkdodo.eu/blog/practical-react-query)
+- [Every Layout](https://every-layout.dev/) - レイアウトプリミティブの設計パターン
+- [フロントエンド開発のためのテスト入門](https://www.shoeisha.co.jp/book/detail/9784798178639)

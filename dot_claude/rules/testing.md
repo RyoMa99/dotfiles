@@ -546,7 +546,7 @@ it('アクセシビリティ違反がない', async () => {
 | フォーム | Integration | Testing Library | バリデーション・送信・エラー表示 |
 | ページ（複数コンポーネント結合） | Integration | Testing Library + MSW | データ取得・表示・操作の統合 |
 | ユーザーフロー | E2E | Playwright / Cypress | 画面遷移を含む一連の操作 |
-| ビジュアル | Visual Regression | Chromatic / Percy | UIの意図しない変更検出 |
+| ビジュアル | Visual Regression | Storycap + reg-suit | UIの意図しない変更検出 |
 
 ### MSW（Mock Service Worker）の活用
 
@@ -592,6 +592,99 @@ it('API エラー時にエラーメッセージを表示する', async () => {
 });
 ```
 
+### ビジュアルリグレッションテスト（VRT）
+
+CSSの変更は意図しないUI崩れを引き起こしやすいが、ロジックテストでは検出できない。
+VRTはスクリーンショットの差分比較で視覚的な変更を検出する。
+
+#### なぜ必要か
+
+```
+Unit / Integration テストで保証できること → ロジック・振る舞い
+VRT で保証できること → レンダリング結果（ピクセル単位）
+```
+
+例: ボタンの背景色が白に変わっても、テストは `getByRole('button')` で取得できるため通る。
+VRTなら「見た目が変わった」ことを画像差分で検出できる。
+
+#### ローカル実行ワークフロー: Storycap + reg-suit
+
+```bash
+# 1. Storybookの全ストーリーをスクリーンショット化
+npx storycap http://localhost:6006 --outDir ./screenshots/actual
+
+# 2. 画像差分を比較（初回はベースラインを作成）
+npx reg-suit compare
+
+# 3. 差分レポートをブラウザで確認
+open ./reg-suit-report/index.html
+```
+
+**Storycap**: Storybook上の各ストーリーを自動でキャプチャ。`waitFor` や `delay` オプションで非同期コンテンツの描画完了を待てる。
+
+**reg-suit**: 2つのスクリーンショットディレクトリを比較し、差分をHTMLレポートで可視化。閾値を設定して微小な差分（アンチエイリアス等）を無視できる。
+
+#### VRT対象の選定
+
+すべてのストーリーを撮るのではなく、効果の高い対象に絞る：
+
+| 対象 | 理由 |
+|------|------|
+| 共通UIコンポーネント（Button, Input, Card等） | 変更の影響範囲が広い |
+| レイアウトコンポーネント（Header, Sidebar等） | 位置関係の崩れを検出 |
+| フォーム全体 | バリデーション状態の表示確認 |
+
+### Storybook Interaction Testing
+
+Storybookの `play` 関数を使い、ストーリー上でユーザー操作をスクリプト化する。
+コンポーネントの振る舞いを**視覚的に確認しながら**テストできる。
+
+```typescript
+import { within, userEvent, expect } from '@storybook/test';
+
+export const FilledForm: Story = {
+  play: async ({ canvasElement }) => {
+    const canvas = within(canvasElement);
+
+    // ユーザー操作をスクリプト化
+    await userEvent.type(canvas.getByLabelText('メールアドレス'), 'user@example.com');
+    await userEvent.type(canvas.getByLabelText('パスワード'), 'password123');
+    await userEvent.click(canvas.getByRole('button', { name: 'ログイン' }));
+
+    // アサーション
+    await expect(canvas.getByText('ログイン成功')).toBeInTheDocument();
+  },
+};
+```
+
+**Testing Library との使い分け**:
+
+| 用途 | ツール | 理由 |
+|------|--------|------|
+| ロジック・振る舞いの網羅的テスト | Testing Library（Vitest / Jest） | 高速・CI向き |
+| UIの視覚確認 + 動作検証 | Storybook Interaction Testing | 目視確認・デバッグ向き |
+| 見た目の変更検出 | VRT（Storycap + reg-suit） | ピクセル単位の差分検出 |
+
+### テストレベル判断フロー
+
+何をテストしたいかに応じて、最適なテストレベルを選択する：
+
+```
+テストしたい内容
+    ↓
+「ロジック」が複雑？（計算、データ変換、条件分岐）
+    ├─ Yes → Unit テスト（Vitest / Jest）
+    └─ No ↓
+「UIの振る舞い」を保証したい？（操作→表示変化）
+    ├─ Yes → Integration テスト（Testing Library）
+    └─ No ↓
+「見た目」の崩れを防ぎたい？（CSS、レイアウト）
+    ├─ Yes → VRT（Storycap + reg-suit）
+    └─ No ↓
+「重要機能」の連携を確認したい？（ログイン、決済）
+    └─ Yes → E2E テスト（Playwright）← 最小限に絞る
+```
+
 ---
 
 ## 参考資料
@@ -609,3 +702,4 @@ it('API エラー時にエラーメッセージを表示する', async () => {
 - [Kent C. Dodds - Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
 - [Testing Library - Guiding Principles](https://testing-library.com/docs/guiding-principles)
 - [MSW - Mock Service Worker](https://mswjs.io/)
+- [フロントエンド開発のためのテスト入門](https://www.shoeisha.co.jp/book/detail/9784798178639)
