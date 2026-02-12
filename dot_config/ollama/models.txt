@@ -1,1 +1,0 @@
-mxbai-embed-large:latest
