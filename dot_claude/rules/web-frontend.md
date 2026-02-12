@@ -367,139 +367,167 @@ Tailwind CSS のデフォルトブレークポイント（`min-width` ベース�
 
 ## CSSレイアウト設計（Tailwind）
 
-『Every Layout』のレイアウトプリミティブをTailwindで実装する。
 メディアクエリに頼らず、コンテンツとコンテナのサイズに自動適応するレイアウトを構築する。
+『Every Layout』のレイアウトプリミティブを参考に、Tailwind で実装する。
 
-### 設計思想: コンポジション
+### 設計思想
 
-巨大なコンポーネントにスタイルを詰め込むのではなく、**単一責任のレイアウトプリミティブを組み合わせる**。
+**レイアウト（配置）と装飾（見た目）を分離する。** 巨大な div に全部詰め込まない。
 
 ```tsx
-// BAD: 1つのコンポーネントにレイアウト・装飾・余白を混在
+// BAD: 1つの div にレイアウト・装飾・余白を混在
 <div className="flex flex-col md:flex-row gap-4 p-6 bg-white rounded-lg shadow-md border">
   {/* すべてが1つのdivに依存 */}
 </div>
 
-// GOOD: レイアウト（配置）と装飾（見た目）を分離
-<Stack gap={6}>           {/* 余白管理 */}
-  <Card>                  {/* 装飾 */}
-    <Cluster gap={4}>     {/* 水平配置 */}
-      <Tag>React</Tag>
-      <Tag>TypeScript</Tag>
-    </Cluster>
-  </Card>
-</Stack>
+// GOOD: レイアウト層と装飾層を分離
+<div className="flex flex-col gap-6">       {/* レイアウト: 余白管理 */}
+  <div className="rounded-lg border p-6">   {/* 装飾: 見た目 */}
+    <div className="flex flex-wrap gap-4">   {/* レイアウト: 水平配置 */}
+      <span className="rounded-full bg-blue-100 px-3 py-1">React</span>
+      <span className="rounded-full bg-blue-100 px-3 py-1">TypeScript</span>
+    </div>
+  </div>
+</div>
 ```
+
+### Flex vs Grid の選択基準
+
+```
+どちらを使う？
+    ↓
+ページレベルの分割？（サイドバー + メイン等）
+    ├─ Yes → Grid（minmax(0, 1fr) でネスト問題を構造的に回避）
+    └─ No → コンポーネント内のレイアウト
+              ├─ 1次元の並び？（ナビ、ボタン群、タグ等）
+              │     └─ Yes → Flex（方向と gap で十分、必要なら min-w-0）
+              └─ 2次元グリッド？（カード一覧等）
+                    └─ Yes → Grid（auto-fit + minmax）
+```
+
+**Flex が得意**: 1次元の並び、折り返し（`flex-wrap`）、均等配置
+**Grid が得意**: 固定＋可変カラム、2次元配置、構造的なレイアウト制御
+
+### Flexbox の `min-width: auto` 罠
+
+Flexbox の子要素にはデフォルトで `min-width: auto` が適用され、**コンテンツ幅以下に縮まない**。
+長いテキストやコードブロックがあると、親をはみ出してレイアウトが崩れる。
+
+```tsx
+// BAD: 長いコンテンツが親をはみ出す
+<div className="flex gap-2">
+  <span className="shrink-0">ラベル</span>
+  <p>とても長いテキスト...</p>
+</div>
+
+// GOOD: Flex → min-w-0 で縮小を許可（コンポーネント内の小さなレイアウトに適切）
+<div className="flex gap-2">
+  <span className="shrink-0">ラベル</span>
+  <p className="min-w-0 flex-1">長いテキストも正しく折り返される...</p>
+</div>
+
+// GOOD: Grid → minmax(0, 1fr) で構造的に制約（固定+可変カラムに適切）
+<div className="grid grid-cols-[auto_minmax(0,1fr)] gap-2">
+  <span>ラベル</span>
+  <p>長いテキストも正しく折り返される...</p>
+</div>
+```
+
+**注意: `min-w-0` はネストで伝播しない。** Flex 内にさらに Flex を入れると、内側でも `min-w-0` が必要になる。ページレベルの分割（サイドバー等）では Grid を使い、コンポーネント内の小さなレイアウトでは Flex + `min-w-0` で十分。
 
 ### 余白管理の原則
 
-> 要素自身にマージンを持たせず、**親（レイアウトプリミティブ）が子の間隔を管理する**。
+> 要素自身にマージンを持たせず、**親が子の間隔を管理する**。
 
 ```tsx
-// BAD: 各要素が自分のマージンを持つ（コンテキストで破綻する）
+// BAD: 各要素が自分のマージンを持つ
 <h2 className="mb-4">見出し</h2>
 <p className="mb-4">本文</p>
-<p className="mb-4">本文</p>  {/* 最後の要素にも不要なマージン */}
 
-// GOOD: 親が子の間隔を管理（space-y / gap）
-<div className="space-y-4">
+// GOOD: 親が gap で間隔を管理
+<div className="flex flex-col gap-4">
   <h2>見出し</h2>
   <p>本文</p>
-  <p>本文</p>
 </div>
 ```
 
-### Every Layout パターン
+**`gap` vs `space-y`**: `gap` を優先する。`space-y` は margin ベースのため、`hidden` 要素があると余白が崩れる。`gap` は Flexbox/Grid のネイティブ機能で、表示要素間のみに適用される。
 
-#### Stack: 垂直方向の配置
+### レイアウトパターン集
 
-要素を縦に積み重ね、間隔を均一に管理する。最も基本的なパターン。
+#### ページ分割: Grid による2/3カラム
+
+`minmax(0, 1fr)` でメイン領域の子孫すべてが自動で幅制約される。
 
 ```tsx
-<div className="flex flex-col gap-4">
-  <Header />
-  <Main />
-  <Footer />
+{/* 2カラム */}
+<div className="grid grid-cols-[250px_minmax(0,1fr)] min-h-screen">
+  <aside>サイドバー</aside>
+  <main>メイン</main>
 </div>
 
-{/* Tailwind の space-y でも同等 */}
-<div className="space-y-4">
-  <h2>タイトル</h2>
-  <p>本文</p>
-  <p>本文</p>
+{/* 3カラム */}
+<div className="grid grid-cols-[250px_minmax(0,1fr)_300px] min-h-screen">
+  <nav>ナビ</nav>
+  <main>メイン</main>
+  <aside>サブ</aside>
+</div>
+
+{/* レスポンシブ: モバイル1カラム → デスクトップ2カラム */}
+<div className="grid grid-cols-1 md:grid-cols-[250px_minmax(0,1fr)] min-h-screen">
+  <aside>サイドバー</aside>
+  <main>メイン</main>
 </div>
 ```
 
-#### Cluster: 水平方向の配置と折り返し
+#### 水平並び: Flex による1次元レイアウト
 
-タグクラウドやボタン群など、**幅が足りなければ自動で折り返す**。
+ナビゲーション、ボタン群、タグクラウドなど。
 
 ```tsx
+{/* 折り返しあり（タグクラウド等） */}
 <div className="flex flex-wrap gap-2">
   <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">React</span>
   <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">TypeScript</span>
-  <span className="rounded-full bg-blue-100 px-3 py-1 text-sm">Tailwind</span>
 </div>
-```
 
-#### Sidebar: メイン・サブの2カラム
-
-**メディアクエリなし**で、幅が狭くなったら自動で縦並びに切り替わる。
-
-```tsx
-{/* サイドバー固定幅 + メインが残りを埋める */}
+{/* コンポーネント内の分割（狭くなったら自動折り返し） */}
 <div className="flex flex-wrap gap-4">
-  <aside className="w-64 shrink-0 grow-0">サイドバー</aside>
-  <main className="min-w-[50%] grow">メインコンテンツ</main>
+  <aside className="w-64 shrink-0 grow-0">サブ</aside>
+  <main className="min-w-[50%] grow">メイン</main>
 </div>
 ```
 
-`min-w-[50%]` がポイント: メインコンテンツの幅が50%を下回ると折り返す。
+#### カード一覧: Grid の auto-fit
 
-#### Switcher: 閾値による水平↔垂直の切り替え
-
-**コンテナ幅**がある閾値より狭くなったら、水平→垂直に自動切り替え。
-
-```tsx
-{/* コンテナクエリで閾値ベースの切り替え */}
-<div className="@container">
-  <div className="flex flex-col @md:flex-row gap-4">
-    <div className="flex-1">カード1</div>
-    <div className="flex-1">カード2</div>
-    <div className="flex-1">カード3</div>
-  </div>
-</div>
-
-{/* または CSS Grid の auto-fit で自動カラム調整 */}
-<div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-4">
-  <div>カード1</div>
-  <div>カード2</div>
-  <div>カード3</div>
-</div>
-```
-
-#### Cover: 垂直方向の中央揃え
-
-ファーストビューや全画面セクションで、メインコンテンツを中央に配置する。
-
-```tsx
-<div className="flex min-h-screen flex-col">
-  <header>ヘッダー</header>
-  <main className="flex flex-1 items-center justify-center">
-    <h1>中央に表示されるコンテンツ</h1>
-  </main>
-  <footer>フッター</footer>
-</div>
-```
-
-#### Grid: レスポンシブグリッド
-
-`auto-fit` + `minmax` で、**メディアクエリなし**にカラム数を自動調整。
+**メディアクエリなし**でカラム数を自動調整。コンテナクエリとの組み合わせも可。
 
 ```tsx
 {/* 各カードが最低250px、余白があれば自動で列を増やす */}
 <div className="grid grid-cols-[repeat(auto-fit,minmax(250px,1fr))] gap-6">
   {items.map(item => <Card key={item.id} {...item} />)}
+</div>
+
+{/* コンテナクエリで閾値ベースの切り替えも可 */}
+<div className="@container">
+  <div className="flex flex-col @md:flex-row gap-4">
+    <div className="flex-1">カード1</div>
+    <div className="flex-1">カード2</div>
+  </div>
+</div>
+```
+
+#### 中央揃え: Cover パターン
+
+ファーストビューや全画面セクション。
+
+```tsx
+<div className="flex min-h-screen flex-col">
+  <header>ヘッダー</header>
+  <main className="flex flex-1 items-center justify-center">
+    <h1>中央コンテンツ</h1>
+  </main>
+  <footer>フッター</footer>
 </div>
 ```
 
@@ -689,7 +717,8 @@ export const WithValidation: Story = {
 - [ ] 画像に適切なフォーマット・サイズを使用しているか
 
 ### CSSレイアウト
-- [ ] 余白は親要素（`gap` / `space-y`）で管理し、子要素にマージンを持たせていないか
+- [ ] ページレベルの分割に Grid `minmax(0,1fr)` を使っているか（Flex のネスト伝播問題を回避）
+- [ ] 余白は親要素の `gap` で管理し、子要素にマージンを持たせていないか
 - [ ] 固定幅・固定高さを避け、`max-w` やコンテンツベースのサイズを使っているか
 - [ ] メディアクエリの代わりにコンテナクエリや `auto-fit` を検討したか
 - [ ] テキスト幅を `max-w-[65ch]` 等で読みやすく制限しているか
@@ -714,4 +743,5 @@ export const WithValidation: Story = {
 - [Bulletproof React](https://github.com/alan2207/bulletproof-react)
 - [TanStack Query - Practical React Query](https://tkdodo.eu/blog/practical-react-query)
 - [Every Layout](https://every-layout.dev/) - レイアウトプリミティブの設計パターン
+- [OPTiM - FlexboxとGridの使い分け](https://tech-blog.optim.co.jp/entry/2025/12/01/150000) - min-width: auto の罠と Grid の利点
 - [フロントエンド開発のためのテスト入門](https://www.shoeisha.co.jp/book/detail/9784798178639)
