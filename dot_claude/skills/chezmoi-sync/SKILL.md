@@ -4,7 +4,7 @@ description: chezmoiの同期操作を統合管理。pull（リモート取得�
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: ["Bash", "Glob", "Read", "Grep", "AskUserQuestion"]
-arguments: "pull | push | drift"
+argument-hint: "pull | push | drift"
 ---
 
 # chezmoi-sync
