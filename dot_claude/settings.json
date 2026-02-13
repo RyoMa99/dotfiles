@@ -46,6 +46,7 @@
     "sentry@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true
   },
+  "language": "Japanese",
   "mcpServers": {
     "context7": {
       "type": "stdio",
