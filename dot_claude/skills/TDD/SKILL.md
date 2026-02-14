@@ -1,7 +1,6 @@
 ---
 name: TDD
 description: TDDで開発を進める。RED-GREEN-REFACTORサイクルを厳格に適用し、コンテキスト汚染を防止。superpowers:test-driven-development の補完。
-disable-model-invocation: true
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 ---
 
