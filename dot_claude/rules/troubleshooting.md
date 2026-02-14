@@ -28,3 +28,21 @@ https://r.jina.ai/https://note.com/user/n/xxxxx
 **ポイント**: jina.aiのReader APIがJavaScriptレンダリング後のコンテンツをマークダウン形式で返す
 
 ---
+
+## xh を非対話環境（Claude Code）で使うと stdin 競合エラー
+
+**状況**: Claude Code の Bash ツールから `xh POST ... --raw '{...}'` を実行すると `Request body from stdin and --raw cannot be mixed` エラー
+
+**解決策**: `--ignore-stdin` フラグを付ける
+
+```bash
+# Before（エラー）
+xh POST http://localhost:8788/v1/logs Authorization:"Bearer token" --raw '{"resourceLogs":[]}'
+
+# After（成功）
+xh --ignore-stdin POST http://localhost:8788/v1/logs Authorization:"Bearer token" --raw '{"resourceLogs":[]}'
+```
+
+**ポイント**: Claude Code の Bash ツールは stdin が接続された状態で実行されるため、xh が stdin からもボディを読もうとして `--raw` と競合する
+
+---

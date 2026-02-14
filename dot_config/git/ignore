@@ -1,5 +1,4 @@
 .tours
-CLAUDE.md
 **/.claude/settings.local.json
 **/.serena
 **/.playwright-mcp
