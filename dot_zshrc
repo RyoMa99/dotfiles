@@ -40,6 +40,7 @@ bindkey "^R" history-selection
 
 ## Homebrew prefix (cache to avoid repeated subprocess calls)
 BREW_PREFIX="$(brew --prefix)"
+export HOMEBREW_CLEANUP_MAX_AGE_DAYS=30
 
 ## auto suggestions
 ## cf. https://github.com/zsh-users/zsh-autosuggestions
@@ -105,6 +106,14 @@ alias gl='git log --all --oneline'
 alias glg='git log --graph --all --pretty=format:"%Cred%h%Creset -%C(yellow)%d%Creset %s %Cgreen(%cr) %C(bold blue)<%an>%Creset"'
 alias gwt='git worktree'
 alias gwtl='git worktree list'
+
+## HTTP クライアント
+## cf. https://github.com/ducaale/xh
+alias curl='xh'
+
+## ディスク使用量
+## cf. https://github.com/bootandy/dust
+alias du='dust'
 
 ## ファイル検索
 alias l='nnn'

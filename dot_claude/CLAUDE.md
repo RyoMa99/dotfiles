@@ -22,6 +22,10 @@
 - コミットメッセージは日本語で書く
 - 末尾に `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` を付ける
 
+## ツール
+
+- HTTP リクエストは `curl` ではなく `xh` を使用
+
 ## コミュニケーション
 
 - 日本語で応答
