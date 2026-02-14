@@ -136,10 +136,6 @@ ghcr() {
   [ -n "$repo_name" ] && gh repo create "$repo_name" $visibility && ghq get https://github.com/RyoMa99/"$repo_name".git
 }
 
-## claude
-## cf. https://azukiazusa.dev/blog/enable-claude-code-tool-search-to-reduce-mcp-token-usage/
-export ENABLE_TOOL_SEARCH=true
-
 ## iterm2
 ## cf. https://github.com/mozumasu/dotfiles/blob/main/.config/wezterm/keymaps.lua#L222
 test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
