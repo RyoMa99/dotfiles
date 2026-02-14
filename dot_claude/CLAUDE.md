@@ -28,6 +28,7 @@
 - ブラウザ操作の優先順位:
   1. **Playwright CLI**（認証不要時）- Bash 1回で完結、コンテキスト最小
   2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
+  3. **chrome-devtools MCP**（Claude in Chrome が使えない時のフォールバック）
 - Playwright CLI は `$(mise which playwright)` でパスを解決して実行する
 
 ## コミュニケーション

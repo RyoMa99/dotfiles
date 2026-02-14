@@ -56,6 +56,13 @@
         "@upstash/context7-mcp"
       ]
     },
+    "chrome-devtools": {
+      "type": "stdio",
+      "command": "npx",
+      "args": [
+        "chrome-devtools-mcp@latest"
+      ]
+    },
     "awslabs.aws-iac-mcp-server": {
       "type": "stdio",
       "command": "uvx",
