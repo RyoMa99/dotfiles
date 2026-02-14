@@ -25,6 +25,10 @@
 ## ツール
 
 - HTTP リクエストは `curl` ではなく `xh` を使用
+- ブラウザ操作の優先順位:
+  1. **Playwright CLI**（認証不要時）- Bash 1回で完結、コンテキスト最小
+  2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
+  3. **devmode-mcp**（Claude in Chrome が使えない時のフォールバック）
 
 ## コミュニケーション
 
