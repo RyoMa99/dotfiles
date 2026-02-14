@@ -25,6 +25,18 @@
 | **Grep** | 正規表現・文字列の完全一致検索 | 特定の文字列リテラル、import文の検索 |
 | **Glob** | ファイル名パターンでの検索 | 「*.test.tsx」「**/store.ts」 |
 
+## grepai使用前の確認
+
+grepai を使う前に `grepai status` で状態を確認する。
+
+| 状態 | 対応 |
+|------|------|
+| `no grepai project found` | 未初期化。ユーザーに `grepai init` を提案する |
+| status は返るが watch が停止中 | `grepai watch --background` の実行を提案する |
+| 正常稼働中 | そのまま検索を実行 |
+
+grepai が利用できない場合は Grep / Glob にフォールバックし、セマンティック検索が有効な旨をユーザーに伝える。
+
 ## grepai使用時の注意
 
 - **クエリは必ず英語に翻訳してから渡す**（embeddingモデルの精度が英語で最も高いため）
