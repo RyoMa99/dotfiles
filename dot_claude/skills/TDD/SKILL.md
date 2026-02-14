@@ -14,13 +14,14 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 - コミットルール（test/feat/refactor の分離）
 - t_wada のテスト原則との統合
 
-詳細なテスト原則は @reference.md と @~/.claude/rules/testing.md を参照。
+詳細なテスト原則は @~/.claude/rules/testing.md を参照。
 
 ## When to Use This Skill
 
-Trigger when user:
+Trigger when:
 - `/TDD` コマンドを実行
 - 「TDDで開発して」「テスト駆動で」と依頼
+- `@~/.claude/rules/implementation.md` のタスク実行時（Step 2 で自動的に呼び出される）
 - `superpowers:subagent-driven-development` 内で個別タスクをTDDで実装する場合
 
 ## 核心原則
@@ -55,11 +56,17 @@ Trigger when user:
 
 ### Phase 0: 終了条件の明確化
 
+計画のタスク定義（`@~/.claude/rules/plan-mode.md` Phase 3 のフォーマット）がある場合、
+そこから終了条件を導出する。ない場合は以下を自分で定義する。
+
 ```markdown
 ## 終了条件
 
 ### 実装する機能
-（1文で説明）
+（1文で説明。計画のタスク名に対応）
+
+### I/O シグネチャ
+（計画で定義済みの型情報。なければここで定義）
 
 ### 成功の定義（全て満たしたら完了）
 - [ ] 全テストケースがパス
@@ -71,6 +78,9 @@ Trigger when user:
 ```
 
 ### Phase 1: テスト設計（実装を見ない）
+
+計画のタスク定義に**受入条件**がある場合、それをテストリストの出発点とする。
+受入条件の `WHEN...THEN` を具体的なテストケースに変換し、不足があれば追加する。
 
 #### 1.1 ユーザージャーニーの作成
 
