@@ -55,4 +55,10 @@ xh --ignore-stdin POST http://localhost:8788/v1/logs Authorization:"Bearer token
 
 **解決策**: `op` コマンドを使う操作（アイテム作成、シークレット読み取り等）はユーザーのターミナルで直接実行してもらう。Claude Code からは実行不可。
 
+**chezmoi テンプレートでの回避策**: `onepasswordRead` の代わりに `output` + フォールバックチェーンを使う。`op read` が失敗した場合、既存ファイルから値を読み取る。
+
+```
+{{ output "sh" "-c" "op read 'op://vault/item/field' 2>/dev/null || jq -r '.key' existing_file.json 2>/dev/null || echo ''" | trim }}
+```
+
 ---
