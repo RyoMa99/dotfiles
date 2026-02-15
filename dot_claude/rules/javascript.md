@@ -1,6 +1,8 @@
-# JavaScript / TypeScript
+# JavaScript / TypeScript エコシステム
 
-JS/TS プロジェクト共通のルール。
+JS/TS プロジェクト共通のツーリング・パッケージ管理のルール。
+
+TypeScript の言語固有の知見（型システム、コンパイラ設定、型パターン）は `typescript.md` を参照。
 
 ---
 

@@ -153,7 +153,7 @@ CyberAgent ジャンプTOON チームの「多観点チェックリスト」ア�
 |---------|---------|
 | React/Next.js | `~/.claude/rules/react-nextjs.md` |
 | TypeScript | `~/.claude/rules/typescript.md` |
-| JS/TS（pnpm, npm, パッケージ管理） | `~/.claude/rules/javascript.md` |
+| JS/TS エコシステム（パッケージ管理, bundler, runtime） | `~/.claude/rules/javascript.md` |
 | テスト | `~/.claude/rules/testing.md` |
 | API設計 | `~/.claude/rules/api-design.md` |
 | DB | `~/.claude/rules/database.md` |
