@@ -141,23 +141,34 @@ CyberAgent ジャンプTOON チームの「多観点チェックリスト」ア�
 
 ## 保存先マッピング（技術的学び）
 
+### 振り分けの原則
+
+**知見の対象技術・ツールに応じたファイルに保存する。**
+エラー解決・トラブルシューティングでも、対象がツール固有なら当該ツールのルールファイルに記載する。
+`troubleshooting.md` は **Claude Code 環境固有のワークアラウンド**（stdin 制約、WebFetch の制限等）にのみ使用する。
+
+### マッピング表
+
 | カテゴリ | ファイル |
 |---------|---------|
 | React/Next.js | `~/.claude/rules/react-nextjs.md` |
 | TypeScript | `~/.claude/rules/typescript.md` |
+| JS/TS（pnpm, npm, パッケージ管理） | `~/.claude/rules/javascript.md` |
 | テスト | `~/.claude/rules/testing.md` |
 | API設計 | `~/.claude/rules/api-design.md` |
 | DB | `~/.claude/rules/database.md` |
+| Cloudflare | `~/.claude/rules/cloudflare.md` |
 | DevOps | `~/.claude/rules/devops.md` |
 | Terraform | `~/.claude/rules/terraform-guidelines.md` |
+| mise | `~/.claude/rules/mise.md` |
 | セキュリティ | `~/.claude/rules/security.md` |
-| 問題解決 | `~/.claude/rules/troubleshooting.md` |
 | フロントエンド | `~/.claude/rules/web-frontend.md` |
 | 命名 | `~/.claude/rules/naming.md` |
 | 型設計 | `~/.claude/rules/type-granularity.md` |
 | ドメインモデリング | `~/.claude/rules/domain-modeling.md` |
 | プランレビュー | `~/.claude/rules/plan-review-learnings.md` |
-| その他 | 新規ファイルを提案 or `~/.claude/rules/general.md` |
+| Claude Code 環境固有の回避策 | `~/.claude/rules/troubleshooting.md` |
+| その他 | 既存ファイルに該当なければ新規ファイルを提案 |
 
 ## 自動化機会の信頼度基準
 
