@@ -688,6 +688,24 @@ export const FilledForm: Story = {
 
 ---
 
+## テストデータ設計の落とし穴
+
+### 時間フィルタ付きクエリのテスト
+
+`WHERE timestamp >= Date.now() - N日` のようなクエリをテストする場合、固定の過去日付をテストデータに使うとフィルタ範囲外になり検索結果が空になる。
+
+```typescript
+// ❌ BAD: 固定日付は時間経過でフィルタ範囲外になる
+const timestampMs = new Date("2025-01-15T12:00:00Z").getTime();
+
+// ✅ GOOD: Date.now() 基準の相対日付で常にフィルタ範囲内
+const timestampMs = Date.now() - 2 * 24 * 60 * 60 * 1000; // 2日前
+```
+
+**ポイント**: プロダクションコードが `Date.now()` を基準にフィルタしている場合、テストデータも `Date.now()` 基準で生成する。
+
+---
+
 ## 参考資料
 
 - [kawasima - Writing effective tests](https://scrapbox.io/kawasima/Writing_effective_tests)

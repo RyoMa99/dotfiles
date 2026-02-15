@@ -81,6 +81,17 @@ import DOMPurify from 'dompurify';
 - すべての保護されたエンドポイントで認証を確認
 - ユーザーの権限を検証してからデータを返す
 - セッションの有効期限を適切に設定
+- Bearer token 検証では `replace` ではなく `match` を使い、スキームの存在を必須にする
+
+```typescript
+// ❌ BAD: Bearer プレフィックスなしの token がそのまま通過する
+const token = authHeader.replace(/^Bearer\s+/i, "");
+if (token !== expectedToken) { /* reject */ }
+
+// ✅ GOOD: Bearer スキームが必須。プレフィックスなしは拒否される
+const match = authHeader.match(/^Bearer\s+(.+)$/i);
+if (!match || match[1] !== expectedToken) { /* reject */ }
+```
 
 ### 6. エラーハンドリング
 
