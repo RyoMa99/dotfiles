@@ -24,3 +24,16 @@ pnpm v10 はセキュリティのため、依存パッケージの `postinstall`
 
 - `pnpm approve-builds` は `pnpm-workspace.yaml` に `ignoredBuiltDependencies` を生成するが、対話モードが使えない環境では正しく動作しない
 - `package.json` の `pnpm.onlyBuiltDependencies` に直接記載する方が確実
+
+## pnpm deploy と pnpm run deploy の違い
+
+`pnpm deploy` は pnpm のビルトインコマンド（workspace からサブセットをデプロイする機能）。
+`package.json` の `scripts.deploy` を実行したい場合は `pnpm run deploy` を使う。
+
+```bash
+# BAD: pnpm のビルトインコマンドが実行される
+pnpm deploy
+
+# GOOD: package.json の scripts.deploy が実行される
+pnpm run deploy
+```

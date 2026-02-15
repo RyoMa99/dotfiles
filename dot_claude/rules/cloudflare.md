@@ -59,3 +59,72 @@ declare module "cloudflare:test" {
 
 - 各テストファイルは同一の D1 インスタンスを共有するため、テストデータは一意な ID を使い他テストとの干渉を防ぐ
 - `tsconfig.json` の `include` に `test/` ディレクトリを追加すること
+
+---
+
+## Workers デプロイ手順
+
+### 初回セットアップ
+
+```bash
+# 1. wrangler 認証（ブラウザが開く）
+pnpm wrangler login
+
+# 2. D1 データベース作成
+pnpm wrangler d1 create <db-name>
+# → 返された database_id を wrangler.toml に設定
+
+# 3. マイグレーション適用
+pnpm db:migrate:remote
+
+# 4. Secrets 設定（対話的に値を入力）
+echo "<token>" | pnpm wrangler secret put AUTH_TOKEN
+
+# 5. デプロイ
+pnpm run deploy  # ※ pnpm deploy ではない（pnpm ビルトインと競合）
+```
+
+### 注意点
+
+- `pnpm wrangler` 経由で実行する（グローバルインストール不要）
+- `wrangler login` はブラウザ認証が必要なため、ユーザーのターミナルで実行
+- 非対話環境では `CLOUDFLARE_API_TOKEN` 環境変数で認証可能
+
+---
+
+## Cloudflare Access でパスごとに認証を分ける
+
+同一ドメインでパスごとに異なる認証ポリシー（例: `/` は保護、`/v1/*` はバイパス）を適用する場合、**Application を2つ作成**する。
+
+| Application | ドメイン | パス | ポリシー |
+|-------------|---------|------|---------|
+| CC Dashboard | `app.workers.dev` | （空） | Allow（メール OTP 等） |
+| CC Dashboard API | `app.workers.dev` | `/v1/` | Bypass（Everyone） |
+
+- Bypass ポリシー内にパスフィルタ機能はないため、Application レベルでパスを指定する
+- より具体的なパスの Application が優先される
+- API 側の認証は Workers アプリケーション内のミドルウェア（Bearer Token 等）で実装する
+
+---
+
+## Hono JSX での SVG レンダリング
+
+Hono JSX の `IntrinsicElements` は `[tagName: string]: Props` のキャッチオールを持つため、`<svg>`, `<rect>`, `<line>`, `<text>`, `<g>` 等の SVG 要素は**型宣言なしでもコンパイル・動作する**。
+
+ただし明示的な `.d.ts`（`declare module "hono/jsx"` で `IntrinsicElements` を拡張）を追加すると、IDE の属性補完が効くようになるため開発体験が向上する。
+
+```typescript
+// src/types/jsx-svg.d.ts
+declare module "hono/jsx" {
+  namespace JSX {
+    interface IntrinsicElements {
+      svg: { viewBox?: string; width?: string; role?: string; "aria-label"?: string; /* ... */ };
+      rect: { x?: number; y?: number; width?: number | string; height?: number | string; fill?: string; rx?: string; /* ... */ };
+      // ...他の SVG 要素
+    }
+  }
+}
+```
+
+- SSR で SVG を直接生成する場合、クライアント JS や追加依存は不要
+- `viewBox` + `width="100%"` でレスポンシブ対応可能

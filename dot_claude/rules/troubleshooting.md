@@ -46,3 +46,13 @@ xh --ignore-stdin POST http://localhost:8788/v1/logs Authorization:"Bearer token
 **ポイント**: Claude Code の Bash ツールは stdin が接続された状態で実行されるため、xh が stdin からもボディを読もうとして `--raw` と競合する
 
 ---
+
+## 1Password CLI が Claude Code の Bash 環境から接続できない
+
+**状況**: `op` コマンドを Claude Code の Bash ツールから実行すると `1Password CLI couldn't connect to the 1Password desktop app` エラー
+
+**原因**: 1Password CLI はデスクトップアプリと Unix ソケット（`~/Library/Group Containers/2BUA8C4S2C.com.1password/t/s.sock`）で通信するが、Claude Code のサンドボックスがソケットへのアクセスを制限する
+
+**解決策**: `op` コマンドを使う操作（アイテム作成、シークレット読み取り等）はユーザーのターミナルで直接実行してもらう。Claude Code からは実行不可。
+
+---

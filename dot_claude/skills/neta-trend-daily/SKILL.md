@@ -7,7 +7,7 @@ user-invocable: true
 
 # トレンドネタ収集
 
-はてなブックマークIT人気エントリー、Hacker News、Redditからトレンド情報を収集し、ideasリポジトリに保存する。
+はてなブックマークIT人気エントリー、Hacker News、Reddit からトレンド情報を収集し、JVN・GitHub Advisory から脆弱性情報を収集して、ideas リポジトリに保存する。
 
 ## 実行手順
 
@@ -49,6 +49,32 @@ user-invocable: true
 - https://www.aikido.dev/blog
 - https://www.wiz.io/blog
 - 最新1-3記事をチェックし、興味度★★★のものがあれば注目トピックに含める
+
+**脆弱性情報（JVN）**
+- https://jvn.jp/ のトップページから直近の注意喚起・脆弱性レポートを取得
+- 対象: macOS, Windows, Linux, 広く使われるインフラ系ツール/ライブラリ（OpenSSL, OpenSSH, curl, glibc, sudo, Git, nginx, PostgreSQL, Docker/containerd 等）、Node.js, Go, Python, PHP, Kotlin/JVM に関連するもの
+- 各エントリーの**タイトル、JVN識別番号（JVNVU#等）、対象ソフトウェア、CVSS スコア（記載がある場合）**を取得
+- ユーザーの技術スタックに無関係なもの（産業制御系、医療機器等）はスキップ
+
+**脆弱性情報（GitHub Advisory Database）** — gh api 使用
+
+取得例:
+```bash
+YESTERDAY=$(date -v-1d +%Y-%m-%d)
+for eco in npm go pip composer maven; do
+  gh api "/advisories?ecosystem=${eco}&type=reviewed&per_page=5&sort=published&direction=desc&published=${YESTERDAY}.." \
+    --jq '.[] | "\(.cve_id // .ghsa_id)|\(.severity)|\(.summary)|\(.html_url)"'
+done
+```
+
+対象エコシステム:
+- npm（React, Next.js, Express 等）
+- go（Go モジュール）
+- pip（Python パッケージ）
+- composer（PHP/Laravel パッケージ）
+- maven（Kotlin/JVM パッケージ）
+
+severity が critical / high のものを優先的に注目トピックに含める。
 
 **Reddit（15サブレッド）** — WebFetchはreddit.comをブロックするため**Bashツールでcurl使用**
 
@@ -157,6 +183,31 @@ OSS/個人開発系:
 
 #### キャリア/実践系
 1. [タイトル](URL) (XXX ups, XXX comments) - r/cscareerquestions - 概要
+
+## 脆弱性情報（JVN / GitHub Advisory）
+
+### 注目（Critical / High）
+
+| CVE / ID | 対象 | 深刻度 | 概要 | ソース |
+|----------|------|--------|------|--------|
+| [CVE-YYYY-XXXXX](URL) | Node.js 24.x | Critical | 概要 | JVN |
+| [GHSA-xxxx-xxxx](URL) | express 4.x | High | 概要 | GitHub Advisory |
+
+### JVN 新着
+
+1. [JVNVU#XXXXXXXX: タイトル](URL) - 対象ソフトウェア - CVSS X.X
+2. ...
+
+### GitHub Advisory（エコシステム別）
+
+#### npm
+1. [GHSA-xxxx: 概要](URL) - severity - 対象パッケージ
+
+#### go
+1. ...
+
+#### pip / composer / maven
+1. ...（該当がなければ「該当なし」）
 ```
 
 ### 4. 保存後
@@ -177,3 +228,6 @@ Co-Authored-By を付与すること。
 - **Redditは完全URL**（`https://www.reddit.com/r/...`形式）
 - **HN・Redditのタイトルは日本語に翻訳**
 - WebFetchで取得できない場合は `https://r.jina.ai/{URL}` 経由でアクセス
+- **JVNはユーザーの技術スタックに関連するもののみ抽出**（産業制御系、医療機器等はスキップ）
+- **GitHub Advisory は直近24時間の published を対象**（`date -v-1d` で前日を算出）
+- **Critical/High の脆弱性は必ず注目トピックに含める**（severity が medium 以下は全エントリーのみ）
