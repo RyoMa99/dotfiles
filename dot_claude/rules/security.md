@@ -13,7 +13,7 @@
 **❌ NEVER:**
 ```typescript
 // ハードコードされた秘密情報
-const API_KEY = "sk-1234567890abcdef";
+const API_KEY = "YOUR_API_KEY_HERE";
 const PASSWORD = "admin123";
 ```
 
