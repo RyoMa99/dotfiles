@@ -6,8 +6,8 @@
     "OTEL_METRICS_EXPORTER": "otlp",
     "OTEL_LOGS_EXPORTER": "otlp",
     "OTEL_EXPORTER_OTLP_PROTOCOL": "http/json",
-    "OTEL_EXPORTER_OTLP_ENDPOINT": "http://localhost:8788",
-    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Bearer dummy"
+    "OTEL_EXPORTER_OTLP_ENDPOINT": "{{ onepasswordRead "op://Personal/CC Dashboard/endpoint" }}",
+    "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Bearer {{ onepasswordRead "op://Personal/CC Dashboard/token" }}"
   },
   "permissions": {
     "allow": [
