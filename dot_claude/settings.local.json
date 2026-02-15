@@ -181,7 +181,16 @@
       "mcp__plugin_serena_serena__read_file",
       "Bash(pkill:*)",
       "Bash(pgrep:*)",
-      "Bash(kill:*)"
+      "Bash(kill:*)",
+      "WebFetch(domain:jvn.jp)",
+      "WebFetch(domain:jvndb.jvn.jp)",
+      "WebFetch(domain:docs.github.com)",
+      "WebFetch(domain:www.chezmoi.io)",
+      "Bash(chezmoi secret --help:*)",
+      "Bash(chezmoi help:*)",
+      "Bash(chezmoi doctor:*)",
+      "Bash(~/.claude/hooks/notify-stop.sh)",
+      "Bash(osascript:*)"
     ]
   },
   "outputStyle": "Learning"

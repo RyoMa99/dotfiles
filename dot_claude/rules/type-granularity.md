@@ -3,6 +3,7 @@
 kawasima氏の知見に基づく、振る舞いの境界を型として明示する設計手法。
 
 関連: @~/.claude/rules/robust-code.md（型による予防的設計）
+関連: @~/.claude/rules/domain-modeling.md（意図の発見、仕様の直交性）
 
 ---
 

@@ -37,7 +37,9 @@ return {
 <html>
 <head>
   <meta charset="UTF-8">
-  <link rel="stylesheet" href="//cdn.jsdelivr.net/npm/docsify/themes/vue.css">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/docsify/themes/vue.css">
+  <script src="https://cdn.jsdelivr.net/npm/mermaid@11/dist/mermaid.min.js"></script>
+  <script>mermaid.initialize({ startOnLoad: false });</script>
 </head>
 <body>
   <div id="app"></div>
@@ -45,13 +47,28 @@ return {
     window.$docsify = {
       loadSidebar: true,
       auto2top: true,
-      mermaidConfig: { theme: 'default' },
+      markdown: {
+        renderer: {
+          code: function(code, lang) {
+            if (lang === 'mermaid') {
+              return '<div class="mermaid">' + code + '</div>';
+            }
+            return this.origin.code.apply(this, arguments);
+          }
+        }
+      },
+      plugins: [
+        function(hook) {
+          hook.doneEach(function() {
+            setTimeout(function() {
+              mermaid.run({ querySelector: '.mermaid' });
+            }, 100);
+          });
+        }
+      ]
     }
   </script>
-  <script src="//cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/mermaid/dist/mermaid.min.js"></script>
-  <script src="//cdn.jsdelivr.net/npm/docsify-mermaid@2.0.0/dist/docsify-mermaid.js"></script>
-  <script type="module" src="https://cdn.jsdelivr.net/npm/docsify-livereload/dist/index.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/docsify/lib/docsify.min.js"></script>
 </body>
 </html>]]
           vim.fn.writefile(vim.split(html, "\n"), index_html)

@@ -1,5 +1,15 @@
 #!/bin/bash
-# Claude Code Stop hook: タブ番号付きで入力待ち通知を表示
+# Claude Code hook: タブ番号付きでイベント種別に応じた通知を表示
+# stdin から JSON を受け取り、hook_event_name でメッセージを分岐
+
+INPUT=$(timeout 2 cat 2>/dev/null || true)
+HOOK_EVENT=$(echo "$INPUT" | jq -r '.hook_event_name // empty' 2>/dev/null)
+STOP_ACTIVE=$(echo "$INPUT" | jq -r '.stop_hook_active // false' 2>/dev/null)
+
+# Stop hook の無限ループ防止
+if [ "$STOP_ACTIVE" = "true" ]; then
+  exit 0
+fi
 
 tab_num=$(wezterm cli list --format json 2>/dev/null | python3 -c "
 import json, sys, os
@@ -15,4 +25,13 @@ for i in items:
         break
 " 2>/dev/null)
 
-osascript -e "display notification \"タブ${tab_num:-?}: 入力待ちです\" with title \"Claude Code\""
+case "${HOOK_EVENT}" in
+  Stop)
+    msg="作業が完了しました"
+    ;;
+  *)
+    msg="入力待ちです"
+    ;;
+esac
+
+osascript -e "display notification \"タブ${tab_num:-?}: ${msg}\" with title \"Claude Code\""
