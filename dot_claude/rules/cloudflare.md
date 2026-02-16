@@ -84,6 +84,18 @@ echo "<token>" | pnpm wrangler secret put AUTH_TOKEN
 pnpm run deploy  # ※ pnpm deploy ではない（pnpm ビルトインと競合）
 ```
 
+### 通常デプロイ（2回目以降）
+
+`wrangler deploy` に D1 マイグレーションは含まれない。スキーマ変更がある場合は**マイグレーション → デプロイ**の順序で実行する。逆にすると、新しいテーブル/カラムを参照するコードが先にデプロイされランタイムエラーになる。
+
+```bash
+# 1. マイグレーション適用（先に実行）
+pnpm db:migrate:remote
+
+# 2. Worker コードのデプロイ
+pnpm run deploy
+```
+
 ### 注意点
 
 - `pnpm wrangler` 経由で実行する（グローバルインストール不要）
