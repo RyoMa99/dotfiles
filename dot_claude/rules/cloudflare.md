@@ -128,3 +128,20 @@ declare module "hono/jsx" {
 
 - SSR で SVG を直接生成する場合、クライアント JS や追加依存は不要
 - `viewBox` + `width="100%"` でレスポンシブ対応可能
+
+---
+
+## wrangler dev のポート自動フォールバック
+
+`wrangler dev` はデフォルトポート（8787）が使用中の場合、8788, 8789... と自動的に別のポートにフォールバックする。
+
+### よくある原因
+
+- `@cloudflare/vitest-pool-workers` のテスト実行後、workerd プロセスがポートを占有したまま残る
+- 複数の Workers プロジェクトを同時に開発している
+
+### 対策
+
+- **stdout の `Ready on http://localhost:{port}` を必ず確認する**（デフォルトポートを仮定しない）
+- wrangler の出力を `/dev/null` にリダイレクトしない
+- 必要に応じて `lsof -i :8787` で占有プロセスを確認・停止する
