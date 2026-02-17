@@ -190,7 +190,9 @@
       "Bash(chezmoi help:*)",
       "Bash(chezmoi doctor:*)",
       "Bash(~/.claude/hooks/notify-stop.sh)",
-      "Bash(osascript:*)"
+      "Bash(osascript:*)",
+      "Bash(chezmoi execute-template:*)",
+      "Bash(exiftool:*)"
     ]
   },
   "outputStyle": "Learning"

@@ -62,6 +62,14 @@ vim.keymap.set('v', 'jk', '<Esc>')
 
 -- 折り返しトグル
 vim.keymap.set("n", "<Leader>tw", "<cmd>set wrap!<cr>", { desc = "折り返し切替" })
+vim.keymap.set("n", "<Leader>tt", "<cmd>terminal zsh -li<cr>", { desc = "ターミナルを開く" })
+
+-- ペイン分割・幅調整
+vim.keymap.set("n", "<Leader>sv", "<cmd>vsplit<cr>", { desc = "垂直分割" })
+vim.keymap.set("n", "<Leader>sc", "<cmd>close<cr>", { desc = "ペインを閉じる" })
+vim.keymap.set("n", "<Leader>s=", "<C-w>=", { desc = "幅を均等化" })
+vim.keymap.set("n", "<Leader>sl", "10<C-w>>", { desc = "幅を広げる" })
+vim.keymap.set("n", "<Leader>sh", "10<C-w><", { desc = "幅を狭める" })
 
 -- カーソル位置のURLを取得
 local function get_url_at_cursor()
