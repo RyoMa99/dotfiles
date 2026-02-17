@@ -172,6 +172,23 @@ res.cookie('session', token, {
 });
 ```
 
+#### SameSite の判定基準と注意点
+
+SameSite は eTLD+1（registrable domain）が同じかどうかで判定する。Same origin（スキーム＋ホスト＋ポートの完全一致）とは異なるゆるい基準。
+
+```
+app.example.com と api.example.com → Same site（eTLD+1 = example.com）
+your-app.github.io と my-app.github.io → Cross-site（eTLD = github.io）
+```
+
+サブドメイン間は Same site 扱いのため、**脆弱なサブドメインがあると SameSite による保護が効かない**。`domain` 属性を不必要に設定しない理由もここにある。
+
+| 値 | Cookie送信条件 | 用途 |
+|---|---|---|
+| **Lax**（デフォルト） | 同一サイト + 外部からのトップレベルGETナビゲーション | 一般的な認証Cookie |
+| **Strict** | 同一サイトのみ（外部リンク遷移でも送らない） | 高セキュリティ操作 |
+| **None** | どこからでも送信（`Secure` 必須） | Cross-site 埋め込みが必要な場合のみ |
+
 ### 10. セキュリティヘッダ
 
 レスポンスヘッダで追加の保護を設定：
@@ -299,12 +316,19 @@ const RESERVED_USERNAMES = [
 
 ### CSRF（クロスサイト・リクエスト・フォージェリ）
 
-**原因**: リクエストが利用者の意図かどうかを検証しない
+**原因**: リクエストの出自が検証されない（攻撃者サイトから被害者のブラウザ経由で Cookie 付きリクエストが送信される）
 
-**対策**:
-- CSRFトークンをhiddenパラメータに埋め込み検証
+**現代のベースプラクティス**（Jxck氏）:
+1. 副作用のある API を GET にしない（POST 使用）
+2. `Origin` ヘッダ確認（ブラウザが強制付与、JS から偽装不可）
+3. `SameSite=Lax` 以上を明示（Cross-site の POST で Cookie が送られない）
+4. Fetch Metadata（`Sec-Fetch-Site` ヘッダ）確認
+
+これらがトークン導入以前の前提。CSRF トークンはこの上に追加する多層防御として位置づける。
+
+**追加対策**:
+- CSRF トークンを hidden パラメータに埋め込み検証
 - 重要操作時にパスワード再認証
-- `SameSite`属性付きCookie
 
 ### HTTPヘッダインジェクション
 
@@ -318,8 +342,11 @@ const RESERVED_USERNAMES = [
 
 **原因**: 透明なiframeを重ねて意図しないクリックを誘導
 
+**現状**: SameSite=Lax がデフォルトの現代では、Cross-site の iframe 内に Cookie が送られないため認証済み操作を狙った攻撃は成立しにくい。ただしサブドメイン間は Same site 扱い（eTLD+1 が同じ）のため、脆弱なサブドメインからの攻撃は依然成立しうる。
+
 **対策**:
-- `X-Frame-Options: DENY`または`SAMEORIGIN`
+- `X-Frame-Options: DENY`または`SAMEORIGIN`（多層防御として引き続き必須）
+- `Content-Security-Policy: frame-ancestors 'none'`（CSP版、推奨）
 - 重要操作時にパスワード再認証
 
 ### アクセス制御・認可制御の欠落
