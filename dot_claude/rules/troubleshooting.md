@@ -82,3 +82,29 @@ cat -e /path/to/file.tsx | sed -n '30,40p'
 **ポイント**: 特に Biome でタブインデントを使うプロジェクト（`"indentStyle": "tab"`）で発生しやすい
 
 ---
+
+## プロジェクトの settings.local.json に env を定義すると OTLP が送信されなくなる
+
+**状況**: グローバルの `~/.claude/settings.local.json` で OTLP の ENDPOINT / HEADERS を設定しているが、プロジェクトの `.claude/settings.local.json` に `env` キーを定義すると OTLP テレメトリが送信されなくなる
+
+**原因**: Claude Code の settings マージはトップレベルキーごとの shallow merge。プロジェクトの `settings.local.json` に `env` が存在すると、グローバルの `settings.local.json` の `env` が**丸ごと置き換え**られる。個別の環境変数単位のマージではない
+
+```json
+// ~/.claude/settings.local.json（グローバル）
+"env": {
+  "OTEL_EXPORTER_OTLP_ENDPOINT": "https://...",  // ← これが消える
+  "OTEL_EXPORTER_OTLP_HEADERS": "Authorization=Bearer ...",  // ← これも消える
+  "OTEL_RESOURCE_ATTRIBUTES": "repository=global"
+}
+
+// .claude/settings.local.json（プロジェクト）
+"env": {
+  "OTEL_RESOURCE_ATTRIBUTES": "repository=my-project"  // ← これだけが env 全体になる
+}
+```
+
+**解決策**: プロジェクトの `settings.local.json` の `env` にも ENDPOINT / HEADERS を含める
+
+**ポイント**: 新しいプロジェクトで `.claude/settings.local.json` に `env` を追加する際は、グローバルで必要な環境変数（特に OTLP 関連）も忘れずに含めること
+
+---
