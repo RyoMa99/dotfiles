@@ -1,0 +1,23 @@
+{
+  "Exclude": [
+    "debug",
+    "file-history",
+    "teams",
+    "tasks",
+    "statsig",
+    "paste-cache",
+    "plans",
+    "plugins",
+    "projects",
+    "cache",
+    "chrome",
+    "ide",
+    "memories",
+    "session-env",
+    "shell-snapshots",
+    "telemetry",
+    "todos",
+    "security_warnings_state_",
+    "skills/notebooklm"
+  ]
+}

@@ -20,7 +20,7 @@ setopt hist_ignore_all_dups   # 以前と同じコマンドはヒストリに保
 setopt hist_find_no_dups      # ヒストリ検索時に以前見たものを2度は表示しない
 setopt hist_save_no_dups      # ヒストリファイルに書き出すときに以前のコマンドと同じものを除去する
 
-### 履歴補完 
+### 履歴補完
 ### cf. https://zenn.dev/naoki_oshiumi/articles/c8a9a727b3e784
 autoload history-search-end
 zle -N history-beginning-search-backward-end history-search-end
