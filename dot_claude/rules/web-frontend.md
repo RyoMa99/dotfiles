@@ -74,71 +74,6 @@ interface ButtonProps {
 
 ---
 
-## 状態管理
-
-### 3分類
-
-フロントエンドの状態は3種類に分類し、それぞれに適したツールを選択する。
-
-| 分類 | 説明 | 例 | 推奨ツール |
-|------|------|-----|-----------|
-| **UI State** | 画面表示に関する一時的な状態 | モーダル開閉、タブ選択、フォーム入力中の値 | `useState` / `useReducer` |
-| **App State** | アプリ全体で共有する状態 | ログインユーザー、テーマ設定、通知 | Context / Zustand / Jotai |
-| **Server State** | サーバーから取得したデータのキャッシュ | ユーザー一覧、商品データ、検索結果 | TanStack Query / SWR |
-
-### ツール選定フロー
-
-```
-この状態はサーバーから取得したデータ？
-  ├─ Yes → TanStack Query / SWR（キャッシュ・再取得・楽観的更新）
-  └─ No → 複数コンポーネントで共有？
-            ├─ No → useState / useReducer（ローカル状態）
-            └─ Yes → 更新頻度は高い？
-                      ├─ Yes → Zustand / Jotai（リレンダリング最適化）
-                      └─ No → Context（低頻度の共有状態）
-```
-
-### アンチパターン
-
-```typescript
-// BAD: Server State を useState で管理
-const [users, setUsers] = useState<User[]>([]);
-const [loading, setLoading] = useState(false);
-const [error, setError] = useState<Error | null>(null);
-
-useEffect(() => {
-  setLoading(true);
-  fetchUsers()
-    .then(setUsers)
-    .catch(setError)
-    .finally(() => setLoading(false));
-}, []);
-
-// GOOD: TanStack Query で Server State を管理
-const { data: users, isLoading, error } = useQuery({
-  queryKey: ['users'],
-  queryFn: fetchUsers,
-});
-```
-
-```typescript
-// BAD: グローバルに何でも入れる
-const useGlobalStore = create((set) => ({
-  user: null,
-  theme: 'light',
-  modalOpen: false,        // UI State を混入
-  searchResults: [],       // Server State を混入
-  formDraft: {},           // ローカル状態を混入
-}));
-
-// GOOD: 責務で分離
-// Server State → TanStack Query
-// UI State → コンポーネントローカル
-// App State → 必要最小限のみストアに
-```
-
----
-
 ## ディレクトリ構成
 
 ### features/ ベースの構成
@@ -706,11 +641,6 @@ export const WithValidation: Story = {
 - [ ] 共通コンポーネントにドメインロジックが混入していないか
 - [ ] Props は variant パターン等で組み合わせを制約しているか
 - [ ] 適切な粒度に分割されているか（大きすぎ / 小さすぎ）
-
-### 状態管理
-- [ ] UI / App / Server State を適切に分類しているか
-- [ ] Server State に TanStack Query / SWR を使用しているか
-- [ ] 不要なグローバル状態を作っていないか
 
 ### フォーム
 - [ ] バリデーションスキーマを定義しているか（Zod等）
