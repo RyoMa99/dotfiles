@@ -457,6 +457,22 @@ generateId(() => 0.5); // 決定的な結果
 
 フロントエンドの Integration テストは、複数のコンポーネントが結合した状態でユーザー操作をシミュレートするテスト。
 
+#### fireEvent vs userEvent
+
+| API | 挙動 | 推奨 |
+|-----|------|------|
+| `fireEvent` | DOM イベントを単発で発火するだけ。フォーカス移動やキー入力の連続性を再現しない | 非推奨 |
+| `userEvent` | 実際のブラウザ操作をシミュレーション（クリック→フォーカス→キーダウン→入力→キーアップの一連のイベント） | **推奨** |
+
+```typescript
+// BAD: fireEvent は単発イベント。ブラウザの実際の挙動と異なる
+fireEvent.change(input, { target: { value: 'hello' } });
+
+// GOOD: userEvent は実際のユーザー操作を再現
+const user = userEvent.setup();
+await user.type(input, 'hello');
+```
+
 #### Testing Library のユーザー視点アプローチ
 
 ```typescript
@@ -493,7 +509,8 @@ Testing Library のクエリは以下の優先順位で選択する（アクセ�
 | 2 | `getByLabelText` | フォームフィールド |
 | 3 | `getByPlaceholderText` | label がない場合のフォールバック |
 | 4 | `getByText` | テキスト表示要素 |
-| 5（最終手段） | `getByTestId` | 他のクエリで特定できない場合のみ |
+| 5 | `getByDisplayValue` | フォーム要素の現在の入力値 |
+| 6（最終手段） | `getByTestId` | 他のクエリで特定できない場合のみ |
 
 ```typescript
 // BAD: data-testid への依存
@@ -501,6 +518,42 @@ screen.getByTestId('submit-button');
 
 // GOOD: ロールで取得（スクリーンリーダーと同じアクセス方法）
 screen.getByRole('button', { name: '送信' });
+```
+
+#### jest-dom カスタムマッチャー
+
+Testing Library とセットで使う `@testing-library/jest-dom` のマッチャー。DOM の状態を直感的に検証する。
+
+| マッチャー | 用途 | 例 |
+|-----------|------|-----|
+| `toBeInTheDocument()` | DOM に存在するか | `expect(screen.getByText("完了")).toBeInTheDocument()` |
+| `toHaveTextContent()` | テキストを含むか（部分一致可） | `expect(element).toHaveTextContent("成功")` |
+| `toBeDisabled()` / `toBeEnabled()` | 有効・無効状態 | `expect(button).toBeDisabled()` |
+| `toBeVisible()` | 視覚的に表示されているか | `expect(modal).toBeVisible()` |
+| `toBeInvalid()` | `aria-invalid="true"` 状態か | `expect(input).toBeInvalid()` |
+| `toHaveErrorMessage()` | `aria-errormessage` の内容 | `expect(input).toHaveErrorMessage("必須項目です")` |
+| `toHaveAttribute()` | 属性値の検証 | `expect(link).toHaveAttribute("href", "/home")` |
+
+```typescript
+// BAD: DOM プロパティを直接参照
+expect(button.disabled).toBe(true);
+
+// GOOD: カスタムマッチャーで意図を明確に
+expect(button).toBeDisabled();
+```
+
+#### 非同期テストの待機
+
+API 通信や状態更新で画面が遅れて変化する場合：
+
+```typescript
+// findBy: 要素が非同期に出現する場合（内部で waitFor を使用）
+const message = await screen.findByRole('alert');
+
+// waitFor: 特定のアサーションが通るまでリトライ
+await waitFor(() => {
+  expect(screen.getByRole('textbox')).toHaveErrorMessage('既に使用されています');
+});
 ```
 
 ### アクセシビリティテスト
@@ -542,7 +595,7 @@ it('アクセシビリティ違反がない', async () => {
 | テスト対象 | テスト種類 | ツール | 確認内容 |
 |-----------|-----------|--------|---------|
 | ユーティリティ関数 | Unit | Vitest / Jest | 入出力の正しさ |
-| カスタム hooks | Unit | renderHook | 状態遷移、副作用 |
+| カスタム hooks | Unit / Integration | renderHook / テスト用コンポーネント | 状態遷移、副作用 |
 | 単一コンポーネント | Integration | Testing Library | 表示・操作・a11y |
 | フォーム | Integration | Testing Library | バリデーション・送信・エラー表示 |
 | ページ（複数コンポーネント結合） | Integration | Testing Library + MSW | データ取得・表示・操作の統合 |
@@ -592,6 +645,111 @@ it('API エラー時にエラーメッセージを表示する', async () => {
   expect(await screen.findByRole('alert')).toHaveTextContent('データの取得に失敗しました');
 });
 ```
+
+### テストパターン集
+
+#### Context / Provider を含むコンポーネント
+
+Provider に依存するコンポーネントは、テスト時にラップして render する。
+
+```typescript
+// テスト用のカスタム render 関数を作成すると便利
+function renderWithProviders(ui: ReactElement) {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ToastProvider>
+        {ui}
+      </ToastProvider>
+    </QueryClientProvider>
+  );
+}
+
+it('Provider 依存コンポーネントのテスト', () => {
+  renderWithProviders(<MyComponent />);
+  expect(screen.getByRole('button')).toBeInTheDocument();
+});
+```
+
+#### カスタム hooks のテスト
+
+`renderHook` よりも、**テスト用コンポーネントを作り「振る舞い」として検証する**アプローチが推奨される。
+
+```typescript
+// BAD: renderHook で内部実装を直接テスト
+const { result } = renderHook(() => useCounter());
+act(() => result.current.increment());
+expect(result.current.count).toBe(1);
+
+// GOOD: テスト用コンポーネントで振る舞いをテスト
+const TestComponent = () => {
+  const { count, increment } = useCounter();
+  return <button onClick={increment}>{count}</button>;
+};
+
+it('ボタンクリックでカウントが増える', async () => {
+  const user = userEvent.setup();
+  render(<TestComponent />);
+  await user.click(screen.getByRole('button'));
+  expect(screen.getByRole('button')).toHaveTextContent('1');
+});
+```
+
+`renderHook` が適切な場面: 副作用のない純粋な状態計算ロジックのテスト。
+
+#### テストデータのファクトリ関数
+
+テストケースごとにデータの一部だけを変えて生成する。可読性と保守性が向上する。
+
+```typescript
+function createUser(overrides?: Partial<User>): User {
+  return {
+    id: '1',
+    name: 'テスト太郎',
+    email: 'test@example.com',
+    role: 'member',
+    ...overrides,
+  };
+}
+
+// 使用例: 管理者ユーザーのテスト
+const admin = createUser({ role: 'admin' });
+```
+
+#### Next.js ルーター / ナビゲーションのテスト
+
+`useRouter` を使うコンポーネントは、ルーターをモック化して検証する。
+
+```typescript
+import { useRouter } from 'next/navigation';
+
+jest.mock('next/navigation', () => ({
+  useRouter: jest.fn(),
+}));
+
+it('ボタンクリックで詳細ページへ遷移する', async () => {
+  const push = jest.fn();
+  (useRouter as jest.Mock).mockReturnValue({ push });
+
+  const user = userEvent.setup();
+  render(<DetailButton id="123" />);
+  await user.click(screen.getByRole('button', { name: '詳細を見る' }));
+
+  expect(push).toHaveBeenCalledWith('/details/123');
+});
+```
+
+### スナップショットテストの注意
+
+スナップショットテスト（`toMatchSnapshot()`）は DOM 構造を文字列化して比較するが、**フロントエンドでは非推奨**。
+
+**問題点**:
+- 些細な変更（クラス名の順序、スペース等）で壊れやすい（Brittle Test）
+- 開発者が `u` キーで盲目的に更新し、バグを見逃す（レビュー疲れ）
+- テストから仕様が読み取れない
+
+**代替手段**:
+- ロジックの検証 → アサーション（`expect(...).toHaveTextContent()`）
+- 見た目の検証 → VRT（下記）
 
 ### ビジュアルリグレッションテスト（VRT）
 
@@ -666,6 +824,15 @@ export const FilledForm: Story = {
 | UIの視覚確認 + 動作検証 | Storybook Interaction Testing | 目視確認・デバッグ向き |
 | 見た目の変更検出 | VRT（Storycap + reg-suit） | ピクセル単位の差分検出 |
 
+#### Storybook Test Runner による CI 自動化
+
+`@storybook/test-runner` を使うと、`play` 関数を含む全ストーリーを CI 上で自動実行できる。`axe-playwright` と組み合わせることで、全コンポーネントに対する a11y テストも自動化される。
+
+```bash
+# play 関数 + a11y テストを CI で一括実行
+npx test-storybook
+```
+
 ### テストレベル判断フロー
 
 何をテストしたいかに応じて、最適なテストレベルを選択する：
@@ -685,6 +852,17 @@ export const FilledForm: Story = {
 「重要機能」の連携を確認したい？（ログイン、決済）
     └─ Yes → E2E テスト（Playwright）← 最小限に絞る
 ```
+
+### E2E テストの安定性（Flaky テスト対策）
+
+E2E テストは信頼性が最も高いが、不安定（Flaky）になりやすい。以下で安定化する：
+
+| 対策 | 説明 |
+|------|------|
+| **DB リセット** | テスト実行ごとにクリーンな状態で開始。前のテストデータの残留を防ぐ |
+| **リソース隔離** | テスト間で競合しないよう、ユーザーごとに独立したデータを作成 |
+| **適切な待機** | Playwright の自動待機機能を活用。`sleep` / `setTimeout` に頼らない |
+| **リトライ戦略** | Flaky テストの一時対策として、テスト単位のリトライを設定 |
 
 ---
 

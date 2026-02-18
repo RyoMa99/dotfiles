@@ -60,11 +60,19 @@ await db.query(query, [userId]);
 
 ### 4. XSS対策
 
-**❌ NEVER:**
-```typescript
-// dangerouslySetInnerHTML を無検証で使用
-<div dangerouslySetInnerHTML={{ __html: userInput }} />
-```
+XSS は発生メカニズムにより3種類に分類される：
+
+| 種類 | 仕組み | 特徴 |
+|------|--------|------|
+| **Reflected（反射型）** | URLパラメータ等の攻撃コードをサーバがそのままHTMLに返却 | 罠リンクのクリックが必要。非持続型 |
+| **Stored（蓄積型）** | 投稿フォーム等から送信された不正スクリプトがDBに保存され、閲覧者のブラウザで実行 | 不特定多数に影響。最も危険 |
+| **DOM-based** | クライアントサイドのJSがDOMを操作する際に発生。サーバを経由しない | `innerHTML` や `javascript:` スキームが原因 |
+
+#### 基本対策：エスケープ
+
+React/Vue 等のモダンフレームワークはデフォルトで変数をエスケープする。以下は生のHTML操作が必要な場合の対策。
+
+**❌ NEVER:** `dangerouslySetInnerHTML` を無検証で使用
 
 **✅ ALWAYS:**
 ```typescript
@@ -74,6 +82,26 @@ import DOMPurify from 'dompurify';
 
 // または、テキストとして扱う
 <div>{userInput}</div>
+```
+
+#### DOM-based XSS 対策
+
+```typescript
+// ❌ BAD: innerHTML はスクリプトを実行する可能性がある
+element.innerHTML = userInput;
+
+// ✅ GOOD: textContent は常にテキストとして扱う
+element.textContent = userInput;
+```
+
+```typescript
+// ❌ BAD: javascript: スキームによる実行
+<a href={userInput}>リンク</a>
+
+// ✅ GOOD: スキームを http/https に限定
+const isSafeUrl = (url: string) =>
+  /^https?:\/\//i.test(url) || url.startsWith('/');
+{isSafeUrl(userInput) && <a href={userInput}>リンク</a>}
 ```
 
 ### 5. 認証・認可
@@ -204,9 +232,25 @@ app.use(helmet({
 ```
 
 主要なヘッダ：
+- `Strict-Transport-Security: max-age=31536000; includeSubDomains` - HTTPS強制（HSTS）
 - `X-Content-Type-Options: nosniff` - MIMEタイプスニッフィング防止
 - `X-Frame-Options: DENY` - クリックジャッキング防止
-- `Content-Security-Policy` - インラインスクリプト制限
+- `Content-Security-Policy` - リソース読み込み制限（XSS緩和）
+- `Permissions-Policy` - ブラウザ機能（カメラ・マイク等）の制限
+- `Cache-Control: no-store` - 機密ページのキャッシュ防止
+- `Cross-Origin-Opener-Policy: same-origin` - 他オリジンとの `window.opener` 関係を遮断
+
+#### HSTS（HTTP Strict Transport Security）
+
+ブラウザに HTTPS 通信を強制し、SSLストリッピング（HTTPSをHTTPにダウングレードする中間者攻撃）を防ぐ。
+
+```
+Strict-Transport-Security: max-age=31536000; includeSubDomains
+```
+
+- `max-age`: HTTPS を強制する期間（秒）。31536000 = 1年
+- `includeSubDomains`: サブドメインにも適用
+- **注意**: HTTP でアクセスした場合にブラウザが自動で HTTPS に変換する。初回アクセス前の保護には HSTS Preload List への登録が必要
 
 #### Strict CSP（Content Security Policy）
 
@@ -222,11 +266,13 @@ export function middleware(request: Request) {
   const nonce = crypto.randomBytes(16).toString('base64');
   const csp = [
     `default-src 'self'`,
-    `script-src 'self' 'nonce-${nonce}'`,  // nonce付きスクリプトのみ許可
-    `style-src 'self' 'unsafe-inline'`,     // CSSは許可（Tailwind等）
+    `script-src 'nonce-${nonce}' 'strict-dynamic'`, // Strict CSP: nonce + 動的スクリプト許可
+    `style-src 'self' 'unsafe-inline'`,              // CSSは許可（Tailwind等）
     `img-src 'self' data: https:`,
     `connect-src 'self' https://api.example.com`,
-    `frame-ancestors 'none'`,               // クリックジャッキング防止
+    `object-src 'none'`,                             // Flash等プラグイン禁止
+    `base-uri 'self'`,                               // <base>タグによるURLハイジャック防止
+    `frame-ancestors 'none'`,                        // クリックジャッキング防止
   ].join('; ');
 
   const response = NextResponse.next();
@@ -235,12 +281,63 @@ export function middleware(request: Request) {
 }
 ```
 
+**Strict CSP の要点**:
+- `nonce-{RANDOM}`: リクエストごとにランダムな nonce を生成し、許可するスクリプトに付与
+- `strict-dynamic`: nonce で許可されたスクリプトから動的に読み込まれるスクリプトも自動許可（GA等の外部スクリプト対応）
+- `object-src 'none'`: プラグイン経由の攻撃を防止
+- `base-uri 'self'`: `<base>` タグによる URL ハイジャックを防止
+
 **❌ NEVER:**
 ```
 script-src 'unsafe-inline' 'unsafe-eval'  // XSS対策が無効化される
 ```
 
+#### CSP Report-Only モード
+
+本番導入前にテストする場合、`Content-Security-Policy-Report-Only` ヘッダーを使用する。
+実際のブロックは行わず、違反レポートのみ送信される。
+
+```
+Content-Security-Policy-Report-Only: script-src 'nonce-xxx' 'strict-dynamic'; report-uri /csp-report
+```
+
+#### Trusted Types（DOM XSS 根本対策）
+
+`innerHTML` 等の危険なシンクに文字列を直接代入することを禁止し、ポリシーで検査された「安全な型」のみ許可する仕組み。Strict CSP と併用することで強力な防御になる。
+
+```
+Content-Security-Policy: trusted-types default; require-trusted-types-for 'script'
+```
+
+#### COOP（Cross-Origin-Opener-Policy）
+
+他オリジンとの `window.opener` 関係をプロセスレベルで遮断し、Tabnabbing や Spectre 系サイドチャネル攻撃を防ぐ。`rel="noopener"` がリンク側の対策であるのに対し、COOP は**リンクされる側（自サイト）が設定する**防御。
+
+```
+Cross-Origin-Opener-Policy: same-origin
+```
+
+| 値 | 挙動 |
+|---|---|
+| `unsafe-none`（デフォルト） | 制限なし。他オリジンから `window.opener` でアクセス可能 |
+| `same-origin` | 同一オリジンのみ browsing context group を共有 |
+| `same-origin-allow-popups` | 自分が開いた popup との関係は維持 |
+
+**OAuth ポップアップとの互換性**:
+
+`same-origin` を設定すると、Cross-origin の popup との `postMessage` 通信が切断される。OAuth のポップアップログインフロー（Google Sign-In 等）を使用している場合は `same-origin-allow-popups` を選択する。
+
+```typescript
+// OAuth ポップアップフローがない場合（推奨）
+response.headers.set('Cross-Origin-Opener-Policy', 'same-origin');
+
+// OAuth ポップアップフローがある場合
+response.headers.set('Cross-Origin-Opener-Policy', 'same-origin-allow-popups');
+```
+
 #### CORS（Cross-Origin Resource Sharing）
+
+**重要**: CORS は「ブラウザがレスポンスを読み取ることを許可する」仕組みであり、サーバへのリクエスト送信自体を止めるものではない。CSRF 対策にはならない。
 
 **❌ NEVER（本番環境）:**
 ```typescript
@@ -271,7 +368,37 @@ app.use(cors({
 }));
 ```
 
-### 11. ユーザー名のリザーブド文字列
+### 11. リンクのセキュリティ（Tabnabbing 対策）
+
+`target="_blank"` で開いた別タブは `window.opener` を通じて元タブを操作できる（フィッシングサイトへの書き換え等）。
+
+**✅ ALWAYS:**
+```html
+<a href="https://external.example.com" target="_blank" rel="noopener noreferrer">
+  外部リンク
+</a>
+```
+
+- `noopener`: `window.opener` を `null` にし、元タブへのアクセスを防止
+- `noreferrer`: Referer ヘッダーの送信も防止
+- **注意**: 最新ブラウザではデフォルトで `noopener` 相当の挙動だが、明示することを推奨
+
+### 12. サブリソース完全性（SRI）
+
+CDN 等の外部サーバからスクリプトを読み込む際、ファイルが改ざんされていないかを検証する。
+
+```html
+<script
+  src="https://cdn.example.com/lib.js"
+  integrity="sha384-xxxxx"
+  crossorigin="anonymous"
+></script>
+```
+
+- ハッシュが一致しない場合、ブラウザはスクリプトの実行をブロック
+- CDN の侵害やサプライチェーン攻撃への緩和策
+
+### 13. ユーザー名のリザーブド文字列
 
 ユーザーが選択できるハンドルネームから除外すべき文字列：
 
@@ -356,6 +483,35 @@ const RESERVED_USERNAMES = [
 **対策**:
 - ユーザーIDはセッション変数から取得
 - リソースアクセス時に権限を常に検証
+
+### オープンリダイレクト
+
+**原因**: `?next=http://evil.com` のようなパラメータでリダイレクト先を外部から指定可能
+
+**攻撃手法**: 信頼されたサイトのログインURLに罠パラメータを付与し、ログイン後にフィッシングサイトへ誘導
+
+**対策**:
+- リダイレクト先を許可ドメインのホワイトリストで検証
+- 外部ドメインへの遷移が不要なら `/` で始まる相対パスのみ受け付ける
+- **注意**: `//evil.com` のようなプロトコル相対URLでバイパスされないよう、先頭が `//` でないことも検証する
+
+---
+
+## サプライチェーン攻撃
+
+フロントエンド開発は多数の npm パッケージに依存するため、その依存関係を狙った攻撃が脅威となる。
+
+### 攻撃手法
+
+- **タイポスクワッティング**: `react` に対して `raect` のような紛らわしい名前の悪意あるパッケージ
+- **依存パッケージの乗っ取り**: メンテナのアカウントが侵害され、悪意あるコードが混入
+
+### 対策
+
+- `npm audit` / `pnpm audit` を CI/CD パイプラインに組み込み、既知の脆弱性を自動スキャン
+- lockfile（`pnpm-lock.yaml` 等）を必ずバージョン管理に含め、同一バージョンを保証
+- SRI（サブリソース完全性）を CDN から読み込むスクリプトに設定
+- 依存パッケージの更新は差分を確認してからマージ
 
 ---
 

@@ -690,6 +690,12 @@ export const WithValidation: Story = {
 | Loading / Error | 非同期状態の表示 |
 | Interactive | `play` 関数による操作テスト |
 
+### addon-a11y によるアクセシビリティチェック
+
+`@storybook/addon-a11y` を導入すると、各ストーリーに対して axe-core ベースのアクセシビリティ自動検知が有効になる。コントラスト比不足、代替テキスト欠如、ラベル不備などをコンポーネント開発時に即座に検出できる。
+
+`@storybook/test-runner` + `axe-playwright` との組み合わせで、CI 上での全ストーリー a11y テスト自動化も可能。
+
 ---
 
 ## チェックリスト
@@ -734,6 +740,7 @@ export const WithValidation: Story = {
 ### Storybook
 - [ ] 共通UIコンポーネントのストーリーを作成しているか
 - [ ] 主要なバリエーション（状態、サイズ、エラー等）をカバーしているか
+- [ ] addon-a11y でアクセシビリティ違反が検出されていないか
 
 ---
 

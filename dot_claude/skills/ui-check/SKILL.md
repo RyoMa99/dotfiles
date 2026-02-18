@@ -42,6 +42,7 @@ https://raw.githubusercontent.com/vercel-labs/web-interface-guidelines/main/comm
 - パフォーマンス（画像サイズ、リスト仮想化）
 - アニメーション（prefers-reduced-motion対応）
 - ナビゲーション（URL状態同期、確認ダイアログ）
+- リンクセキュリティ（`target="_blank"` に `rel="noopener noreferrer"`）
 
 ### Step 3: アクセシビリティ詳細チェック
 
