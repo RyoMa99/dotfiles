@@ -38,6 +38,9 @@ function history-selection() {
 zle -N history-selection
 bindkey "^R" history-selection
 
+# mise (activate: 対話シェル用、shims より優先)
+eval "$(mise activate zsh)"
+
 export HOMEBREW_CLEANUP_MAX_AGE_DAYS=30
 
 ## auto suggestions
