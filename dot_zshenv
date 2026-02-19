@@ -1,4 +1,5 @@
+# Homebrew
+eval "$(/opt/homebrew/bin/brew shellenv)"
+
 # mise
-# cf. https://mise.jdx.dev/getting-started.html
-# .zshenv は非対話シェル（Claude Code等）でも読まれるため、ここに配置
 eval "$(mise activate zsh)"
