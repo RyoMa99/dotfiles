@@ -70,10 +70,6 @@ alias cdi='zi'
 # cf. https://starship.rs/ja-JP/
 eval "$(starship init zsh)"
 
-# mise
-# cf. https://mise.jdx.dev/getting-started.html
-eval "$(mise activate zsh)"              # フック・自動バージョン切替を有効化
-
 # Go
 export GOPATH="$HOME/go"
 export PATH="$GOPATH/bin:$PATH"
