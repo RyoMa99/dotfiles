@@ -3,7 +3,7 @@
 Future Architect「Webフロントエンド設計ガイドライン」等を参考にしたフロントエンド固有の設計原則。
 
 関連: @~/.claude/rules/robust-code.md（型による予防的設計）
-関連: @~/.claude/rules/testing.md（フロントエンドテストセクション）
+関連: @~/.claude/rules/testing.md（テスト原則）
 関連: @~/.claude/rules/security.md（フロントエンド認証セクション）
 
 ---
@@ -562,6 +562,263 @@ export default {
 
 ---
 
+## フロントエンドテスト
+
+バックエンドのテストピラミッドとは異なり、フロントエンドでは**テストトロフィー**モデルを採用する。
+
+テストの一般原則（偽陽性/偽陰性、テストダブル、テストサイズ等）は @~/.claude/rules/testing.md を参照。
+
+### テストトロフィー
+
+```
+        /\
+       /  \  E2E（少）
+      /----\
+     /      \  Integration（最多）← フロントエンドの主戦場
+    /--------\
+   /          \  Unit（中）
+  --------------
+  Static（型チェック・lint）
+```
+
+バックエンドは Unit テストが最多（ドメインロジック中心）だが、フロントエンドは Integration テストが最多（コンポーネント結合の振る舞い中心）。
+
+### テストレベル判断フロー
+
+```
+テストしたい内容
+    ↓
+「ロジック」が複雑？（計算、データ変換、条件分岐）
+    ├─ Yes → Unit テスト（Vitest / Jest）
+    └─ No ↓
+「UIの振る舞い」を保証したい？（操作→表示変化）
+    ├─ Yes → Integration テスト（Testing Library）
+    └─ No ↓
+「見た目」の崩れを防ぎたい？（CSS、レイアウト）
+    ├─ Yes → VRT（Storycap + reg-suit）
+    └─ No ↓
+「重要機能」の連携を確認したい？（ログイン、決済）
+    └─ Yes → E2E テスト（Playwright）← 最小限に絞る
+```
+
+### テスト観点マトリクス
+
+| テスト対象 | テスト種類 | ツール | 確認内容 |
+|-----------|-----------|--------|---------|
+| ユーティリティ関数 | Unit | Vitest / Jest | 入出力の正しさ |
+| カスタム hooks | Unit / Integration | renderHook / テスト用コンポーネント | 状態遷移、副作用 |
+| 単一コンポーネント | Integration | Testing Library | 表示・操作・a11y |
+| フォーム | Integration | Testing Library | バリデーション・送信・エラー表示 |
+| ページ（複数コンポーネント結合） | Integration | Testing Library + MSW | データ取得・表示・操作の統合 |
+| ユーザーフロー | E2E | Playwright / Cypress | 画面遷移を含む一連の操作 |
+| ビジュアル | Visual Regression | Storycap + reg-suit | UIの意図しない変更検出 |
+
+### Integration テスト
+
+#### fireEvent vs userEvent
+
+| API | 挙動 | 推奨 |
+|-----|------|------|
+| `fireEvent` | DOM イベントを単発で発火。フォーカス移動やキー入力の連続性を再現しない | 非推奨 |
+| `userEvent` | 実際のブラウザ操作をシミュレーション（クリック→フォーカス→キーダウン→入力→キーアップ） | **推奨** |
+
+```typescript
+// BAD: fireEvent は単発イベント
+fireEvent.change(input, { target: { value: 'hello' } });
+
+// GOOD: userEvent は実際のユーザー操作を再現
+const user = userEvent.setup();
+await user.type(input, 'hello');
+```
+
+#### Testing Library のユーザー視点アプローチ
+
+```typescript
+// BAD: 実装の詳細をテスト（shallow + state 直接参照）
+const wrapper = shallow(<LoginForm />);
+expect(wrapper.state('email')).toBe('user@example.com');
+
+// GOOD: ユーザーの視点でテスト
+it('メールアドレスを入力してログインできる', async () => {
+  const user = userEvent.setup();
+  render(<LoginForm onSubmit={mockSubmit} />);
+  await user.type(screen.getByLabelText('メールアドレス'), 'user@example.com');
+  await user.type(screen.getByLabelText('パスワード'), 'password123');
+  await user.click(screen.getByRole('button', { name: 'ログイン' }));
+  expect(mockSubmit).toHaveBeenCalledWith({ email: 'user@example.com', password: 'password123' });
+});
+```
+
+#### クエリの優先順位
+
+| 優先度 | クエリ | 用途 |
+|--------|--------|------|
+| 1（推奨） | `getByRole` | ボタン、リンク、フォーム要素 |
+| 2 | `getByLabelText` | フォームフィールド |
+| 3 | `getByPlaceholderText` | label がない場合のフォールバック |
+| 4 | `getByText` | テキスト表示要素 |
+| 5 | `getByDisplayValue` | フォーム要素の現在の入力値 |
+| 6（最終手段） | `getByTestId` | 他のクエリで特定できない場合のみ |
+
+**`getByRole` のパフォーマンス注意**: 内部で ARIA ロール計算を行うため遅い。大規模テストスイートでタイムアウトが頻発する場合は `getByText` / `getByLabelText` へのフォールバックを検討。
+
+#### jest-dom カスタムマッチャー
+
+| マッチャー | 用途 |
+|-----------|------|
+| `toBeInTheDocument()` | DOM に存在するか |
+| `toHaveTextContent()` | テキストを含むか |
+| `toBeDisabled()` / `toBeEnabled()` | 有効・無効状態 |
+| `toBeVisible()` | 視覚的に表示されているか |
+| `toBeInvalid()` | `aria-invalid="true"` 状態か |
+| `toHaveAttribute()` | 属性値の検証 |
+
+```typescript
+// BAD: DOM プロパティを直接参照
+expect(button.disabled).toBe(true);
+
+// GOOD: カスタムマッチャーで意図を明確に
+expect(button).toBeDisabled();
+```
+
+#### 非同期テストの待機
+
+```typescript
+// findBy: 要素が非同期に出現する場合
+const message = await screen.findByRole('alert');
+
+// waitFor: 特定のアサーションが通るまでリトライ
+await waitFor(() => {
+  expect(screen.getByRole('textbox')).toHaveErrorMessage('既に使用されています');
+});
+```
+
+### アクセシビリティテスト
+
+axe-core を組み込み、a11y 違反を自動検出する。
+
+```typescript
+import { axe, toHaveNoViolations } from 'jest-axe';
+
+expect.extend(toHaveNoViolations);
+
+it('アクセシビリティ違反がない', async () => {
+  const { container } = render(<OrderForm />);
+  const results = await axe(container);
+  expect(results).toHaveNoViolations();
+});
+```
+
+**検出できるもの**: label 欠落、コントラスト比不足、aria 属性の不正使用、見出しレベルスキップ、alt テキスト欠落。
+**検出できないもの**: キーボード操作の使い勝手、スクリーンリーダーの読み上げ順序、認知的負荷。自動テストは最低限の品質担保であり、手動テストも併用する。
+
+### MSW（Mock Service Worker）
+
+API モックは MSW で統一し、テストとローカル開発で共有する。setup/teardown は `beforeAll(() => server.listen())`, `afterEach(() => server.resetHandlers())`, `afterAll(() => server.close())`。
+
+```typescript
+export const handlers = [
+  http.get('/api/users', () => {
+    return HttpResponse.json([{ id: 1, name: 'Alice' }, { id: 2, name: 'Bob' }]);
+  }),
+];
+
+// エラーケースのテスト
+it('API エラー時にエラーメッセージを表示する', async () => {
+  server.use(
+    http.get('/api/users', () => HttpResponse.json({ message: 'Error' }, { status: 500 })),
+  );
+  render(<UserList />);
+  expect(await screen.findByRole('alert')).toHaveTextContent('データの取得に失敗しました');
+});
+```
+
+### テストパターン集
+
+#### Provider ラップ
+
+```typescript
+function renderWithProviders(ui: ReactElement) {
+  return render(
+    <QueryClientProvider client={new QueryClient()}>
+      <ToastProvider>{ui}</ToastProvider>
+    </QueryClientProvider>
+  );
+}
+```
+
+#### カスタム hooks のテスト
+
+`renderHook` よりも**テスト用コンポーネントで振る舞いを検証**するアプローチを推奨。`renderHook` が適切な場面は副作用のない純粋な状態計算ロジックのみ。
+
+```typescript
+const TestComponent = () => {
+  const { count, increment } = useCounter();
+  return <button onClick={increment}>{count}</button>;
+};
+
+it('ボタンクリックでカウントが増える', async () => {
+  const user = userEvent.setup();
+  render(<TestComponent />);
+  await user.click(screen.getByRole('button'));
+  expect(screen.getByRole('button')).toHaveTextContent('1');
+});
+```
+
+#### テストデータのファクトリ関数
+
+```typescript
+function createUser(overrides?: Partial<User>): User {
+  return { id: '1', name: 'テスト太郎', email: 'test@example.com', role: 'member', ...overrides };
+}
+
+const admin = createUser({ role: 'admin' });
+```
+
+#### Next.js ルーターのモック
+
+```typescript
+jest.mock('next/navigation', () => ({ useRouter: jest.fn() }));
+
+it('詳細ページへ遷移する', async () => {
+  const push = jest.fn();
+  (useRouter as jest.Mock).mockReturnValue({ push });
+  const user = userEvent.setup();
+  render(<DetailButton id="123" />);
+  await user.click(screen.getByRole('button', { name: '詳細を見る' }));
+  expect(push).toHaveBeenCalledWith('/details/123');
+});
+```
+
+### スナップショットテスト
+
+**フロントエンドでは非推奨**。些細な変更で壊れやすく（Brittle Test）、開発者が盲目的に更新しバグを見逃す。代替: ロジック→アサーション、見た目→VRT。
+
+### ビジュアルリグレッションテスト（VRT）
+
+CSS の変更による意図しない UI 崩れをスクリーンショット差分で検出する。Unit / Integration テストでは検出できない。
+
+#### Storycap + reg-suit
+
+```bash
+npx storycap http://localhost:6006 --outDir ./screenshots/actual
+npx reg-suit compare
+open ./reg-suit-report/index.html
+```
+
+**対象の選定**: 共通UIコンポーネント（影響範囲大）、レイアウトコンポーネント（位置崩れ検出）、フォーム全体（バリデーション状態）に絞る。
+
+### E2E テストの安定性（Flaky テスト対策）
+
+| 対策 | 説明 |
+|------|------|
+| **DB リセット** | テスト実行ごとにクリーンな状態で開始 |
+| **リソース隔離** | テスト間で競合しないよう独立データを作成 |
+| **適切な待機** | Playwright の自動待機機能を活用。`sleep` に頼らない |
+| **リトライ戦略** | Flaky テストの一時対策として、テスト単位のリトライを設定 |
+
+---
+
 ## Storybook 活用
 
 ### コンポーネントカタログ
@@ -615,6 +872,14 @@ export const WithValidation: Story = {
 };
 ```
 
+**Testing Library との使い分け**:
+
+| 用途 | ツール | 理由 |
+|------|--------|------|
+| ロジック・振る舞いの網羅的テスト | Testing Library（Vitest / Jest） | 高速・CI向き |
+| UIの視覚確認 + 動作検証 | Storybook Interaction Testing | 目視確認・デバッグ向き |
+| 見た目の変更検出 | VRT（Storycap + reg-suit） | ピクセル単位の差分検出 |
+
 ### ストーリー設計のガイドライン
 
 | ストーリー | 目的 |
@@ -629,7 +894,7 @@ export const WithValidation: Story = {
 
 `@storybook/addon-a11y` を導入すると、各ストーリーに対して axe-core ベースのアクセシビリティ自動検知が有効になる。コントラスト比不足、代替テキスト欠如、ラベル不備などをコンポーネント開発時に即座に検出できる。
 
-`@storybook/test-runner` + `axe-playwright` との組み合わせで、CI 上での全ストーリー a11y テスト自動化も可能。
+`@storybook/test-runner` + `axe-playwright` との組み合わせで、CI 上での全ストーリー a11y テスト自動化も可能（`npx test-storybook`）。
 
 ---
 
@@ -667,6 +932,12 @@ export const WithValidation: Story = {
 - [ ] カラーは役割ベースで命名しているか（`primary`, `destructive` 等）
 - [ ] フォントサイズは `rem` ベースのスケールを使用しているか
 
+### テスト
+- [ ] テストトロフィーに従い Integration テストを中心に書いているか
+- [ ] `userEvent` を使用しているか（`fireEvent` ではなく）
+- [ ] `getByRole` > `getByLabelText` > `getByText` の優先順位に従っているか
+- [ ] axe-core による a11y テストを含めているか
+
 ### Storybook
 - [ ] 共通UIコンポーネントのストーリーを作成しているか
 - [ ] 主要なバリエーション（状態、サイズ、エラー等）をカバーしているか
@@ -682,3 +953,9 @@ export const WithValidation: Story = {
 - [Every Layout](https://every-layout.dev/) - レイアウトプリミティブの設計パターン
 - [OPTiM - FlexboxとGridの使い分け](https://tech-blog.optim.co.jp/entry/2025/12/01/150000) - min-width: auto の罠と Grid の利点
 - [フロントエンド開発のためのテスト入門](https://www.shoeisha.co.jp/book/detail/9784798178639)
+- [Kent C. Dodds - Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
+- [Testing Library - Guiding Principles](https://testing-library.com/docs/guiding-principles)
+- [MSW - Mock Service Worker](https://mswjs.io/)
+- [koki_tech - フロントエンドのテスト戦略について考える](https://zenn.dev/koki_tech/articles/a96e58695540a7)
+- [silverbirder - 網羅的Webフロントエンドテストパターンガイド](https://zenn.dev/silverbirder/articles/c3de04c9e6dd58)
+- [Social Plus - フロントエンドのテスト](https://zenn.dev/socialplus/articles/b09827d74ff148)

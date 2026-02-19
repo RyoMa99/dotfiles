@@ -107,15 +107,7 @@ E2E               → Large（最小限に）
 
 ### テストレベル間の重複回避
 
-同じシナリオを複数レベルでテストしない。下位レベルで十分に検証された振る舞いを上位レベルで再検証するのは無駄。
-
-```
-Integration で「バリデーションエラー表示」を検証済み
-  → E2E で同じバリデーションを再テストしない
-  → E2E は「ログイン → 注文 → 決済」のクリティカルパスに集中
-```
-
-各テストが「このレベルでしか検証できないこと」に焦点を当てる。
+同じシナリオを複数レベルでテストしない。各テストが「このレベルでしか検証できないこと」に焦点を当てる。
 
 ---
 
@@ -154,13 +146,9 @@ Mockを多用すると:
 
 **原則: 状態テストを優先する**
 
-インタラクションテストは「メソッドを呼んだ」ことしか保証しない。
-呼んだメソッドが正しく動くかは保証されない。
+インタラクションテストは「メソッドを呼んだ」ことしか保証しない。呼んだメソッドが正しく動くかは保証されない。
 
-**インタラクションテストが適切な場面**:
-- 副作用の検証（メール送信、ログ出力など）
-- 外部APIの呼び出し回数制限
-- パフォーマンス・スレッド処理の検証
+**インタラクションテストが適切な場面**: 副作用の検証（メール送信等）、外部APIの呼び出し回数制限、パフォーマンス検証。
 
 ### Change-Detector Tests（変更検出テスト）
 
@@ -197,27 +185,13 @@ it('注文処理後に確認メールが送信される', () => {
 
 ### テストコードは「愚直に」書く（DAMP > DRY）
 
-テストコードはメンテナンスし続けるコードとして質を追求する。ただし本番コードとは異なり、**可読性と意図の明確さ**を最優先する。
+テストコードは**可読性と意図の明確さ**を最優先する。
 
 | 本番コード | テストコード |
 |-----------|------------|
 | DRY（重複排除） | DAMP（意図が明確な適度な重複） |
 | 抽象化・共通化推奨 | ハードコード・ベタ書き推奨 |
 | ヘルパー関数で整理 | 各テストが自己完結 |
-
-```typescript
-// BAD: 過度な抽象化（何をテストしているか不明）
-const setup = (overrides = {}) => render(<Form {...defaultProps} {...overrides} />);
-const fillAndSubmit = async (data) => { /* 10行の共通処理 */ };
-
-// GOOD: 愚直だが意図が明確
-it('必須項目未入力でエラー表示', async () => {
-  const user = userEvent.setup();
-  render(<Form onSubmit={mockSubmit} />);
-  await user.click(screen.getByRole('button', { name: '送信' }));
-  expect(screen.getByText('名前は必須です')).toBeInTheDocument();
-});
-```
 
 **テストコードに入れてはいけないもの**: `if` / `for` / `while` 等の制御構文。テストにロジックが入ると、テスト自体にバグが生まれる。
 
@@ -275,15 +249,7 @@ expect(users.length).toBeGreaterThan(0);
 expect(users.every(u => u.name.includes("hoge"))).toBe(true);
 ```
 
-**マッチポンプテストの問題点**:
-1. スキーマやセットアップデータ変更時に、期待値もメンテナンスが必要
-2. テストコードから仕様が読み取れない
-3. 実質的にデータストアのテストであり、ビジネスロジックの検証になっていない
-
-**性質ベースアサーションの利点**:
-- テストが仕様書として機能する（「hogeを含む名前のユーザーを返す」）
-- セットアップデータの変更に強い（Resilience↑）
-- バグ検出能力が高い（Fidelity↑）
+マッチポンプテストはセットアップ変更に弱く仕様が読み取れない。性質ベースアサーションはテストが仕様書として機能し、Resilience↑ と Fidelity↑ を両立する。
 
 ### テストデータは業務上の前提を反映する
 
@@ -304,13 +270,19 @@ const testData = [
 ];
 ```
 
-**考慮すべき業務上の前提**:
-- 派生データがあるなら元データも存在する
-- 状態遷移の順序（下書き → 公開 → アーカイブ）
-- 親子関係（親なしの子は存在しない）
-- 時系列の整合性（作成日 < 更新日）
+**考慮すべき業務上の前提**: 派生データ→元データの存在、状態遷移の順序、親子関係、時系列の整合性。
 
-現実にありえないテストデータは、テストの信頼性（Fidelity）を下げる。
+#### 時間フィルタ付きクエリの注意
+
+`WHERE timestamp >= Date.now() - N日` のようなクエリをテストする場合、固定の過去日付はフィルタ範囲外になりうる。
+
+```typescript
+// ❌ BAD: 固定日付は時間経過でフィルタ範囲外になる
+const timestampMs = new Date("2025-01-15T12:00:00Z").getTime();
+
+// ✅ GOOD: Date.now() 基準の相対日付で常にフィルタ範囲内
+const timestampMs = Date.now() - 2 * 24 * 60 * 60 * 1000; // 2日前
+```
 
 ---
 
@@ -334,35 +306,13 @@ const testData = [
 
 ### 2. 正常系と同数以上の失敗系
 
-正常系だけでは偽陰性（バグを見逃す）リスクが高い。
+正常系だけでは偽陰性（バグを見逃す）リスクが高い。`正常系 : 失敗系 = 1 : 1以上`
 
-```
-正常系 : 失敗系 = 1 : 1以上
-```
-
-失敗系に含めるもの:
-- バリデーションエラー
-- 例外パス
-- 不正な型・形式の入力
-- 外部依存の失敗（API / DB）
+失敗系に含めるもの: バリデーションエラー、例外パス、不正な型・形式の入力、外部依存の失敗（API / DB）。
 
 ### 3. Given / When / Then コメント
 
-各テストケースにコメントを付与し、シナリオを追えるようにする。
-
-```typescript
-it('無効なメールアドレスでバリデーションエラーになる', () => {
-  // Given: 不正な形式のメールアドレス
-  const invalidEmail = 'not-an-email';
-
-  // When: バリデーションを実行
-  const result = validateEmail(invalidEmail);
-
-  // Then: エラーが返される
-  expect(result.isValid).toBe(false);
-  expect(result.error).toBe('Invalid email format');
-});
-```
+各テストケースに `// Given: ... // When: ... // Then: ...` コメントを付与し、シナリオを追えるようにする。
 
 ### 4. 例外・エラーの検証
 
@@ -391,11 +341,6 @@ expect(() => fn()).toThrow('Email is required');
 > テストは目的のための手段である。
 > 目的は「プロジェクトの主要リスクを減らすこと」であり、「慣習に従うこと」ではない。
 
-### アンチパターン
-
-あるチームは unit / integration / UI テストを網羅的に書いたが、
-実際のリスク（データ破損、サーバーダウン）はテストされておらず、リリース直前に問題が発覚した。
-
 ### 推奨アプローチ: Risks First
 
 1. プロジェクトの主要リスクを特定する
@@ -403,10 +348,7 @@ expect(() => fn()).toThrow('Email is required');
 3. テストはリスク緩和の手段の一つとして位置づける
 4. **ROI（投資対効果）を意識する**
 
-### テストを書かない判断もありうる
-
-- 短期間で廃止される機能 → 手動テストの方が費用対効果が高い場合も
-- ただし、ほとんどの場合は標準的なテスト戦略が有効
+短期間で廃止される機能など、テストを書かない判断もありうる。ただし、ほとんどの場合は標準的なテスト戦略が有効。
 
 ---
 
@@ -414,25 +356,13 @@ expect(() => fn()).toThrow('Email is required');
 
 テストなしのコードを改善する際の戦略（t_wada）。
 
-### ジレンマ
-
 > テストがないと安全にコードを変更できない。
 > しかしテストを書くにはコードを変更する必要がある。
 
 ### 解決アプローチ
 
-#### 1. リクエスト/レスポンスレベルから始める
-
-```
-実装から距離を取りつつ、安定したテストを書ける
-```
-
-- 最初は完全一致を求めず、簡潔なアサーションから開始
-- 入力と出力の関係をテストする（実装詳細に依存しない）
-
-#### 2. Seam（継ぎ目）を見つける
-
-依存性を外部から注入可能にして、テスト駆動で開発できる環境を整備：
+1. **リクエスト/レスポンスレベルから始める** — 実装から距離を取り、入力と出力の関係を簡潔にテスト
+2. **Seam（継ぎ目）を見つける** — 依存性を外部から注入可能にする
 
 ```typescript
 // BAD: ランダム性が内部に閉じている
@@ -444,494 +374,14 @@ function generateId() {
 function generateId(randomFn = Math.random) {
   return randomFn().toString(36);
 }
-
-// テスト時
-generateId(() => 0.5); // 決定的な結果
 ```
 
-#### 3. Extract戦略
-
-既存コードを壊さずに、テスト可能なコードを抽出：
-
-```
-1. 既存コードにテストを書く（現状の動作を記録）
-2. 新しいコードを段階的に抽出
-3. 変更のタイミング・理由が同じものをまとめる
-4. 異なるものは分離する
-```
-
-### ドメインとインフラの分離
-
-```
-┌─────────────────────────────────────┐
-│  インフラ層（テスト困難）           │
-│  - HTTP/Lambda/外部API              │
-└─────────────────────────────────────┘
-              ↓ 依存
-┌─────────────────────────────────────┐
-│  ドメイン層（テスト容易）           │
-│  - ビジネスロジック                 │
-│  - TDDで段階的に成長                │
-└─────────────────────────────────────┘
-```
-
-ドメインをインフラから分離し、ドメインをテスト駆動で育てる。
+3. **Extract 戦略** — 既存コードにテストを書き現状を記録 → 段階的に抽出 → 変更理由が同じものをまとめ、異なるものを分離
+4. **ドメインとインフラの分離** — ドメイン層（テスト容易）をインフラ層（HTTP/Lambda/外部API）から分離し、ドメインを TDD で育てる
 
 ---
 
-## フロントエンドテスト
-
-バックエンドのテストピラミッドとは異なり、フロントエンドでは**テストトロフィー**モデルを採用する。
-
-関連: @~/.claude/rules/web-frontend.md
-
-### テストトロフィー
-
-```
-        /\
-       /  \  E2E（少）
-      /----\
-     /      \  Integration（最多）← フロントエンドの主戦場
-    /--------\
-   /          \  Unit（中）
-  --------------
-  Static（型チェック・lint）
-```
-
-**バックエンドのテストピラミッドとの違い**:
-- バックエンド: Unit テストが最多（ドメインロジック中心）
-- フロントエンド: Integration テストが最多（コンポーネント結合の振る舞い中心）
-
-### Integration テスト = コンポーネントテスト
-
-フロントエンドの Integration テストは、複数のコンポーネントが結合した状態でユーザー操作をシミュレートするテスト。
-
-#### fireEvent vs userEvent
-
-| API | 挙動 | 推奨 |
-|-----|------|------|
-| `fireEvent` | DOM イベントを単発で発火するだけ。フォーカス移動やキー入力の連続性を再現しない | 非推奨 |
-| `userEvent` | 実際のブラウザ操作をシミュレーション（クリック→フォーカス→キーダウン→入力→キーアップの一連のイベント） | **推奨** |
-
-```typescript
-// BAD: fireEvent は単発イベント。ブラウザの実際の挙動と異なる
-fireEvent.change(input, { target: { value: 'hello' } });
-
-// GOOD: userEvent は実際のユーザー操作を再現
-const user = userEvent.setup();
-await user.type(input, 'hello');
-```
-
-#### Testing Library のユーザー視点アプローチ
-
-```typescript
-// BAD: 実装の詳細をテスト
-it('setStateが呼ばれる', () => {
-  const wrapper = shallow(<LoginForm />);
-  wrapper.find('input').simulate('change', { target: { value: 'user@example.com' } });
-  expect(wrapper.state('email')).toBe('user@example.com');
-});
-
-// GOOD: ユーザーの視点でテスト（Testing Library）
-it('メールアドレスを入力してログインできる', async () => {
-  const user = userEvent.setup();
-  render(<LoginForm onSubmit={mockSubmit} />);
-
-  await user.type(screen.getByLabelText('メールアドレス'), 'user@example.com');
-  await user.type(screen.getByLabelText('パスワード'), 'password123');
-  await user.click(screen.getByRole('button', { name: 'ログイン' }));
-
-  expect(mockSubmit).toHaveBeenCalledWith({
-    email: 'user@example.com',
-    password: 'password123',
-  });
-});
-```
-
-#### クエリの優先順位
-
-Testing Library のクエリは以下の優先順位で選択する（アクセシビリティに基づく）：
-
-| 優先度 | クエリ | 用途 |
-|--------|--------|------|
-| 1（推奨） | `getByRole` | ボタン、リンク、フォーム要素 |
-| 2 | `getByLabelText` | フォームフィールド |
-| 3 | `getByPlaceholderText` | label がない場合のフォールバック |
-| 4 | `getByText` | テキスト表示要素 |
-| 5 | `getByDisplayValue` | フォーム要素の現在の入力値 |
-| 6（最終手段） | `getByTestId` | 他のクエリで特定できない場合のみ |
-
-```typescript
-// BAD: data-testid への依存
-screen.getByTestId('submit-button');
-
-// GOOD: ロールで取得（スクリーンリーダーと同じアクセス方法）
-screen.getByRole('button', { name: '送信' });
-```
-
-**`getByRole` のパフォーマンス注意**: `getByRole` は内部で ARIA ロール計算を行うため、`getByText` 等より顕著に遅い。大規模テストスイートでタイムアウトが頻発する場合、テストの `timeout` を延長するか、パフォーマンスクリティカルなテストでは `getByText` / `getByLabelText` へのフォールバックを検討する。a11y の原則を保ちつつ実用性とバランスを取る。
-
-#### jest-dom カスタムマッチャー
-
-Testing Library とセットで使う `@testing-library/jest-dom` のマッチャー。DOM の状態を直感的に検証する。
-
-| マッチャー | 用途 | 例 |
-|-----------|------|-----|
-| `toBeInTheDocument()` | DOM に存在するか | `expect(screen.getByText("完了")).toBeInTheDocument()` |
-| `toHaveTextContent()` | テキストを含むか（部分一致可） | `expect(element).toHaveTextContent("成功")` |
-| `toBeDisabled()` / `toBeEnabled()` | 有効・無効状態 | `expect(button).toBeDisabled()` |
-| `toBeVisible()` | 視覚的に表示されているか | `expect(modal).toBeVisible()` |
-| `toBeInvalid()` | `aria-invalid="true"` 状態か | `expect(input).toBeInvalid()` |
-| `toHaveErrorMessage()` | `aria-errormessage` の内容 | `expect(input).toHaveErrorMessage("必須項目です")` |
-| `toHaveAttribute()` | 属性値の検証 | `expect(link).toHaveAttribute("href", "/home")` |
-
-```typescript
-// BAD: DOM プロパティを直接参照
-expect(button.disabled).toBe(true);
-
-// GOOD: カスタムマッチャーで意図を明確に
-expect(button).toBeDisabled();
-```
-
-#### 非同期テストの待機
-
-API 通信や状態更新で画面が遅れて変化する場合：
-
-```typescript
-// findBy: 要素が非同期に出現する場合（内部で waitFor を使用）
-const message = await screen.findByRole('alert');
-
-// waitFor: 特定のアサーションが通るまでリトライ
-await waitFor(() => {
-  expect(screen.getByRole('textbox')).toHaveErrorMessage('既に使用されています');
-});
-```
-
-### アクセシビリティテスト
-
-#### axe-core 統合
-
-自動テストに axe-core を組み込み、a11y 違反を検出する。
-
-```typescript
-import { axe, toHaveNoViolations } from 'jest-axe';
-
-expect.extend(toHaveNoViolations);
-
-it('アクセシビリティ違反がない', async () => {
-  const { container } = render(<OrderForm />);
-  const results = await axe(container);
-  expect(results).toHaveNoViolations();
-});
-```
-
-#### a11y テストで検出できるもの
-
-- label の欠落
-- コントラスト比不足
-- aria 属性の不正使用
-- 見出しレベルのスキップ
-- 画像の alt テキスト欠落
-
-#### a11y テストで検出できないもの
-
-- キーボード操作の実際の使い勝手
-- スクリーンリーダーでの読み上げ順序の妥当性
-- 認知的負荷の高さ
-
-→ 自動テストは**最低限の品質担保**。手動テストも併用する。
-
-### フロントエンドテスト観点マトリクス
-
-| テスト対象 | テスト種類 | ツール | 確認内容 |
-|-----------|-----------|--------|---------|
-| ユーティリティ関数 | Unit | Vitest / Jest | 入出力の正しさ |
-| カスタム hooks | Unit / Integration | renderHook / テスト用コンポーネント | 状態遷移、副作用 |
-| 単一コンポーネント | Integration | Testing Library | 表示・操作・a11y |
-| フォーム | Integration | Testing Library | バリデーション・送信・エラー表示 |
-| ページ（複数コンポーネント結合） | Integration | Testing Library + MSW | データ取得・表示・操作の統合 |
-| ユーザーフロー | E2E | Playwright / Cypress | 画面遷移を含む一連の操作 |
-| ビジュアル | Visual Regression | Storycap + reg-suit | UIの意図しない変更検出 |
-
-### MSW（Mock Service Worker）の活用
-
-API モックは MSW で統一し、テストとローカル開発で共有する。
-
-```typescript
-// handlers.ts: API モックの定義
-export const handlers = [
-  http.get('/api/users', () => {
-    return HttpResponse.json([
-      { id: 1, name: 'Alice' },
-      { id: 2, name: 'Bob' },
-    ]);
-  }),
-
-  http.post('/api/orders', async ({ request }) => {
-    const body = await request.json();
-    return HttpResponse.json({ id: 1, ...body }, { status: 201 });
-  }),
-];
-
-// テストで使用
-beforeAll(() => server.listen());
-afterEach(() => server.resetHandlers());
-afterAll(() => server.close());
-
-it('ユーザー一覧を表示する', async () => {
-  render(<UserList />);
-  expect(await screen.findByText('Alice')).toBeInTheDocument();
-  expect(screen.getByText('Bob')).toBeInTheDocument();
-});
-
-// エラーケースのテスト
-it('API エラー時にエラーメッセージを表示する', async () => {
-  server.use(
-    http.get('/api/users', () => {
-      return HttpResponse.json({ message: 'Internal Server Error' }, { status: 500 });
-    }),
-  );
-
-  render(<UserList />);
-  expect(await screen.findByRole('alert')).toHaveTextContent('データの取得に失敗しました');
-});
-```
-
-### テストパターン集
-
-#### Context / Provider を含むコンポーネント
-
-Provider に依存するコンポーネントは、テスト時にラップして render する。
-
-```typescript
-// テスト用のカスタム render 関数を作成すると便利
-function renderWithProviders(ui: ReactElement) {
-  return render(
-    <QueryClientProvider client={new QueryClient()}>
-      <ToastProvider>
-        {ui}
-      </ToastProvider>
-    </QueryClientProvider>
-  );
-}
-
-it('Provider 依存コンポーネントのテスト', () => {
-  renderWithProviders(<MyComponent />);
-  expect(screen.getByRole('button')).toBeInTheDocument();
-});
-```
-
-#### カスタム hooks のテスト
-
-`renderHook` よりも、**テスト用コンポーネントを作り「振る舞い」として検証する**アプローチが推奨される。
-
-```typescript
-// BAD: renderHook で内部実装を直接テスト
-const { result } = renderHook(() => useCounter());
-act(() => result.current.increment());
-expect(result.current.count).toBe(1);
-
-// GOOD: テスト用コンポーネントで振る舞いをテスト
-const TestComponent = () => {
-  const { count, increment } = useCounter();
-  return <button onClick={increment}>{count}</button>;
-};
-
-it('ボタンクリックでカウントが増える', async () => {
-  const user = userEvent.setup();
-  render(<TestComponent />);
-  await user.click(screen.getByRole('button'));
-  expect(screen.getByRole('button')).toHaveTextContent('1');
-});
-```
-
-`renderHook` が適切な場面: 副作用のない純粋な状態計算ロジックのテスト。
-
-#### テストデータのファクトリ関数
-
-テストケースごとにデータの一部だけを変えて生成する。可読性と保守性が向上する。
-
-```typescript
-function createUser(overrides?: Partial<User>): User {
-  return {
-    id: '1',
-    name: 'テスト太郎',
-    email: 'test@example.com',
-    role: 'member',
-    ...overrides,
-  };
-}
-
-// 使用例: 管理者ユーザーのテスト
-const admin = createUser({ role: 'admin' });
-```
-
-#### Next.js ルーター / ナビゲーションのテスト
-
-`useRouter` を使うコンポーネントは、ルーターをモック化して検証する。
-
-```typescript
-import { useRouter } from 'next/navigation';
-
-jest.mock('next/navigation', () => ({
-  useRouter: jest.fn(),
-}));
-
-it('ボタンクリックで詳細ページへ遷移する', async () => {
-  const push = jest.fn();
-  (useRouter as jest.Mock).mockReturnValue({ push });
-
-  const user = userEvent.setup();
-  render(<DetailButton id="123" />);
-  await user.click(screen.getByRole('button', { name: '詳細を見る' }));
-
-  expect(push).toHaveBeenCalledWith('/details/123');
-});
-```
-
-### スナップショットテストの注意
-
-スナップショットテスト（`toMatchSnapshot()`）は DOM 構造を文字列化して比較するが、**フロントエンドでは非推奨**。
-
-**問題点**:
-- 些細な変更（クラス名の順序、スペース等）で壊れやすい（Brittle Test）
-- 開発者が `u` キーで盲目的に更新し、バグを見逃す（レビュー疲れ）
-- テストから仕様が読み取れない
-
-**代替手段**:
-- ロジックの検証 → アサーション（`expect(...).toHaveTextContent()`）
-- 見た目の検証 → VRT（下記）
-
-### ビジュアルリグレッションテスト（VRT）
-
-CSSの変更は意図しないUI崩れを引き起こしやすいが、ロジックテストでは検出できない。
-VRTはスクリーンショットの差分比較で視覚的な変更を検出する。
-
-#### なぜ必要か
-
-```
-Unit / Integration テストで保証できること → ロジック・振る舞い
-VRT で保証できること → レンダリング結果（ピクセル単位）
-```
-
-例: ボタンの背景色が白に変わっても、テストは `getByRole('button')` で取得できるため通る。
-VRTなら「見た目が変わった」ことを画像差分で検出できる。
-
-#### ローカル実行ワークフロー: Storycap + reg-suit
-
-```bash
-# 1. Storybookの全ストーリーをスクリーンショット化
-npx storycap http://localhost:6006 --outDir ./screenshots/actual
-
-# 2. 画像差分を比較（初回はベースラインを作成）
-npx reg-suit compare
-
-# 3. 差分レポートをブラウザで確認
-open ./reg-suit-report/index.html
-```
-
-**Storycap**: Storybook上の各ストーリーを自動でキャプチャ。`waitFor` や `delay` オプションで非同期コンテンツの描画完了を待てる。
-
-**reg-suit**: 2つのスクリーンショットディレクトリを比較し、差分をHTMLレポートで可視化。閾値を設定して微小な差分（アンチエイリアス等）を無視できる。
-
-#### VRT対象の選定
-
-すべてのストーリーを撮るのではなく、効果の高い対象に絞る：
-
-| 対象 | 理由 |
-|------|------|
-| 共通UIコンポーネント（Button, Input, Card等） | 変更の影響範囲が広い |
-| レイアウトコンポーネント（Header, Sidebar等） | 位置関係の崩れを検出 |
-| フォーム全体 | バリデーション状態の表示確認 |
-
-### Storybook Interaction Testing
-
-Storybookの `play` 関数を使い、ストーリー上でユーザー操作をスクリプト化する。
-コンポーネントの振る舞いを**視覚的に確認しながら**テストできる。
-
-```typescript
-import { within, userEvent, expect } from '@storybook/test';
-
-export const FilledForm: Story = {
-  play: async ({ canvasElement }) => {
-    const canvas = within(canvasElement);
-
-    // ユーザー操作をスクリプト化
-    await userEvent.type(canvas.getByLabelText('メールアドレス'), 'user@example.com');
-    await userEvent.type(canvas.getByLabelText('パスワード'), 'password123');
-    await userEvent.click(canvas.getByRole('button', { name: 'ログイン' }));
-
-    // アサーション
-    await expect(canvas.getByText('ログイン成功')).toBeInTheDocument();
-  },
-};
-```
-
-**Testing Library との使い分け**:
-
-| 用途 | ツール | 理由 |
-|------|--------|------|
-| ロジック・振る舞いの網羅的テスト | Testing Library（Vitest / Jest） | 高速・CI向き |
-| UIの視覚確認 + 動作検証 | Storybook Interaction Testing | 目視確認・デバッグ向き |
-| 見た目の変更検出 | VRT（Storycap + reg-suit） | ピクセル単位の差分検出 |
-
-#### Storybook Test Runner による CI 自動化
-
-`@storybook/test-runner` を使うと、`play` 関数を含む全ストーリーを CI 上で自動実行できる。`axe-playwright` と組み合わせることで、全コンポーネントに対する a11y テストも自動化される。
-
-```bash
-# play 関数 + a11y テストを CI で一括実行
-npx test-storybook
-```
-
-### テストレベル判断フロー
-
-何をテストしたいかに応じて、最適なテストレベルを選択する：
-
-```
-テストしたい内容
-    ↓
-「ロジック」が複雑？（計算、データ変換、条件分岐）
-    ├─ Yes → Unit テスト（Vitest / Jest）
-    └─ No ↓
-「UIの振る舞い」を保証したい？（操作→表示変化）
-    ├─ Yes → Integration テスト（Testing Library）
-    └─ No ↓
-「見た目」の崩れを防ぎたい？（CSS、レイアウト）
-    ├─ Yes → VRT（Storycap + reg-suit）
-    └─ No ↓
-「重要機能」の連携を確認したい？（ログイン、決済）
-    └─ Yes → E2E テスト（Playwright）← 最小限に絞る
-```
-
-### E2E テストの安定性（Flaky テスト対策）
-
-E2E テストは信頼性が最も高いが、不安定（Flaky）になりやすい。以下で安定化する：
-
-| 対策 | 説明 |
-|------|------|
-| **DB リセット** | テスト実行ごとにクリーンな状態で開始。前のテストデータの残留を防ぐ |
-| **リソース隔離** | テスト間で競合しないよう、ユーザーごとに独立したデータを作成 |
-| **適切な待機** | Playwright の自動待機機能を活用。`sleep` / `setTimeout` に頼らない |
-| **リトライ戦略** | Flaky テストの一時対策として、テスト単位のリトライを設定 |
-
----
-
-## テストデータ設計の落とし穴
-
-### 時間フィルタ付きクエリのテスト
-
-`WHERE timestamp >= Date.now() - N日` のようなクエリをテストする場合、固定の過去日付をテストデータに使うとフィルタ範囲外になり検索結果が空になる。
-
-```typescript
-// ❌ BAD: 固定日付は時間経過でフィルタ範囲外になる
-const timestampMs = new Date("2025-01-15T12:00:00Z").getTime();
-
-// ✅ GOOD: Date.now() 基準の相対日付で常にフィルタ範囲内
-const timestampMs = Date.now() - 2 * 24 * 60 * 60 * 1000; // 2日前
-```
-
-**ポイント**: プロダクションコードが `Date.now()` を基準にフィルタしている場合、テストデータも `Date.now()` 基準で生成する。
+フロントエンド固有のテスト手法は @~/.claude/rules/web-frontend.md（フロントエンドテストセクション）を参照。
 
 ---
 
@@ -947,10 +397,3 @@ const timestampMs = Date.now() - 2 * 24 * 60 * 60 * 1000; // 2日前
 - [Google Testing Blog - Testing State vs. Testing Interactions](https://testing.googleblog.com/2013/03/testing-on-toilet-testing-state-vs.html)
 - [Google Testing Blog - Risk-Driven Testing](https://testing.googleblog.com/2014/05/testing-on-toilet-risk-driven-testing.html)
 - [Google Testing Blog - Change-Detector Tests Considered Harmful](https://testing.googleblog.com/2015/01/testing-on-toilet-change-detector-tests.html)
-- [Kent C. Dodds - Testing Trophy](https://kentcdodds.com/blog/the-testing-trophy-and-testing-classifications)
-- [Testing Library - Guiding Principles](https://testing-library.com/docs/guiding-principles)
-- [MSW - Mock Service Worker](https://mswjs.io/)
-- [フロントエンド開発のためのテスト入門](https://www.shoeisha.co.jp/book/detail/9784798178639)
-- [koki_tech - フロントエンドのテスト戦略について考える](https://zenn.dev/koki_tech/articles/a96e58695540a7)
-- [silverbirder - 網羅的Webフロントエンドテストパターンガイド](https://zenn.dev/silverbirder/articles/c3de04c9e6dd58)
-- [Social Plus - フロントエンドのテスト](https://zenn.dev/socialplus/articles/b09827d74ff148)
