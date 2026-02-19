@@ -581,7 +581,13 @@ function ColorPicker({ children }: { children: ReactNode }) {
 
 ---
 
-## Suspense
+## Async React（Suspense / Transition）
+
+非同期処理を前提に最適な UX を目指す設計思想（React 19〜）。Suspense と Transition が基盤。
+
+> Async React の理想は、トランジションの「意味」をプログラマーが考えて、具体的な挙動は React がよしなにやってくれること。これは宣言的 UI の拡張である。 — uhyo
+
+### Suspense
 
 宣言的なローディング。コンポーネントが pending になると最も近い Suspense 境界の `fallback` が表示される。
 
@@ -591,7 +597,72 @@ function ColorPicker({ children }: { children: ReactNode }) {
 </Suspense>
 ```
 
-**境界の設計原則**: 最も遅い部分が高速な部分を引きずらないように分割する。Suspense 対応のデータフェッチには TanStack Query / SWR / Next.js 等を使用。自前で Promise を throw しない。
+- **Suspense は前提** — オプションではなく非同期 React の基盤
+- **境界の設計**: 最も遅い部分が高速な部分を引きずらないよう分割する
+- Suspense 対応のデータフェッチには TanStack Query / SWR / Next.js 等を使用。自前で Promise を throw しない
+
+### Transition
+
+`startTransition` で非同期更新をマークすると、更新中も前の UI を維持しインタラクティブに保つ。Suspense フォールバックへの即時切り替えを防ぎ、ちらつきを抑制する。
+
+```tsx
+// BAD: 手動ローディング管理
+const [isPending, setIsPending] = useState(false);
+const handleClick = async () => {
+  setIsPending(true); await submitData(); setIsPending(false);
+};
+
+// GOOD: React がスケジューリング管理
+const [isPending, startTransition] = useTransition();
+const handleClick = () => {
+  startTransition(async () => { await submitData(); router.navigate('/next'); });
+};
+```
+
+### Action パターン（汎用コンポーネント設計）
+
+汎用コンポーネントが `action` prop を受け取り、内部で `startTransition` を適用。アプリ全体で一貫した非同期 UX を実現する。
+
+```tsx
+function Button({ action, children }: ButtonProps) {
+  const [isPending, startTransition] = useTransition();
+  return (
+    <button disabled={isPending} onClick={(e) => startTransition(() => action(e))}>
+      {isPending ? <Spinner /> : children}
+    </button>
+  );
+}
+
+// 使用側: 同期的なコードで非同期処理を記述
+<Button action={async () => {
+  await login(fields);
+  await prefetchDashboard();
+  router.navigate('/');
+}}>ログイン</Button>
+```
+
+### useOptimistic
+
+Transition 中に楽観的な値を即座に表示し、完了後に実際の値へ置換する。
+
+```tsx
+const [optimisticLikes, addOptimisticLike] = useOptimistic(
+  likes, (cur, newLike: Like) => [...cur, newLike]
+);
+// addOptimisticLike(tempLike) → 即 UI 反映、await api.addLike() → サーバー送信
+```
+
+### ネットワーク速度と UX の自動分岐
+
+Transition + Suspense により、ネットワーク速度に応じた UX が自動的に実現される。
+
+| 速度 | UX |
+|------|-----|
+| 高速（<150ms） | 即座に遷移、ローディング表示なし |
+| 中速（150ms〜1s） | Transition が前画面を維持、完了後に切替 |
+| 低速（>1s） | Suspense フォールバック表示 |
+
+参考: [uhyo - React 19時代のコンポーネント設計ベストプラクティス](https://speakerdeck.com/uhyo/react-19shi-dai-nokonponentoshe-ji-besutopurakuteisu) / [rickhanlonii/async-react](https://github.com/rickhanlonii/async-react)
 
 ---
 
