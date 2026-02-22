@@ -1,12 +1,12 @@
 ---
 name: finish
-description: 実装完了前の検証を一括実行。naming-review → ui-check → security-review → テスト・型チェック・lint → 開発サーバー停止 → コミット方法確認。implementation.md Step 3-4 を自動化。
+description: 実装完了前の検証を一括実行。naming-review → ui-check → security-review → テスト・型チェック・lint → 開発サーバー停止 → コミット方法確認。/implementation スキルの Step 3-4 を自動化。
 allowed-tools: ["Skill", "Bash", "Glob", "Grep", "Read", "AskUserQuestion"]
 ---
 
 # Finish Skill
 
-implementation.md Step 3-4（完了前検証 → コミット方法確認）を一括実行するオーケストレーター。
+`/implementation` スキルの Step 3-4（完了前検証 → コミット方法確認）を一括実行するオーケストレーター。
 
 ## When to Use
 

@@ -16,7 +16,7 @@ CyberAgent ジャンプTOON チームの「多観点チェックリスト」ア�
 
 ## When to Use This Skill
 
-- セッション終了時（`implementation.md` Step 5）
+- セッション終了時（`/implementation` スキルの Step 5）
 - `/session-retrospective` コマンドを実行
 - 「振り返って」「まとめて」と依頼
 

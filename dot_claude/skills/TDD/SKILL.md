@@ -20,7 +20,7 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 Trigger when:
 - `/TDD` コマンドを実行
 - 「TDDで開発して」「テスト駆動で」と依頼
-- `@~/.claude/rules/implementation.md` のタスク実行時（Step 2 で自動的に呼び出される）
+- `/implementation` スキルの Step 2 でタスク実行時（自動的に呼び出される）
 - `superpowers:subagent-driven-development` 内で個別タスクをTDDで実装する場合
 
 ## 核心原則

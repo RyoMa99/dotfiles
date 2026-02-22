@@ -264,6 +264,8 @@ IMPORTANT: `ExitPlanMode` の前に必ず実施する。
 - Critical/Major があれば計画を修正し、再度レビューしてから `ExitPlanMode`
 - 重要な学びがあれば plan-mode.md を直接改善するか、`/session-retrospective` で振り返る
 
+> **計画承認後**: ユーザーが計画を承認したら、`/implementation` スキルを実行して計画を遂行する。
+
 ### 計画却下時のフロー
 
 `ExitPlanMode` 後にユーザーが計画を却下した場合、却下理由に応じて再突入先を決める。

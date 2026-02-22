@@ -1,18 +1,26 @@
 ---
-alwaysApply: true
+name: implementation
+description: Use when a plan has been approved via ExitPlanMode and you're ready to begin implementation. Covers the full workflow from branch creation through TDD execution to completion verification.
+allowed-tools: ["Skill", "Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "AskUserQuestion"]
 ---
 
-# 実装フェーズの進め方
+# Implementation Skill
 
-Plan モードで承認された計画に基づいてコードを変更する際のルール。
+Plan モードで承認された計画に基づいてコードを変更する際のワークフロー。
 
----
+## When to Use
 
-## 0. タスク0: 計画ファイル保存 + 作業ブランチ作成
+- `/implementation` コマンドを実行
+- Plan モードで計画が承認された後（plan-mode.md Phase 4 の ExitPlanMode 後）
+- 「計画に沿って実装して」「実装フェーズに入って」と依頼
 
-計画が承認されたら、最初に実行するタスク。
+## 実装フロー
 
-### 作業ブランチの作成
+### Step 0: 計画ファイル保存 + 作業ブランチ作成
+
+計画が承認されたら、最初に実行するステップ。
+
+#### 作業ブランチの作成
 
 ```bash
 # ベースブランチを最新化（Phase 0 で確認済みの状態を前提）
@@ -34,13 +42,13 @@ git checkout -b <prefix>/<slug>
 
 slug はケバブケースで簡潔に。計画の内容から適切な prefix と slug を選択する。
 
-### 計画ファイルの保存
+#### 計画ファイルの保存
 
 プロジェクトに `docs/plan/` がある場合、承認された計画をバージョニングして保存する。
 
 ---
 
-## 1. ガードレール先行
+### Step 1: ガードレール先行
 
 個別タスクの実装に入る前に、プロジェクト全体のガードレールを整備する。
 
@@ -51,7 +59,7 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 
 ---
 
-## 2. タスク単位で TDD 実装
+### Step 2: タスク単位で TDD 実装
 
 計画の各タスクを `/TDD` スキルで実装する。
 
@@ -66,20 +74,21 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 
 ---
 
-## 3-4. 完了前検証 → コミット → PR 作成
+### Step 3-4: 完了前検証 → コミット → PR 作成
 
 全タスク完了後、**`/finish` スキルを実行する**。
 
 `/finish` は以下を一括実行する:
 1. `/naming-review`（常に実行）
 2. `/ui-check`（UI 変更時のみ）
-3. 全テスト・型チェック・lint
-4. 開発サーバーの停止確認
-5. コミット方法をユーザーに確認
+3. `/security-review`（常に実行）
+4. 全テスト・型チェック・lint
+5. 開発サーバーの停止確認
+6. コミット方法をユーザーに確認
 
 > `/finish` を経由せずにコミットしない。検証漏れを防ぐためのガードレール。
 
-### PR 作成
+#### PR 作成
 
 `/finish` でコミットが完了したら、PR を作成する。
 
@@ -93,12 +102,12 @@ gh pr create --title "<タイトル>" --body "<本文>"
 
 - PR タイトルは70文字以内、変更内容を簡潔に
 - 本文には `## Summary`（箇条書き）と `## Test plan`（検証チェックリスト）を含める
-- タスク0 で作成した作業ブランチからデフォルトブランチ向けに作成する
+- Step 0 で作成した作業ブランチからデフォルトブランチ向けに作成する
 - ユーザーが「コミットのみ」「PR は後で」を選択した場合はスキップ
 
 ---
 
-## 5. セッション後の振り返り
+### Step 5: セッション後の振り返り
 
 ユーザーが完了を確認した後、`/session-retrospective` を実行する。
 
