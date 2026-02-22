@@ -11,7 +11,7 @@ allowed-tools: ["Glob", "Grep", "Read", "Bash", "Task", "WebFetch", "AskUserQues
 変更差分を対象に、命名・UI・セキュリティの3観点でレビューするスキル。
 
 関連:
-- @~/.claude/rules/robust-code.md（型による予防的設計）
+- `robust-code.md` ルール（型による予防的設計）
 
 ## When to Use
 

@@ -11,7 +11,7 @@ disable-model-invocation: false
 
 # Web フロントエンド設計原則
 
-関連: @~/.claude/rules/robust-code.md（型による予防的設計）
+関連: `robust-code.md` ルール（型による予防的設計）
 関連: `/TDD` スキル内のテスト原則を参照
 
 ---

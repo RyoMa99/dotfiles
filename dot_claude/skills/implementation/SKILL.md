@@ -1,6 +1,6 @@
 ---
 name: implementation
-description: "Use when executing an approved implementation plan - manages branch, TDD, review, and commit workflow"
+description: "Use when executing an approved implementation plan in the current session"
 allowed-tools: ["Skill", "Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "AskUserQuestion"]
 ---
 

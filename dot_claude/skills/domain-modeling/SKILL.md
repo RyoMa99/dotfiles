@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "Use when designing domain models with unclear concepts - covers orthogonality, OR/AND notation, and type judgment flow"
+description: "Use when designing domain models with unclear concepts or complex business rules"
 disable-model-invocation: false
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 「Domain Modeling Made Functional」に基づくドメイン記述手法。kawasima氏による解説を参考。
 
-関連: @~/.claude/rules/robust-code.md（型による予防的設計、完全性）
+関連: `robust-code.md` ルール（型による予防的設計、完全性）
 
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: TDD
-description: "Use when implementing features through TDD - extends superpowers:test-driven-development with VERIFY loop and testing principles"
+description: "Use when implementing features through TDD with strict RED-GREEN-REFACTOR cycles"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 ---
 
