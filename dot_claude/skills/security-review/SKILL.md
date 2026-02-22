@@ -1,6 +1,6 @@
 ---
 name: security-review
-description: 変更差分に対してセキュリティ観点のレビューを実行する。秘密情報・入力検証・インジェクション・認証漏れ等を検出。
+description: "Use when reviewing code changes for security vulnerabilities - secrets, injection, XSS, auth gaps"
 argument-hint: "[file-or-directory]"
 disable-model-invocation: false
 allowed-tools: ["Glob", "Grep", "Read", "Bash", "Task"]

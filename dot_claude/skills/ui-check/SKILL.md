@@ -1,6 +1,6 @@
 ---
 name: ui-check
-description: UIコンポーネント作成・編集後に自動実行。「UIを作って」「コンポーネント追加」「フォーム作成」「ボタン実装」「画面を作って」で発動。アクセシビリティ、スペーシング、タイポグラフィをチェック。
+description: "Use after creating or editing UI components to validate accessibility, spacing, and typography"
 argument-hint: "[file-or-pattern]"
 allowed-tools: ["Glob", "Grep", "Read", "WebFetch", "AskUserQuestion"]
 ---

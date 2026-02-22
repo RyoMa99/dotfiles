@@ -1,6 +1,6 @@
 ---
 name: implementation
-description: Use when a plan has been approved via ExitPlanMode and you're ready to begin implementation. Covers the full workflow from branch creation through TDD execution to completion verification.
+description: "Use when executing an approved implementation plan - manages branch, TDD, review, and commit workflow"
 allowed-tools: ["Skill", "Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task", "AskUserQuestion"]
 ---
 
@@ -74,36 +74,98 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 
 ---
 
-### Step 3-4: 完了前検証 → コミット → PR 作成
+### Step 3: レビュー
 
-全タスク完了後、**`/finish` スキルを実行する**。
+全タスク完了後、変更ファイルを特定してレビューを実行する。
 
-`/finish` は以下を一括実行する:
-1. `/naming-review`（常に実行）
-2. `/ui-check`（UI 変更時のみ）
-3. `/security-review`（常に実行）
-4. 全テスト・型チェック・lint
-5. 開発サーバーの停止確認
-6. コミット方法をユーザーに確認
-
-> `/finish` を経由せずにコミットしない。検証漏れを防ぐためのガードレール。
-
-#### PR 作成
-
-`/finish` でコミットが完了したら、PR を作成する。
+#### 3-1. 変更ファイルの特定
 
 ```bash
-# 1. リモートにプッシュ
-git push -u origin <branch-name>
+git diff --name-only HEAD
+git diff --name-only --cached
+git ls-files --others --exclude-standard
+```
 
-# 2. PR 作成
+変更ファイル一覧をユーザーに提示する。
+
+#### 3-2. /naming-review（常に実行）
+
+変更されたソースファイル（テストファイル除外）を対象に `/naming-review` を実行する。
+Critical/Major の指摘があればユーザーに報告し、修正するか確認する。
+
+#### 3-3. /ui-check（UI 変更時のみ）
+
+変更ファイルに UI コンポーネント（`.tsx`, `.jsx`, `.vue`, `.svelte` 等）が含まれる場合のみ実行。
+該当ファイルがなければスキップし、スキップした旨を明記する。
+
+#### 3-4. /security-review（常に実行）
+
+変更ファイルを対象に `/security-review` を実行する。
+Critical 指摘がある場合は後続ステップをブロックし、修正を求める。
+
+> レビューで Critical/Major 指摘があり修正した場合、Step 4 の検証を再実行する。
+
+---
+
+### Step 4: 検証 → コミット → PR 作成
+
+#### 4-1. 全体の整合性確認
+
+プロジェクトの検証コマンドを実行する。以下の優先順で検出:
+
+1. `package.json` の scripts に `typecheck`, `lint`, `test` があれば実行
+2. なければ一般的なコマンド（`tsc --noEmit`, `eslint`, `vitest run` 等）を試行
+
+```bash
+pnpm typecheck && pnpm lint && pnpm test
+```
+
+**実際のコマンド出力を提示する。証拠なき「通りました」は禁止。**
+
+#### 4-2. 開発サーバーの停止確認
+
+検証のために起動した開発サーバーが残っていないか確認する。
+
+```bash
+lsof -i :8787 -i :8788 -i :5173 -i :3000 -P 2>/dev/null | grep LISTEN
+```
+
+残っている場合はポート指定で停止: `lsof -ti :{port} | xargs kill`
+
+#### 4-3. 結果サマリーとコミット方法確認
+
+全 Step の結果をまとめて提示する。
+
+```markdown
+## 完了前検証サマリー
+
+| Step | 結果 |
+|------|------|
+| naming-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
+| ui-check | ✅ 問題なし / ⏭️ スキップ（UI変更なし） |
+| security-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
+| typecheck | ✅ |
+| lint | ✅ |
+| test | ✅ N tests passed |
+| 開発サーバー | ✅ 停止済み / ✅ 起動なし |
+```
+
+AskUserQuestion でコミット方法を確認:
+- コミットのみ
+- コミット + プッシュ
+- コミット + プッシュ + PR 作成
+- コミットしない（変更のみ残す）
+
+#### 4-4. PR 作成（選択時）
+
+```bash
+git push -u origin <branch-name>
 gh pr create --title "<タイトル>" --body "<本文>"
 ```
 
 - PR タイトルは70文字以内、変更内容を簡潔に
 - 本文には `## Summary`（箇条書き）と `## Test plan`（検証チェックリスト）を含める
 - Step 0 で作成した作業ブランチからデフォルトブランチ向けに作成する
-- ユーザーが「コミットのみ」「PR は後で」を選択した場合はスキップ
 
 ---
 
@@ -115,3 +177,9 @@ gh pr create --title "<タイトル>" --body "<本文>"
 セッションを1回で振り返り、保存先を振り分ける。
 
 > ユーザー承認なしに保存しない。提案のみ行い、不要なら即スキップ。
+
+## 注意事項
+
+- Step 3 で Critical 指摘があり修正した場合、Step 4 を再実行する
+- CLAUDE.md にプロジェクト固有の検証手順がある場合はそれも実行する
+- レビューはレビュー+検証のみ。コード編集は各レビュースキルの指摘に基づいてユーザー承認後に行う

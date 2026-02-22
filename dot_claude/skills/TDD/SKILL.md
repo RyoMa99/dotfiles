@@ -1,6 +1,6 @@
 ---
 name: TDD
-description: TDDで開発を進める。RED-GREEN-REFACTORサイクルを厳格に適用し、コンテキスト汚染を防止。superpowers:test-driven-development の補完。
+description: "Use when implementing features through TDD - extends superpowers:test-driven-development with VERIFY loop and testing principles"
 allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 ---
 

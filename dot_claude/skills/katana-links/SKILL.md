@@ -1,6 +1,6 @@
 ---
 name: katana-links
-description: URLを渡してkatanaでリンクを全列挙し、結果をクリップボードにコピーする。
+description: "Use when enumerating all links from a URL via katana"
 allowed-tools: ["Bash", "AskUserQuestion"]
 ---
 

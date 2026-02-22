@@ -1,6 +1,6 @@
 ---
 name: nvim-plugin-management
-description: Neovimプラグインの追加・削除手順。lazy.nvimを使用したプラグイン管理で、プラグインファイル作成とlazy.luaへのimport追加/削除を行う。
+description: "Use when adding or removing Neovim plugins managed by lazy.nvim"
 allowed-tools:
   - Read
   - Write

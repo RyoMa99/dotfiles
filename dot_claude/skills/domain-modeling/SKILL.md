@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "ドメインモデリングと型の粒度設計。仕様の直交性、意図の発見、OR/AND記法、型の4段階判断フロー。設計・計画フェーズで参照。"
+description: "Use when designing domain models with unclear concepts - covers orthogonality, OR/AND notation, and type judgment flow"
 disable-model-invocation: false
 ---
 

@@ -1,6 +1,6 @@
 ---
 name: chezmoi-sync
-description: chezmoiの同期操作を統合管理。pull（リモート取得→ローカル適用）、push（ローカル変更→chezmoi反映→コミット&プッシュ）、drift（差分レポート）の3モード。
+description: "Use when syncing dotfiles via chezmoi - supports pull, push, and drift detection modes"
 user-invocable: true
 disable-model-invocation: true
 allowed-tools: ["Bash", "Glob", "Read", "Grep", "AskUserQuestion"]

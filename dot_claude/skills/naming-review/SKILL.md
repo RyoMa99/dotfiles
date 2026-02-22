@@ -1,6 +1,6 @@
 ---
 name: naming-review
-description: コードの命名を7段階プロセスに沿ってレビューし、改善提案を行う。
+description: "Use when reviewing code naming quality against 7-stage naming evolution"
 argument-hint: "[file-or-directory]"
 disable-model-invocation: false
 allowed-tools: ["Glob", "Grep", "Read", "Task"]

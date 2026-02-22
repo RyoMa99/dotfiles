@@ -1,6 +1,6 @@
 ---
 name: tbls-doc
-description: データベースのスキーマドキュメントをtblsで生成し、指定ディレクトリに出力する。
+description: "Use when generating database schema documentation via tbls"
 allowed-tools: ["Bash", "AskUserQuestion", "Read"]
 ---
 
