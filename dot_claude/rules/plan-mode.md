@@ -1,3 +1,7 @@
+---
+alwaysApply: true
+---
+
 # Plan モードの進め方
 
 Plan モード（EnterPlanMode）に入った場合、以下の5フェーズで進める。

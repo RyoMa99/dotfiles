@@ -1,6 +1,11 @@
+---
+alwaysApply: true
+---
+
 # 堅牢なコードの設計原則
 
 t_wada（和田卓人）氏の「堅牢なコードを育てる」知見をベースにした原則集。
+原則は言語共通。コード例は TypeScript だが、他言語にも各言語のイディオムで適用すること。
 
 ---
 
@@ -60,7 +65,7 @@ function withdraw(amount: PositiveNumber) {}
 
 ## Parse, don't Validate
 
-検証と変換を分離し、検証済みの値を型で表現する。
+検証（validate）ではなくパース（parse）する。入力を検証しつつ、検証済みの値をより具体的な型に変換して返す。
 
 ### バリデーション（従来）
 
@@ -187,7 +192,7 @@ interface OrderPlaced {
 
 // 情報（Information）: 事実から計算で導出
 function calculateTotal(order: OrderPlaced): Money {
-  return order.items.reduce((sum, item) => sum + item.price, 0);
+  return order.items.reduce((sum, item) => add(sum, item.price), Money.zero());
 }
 ```
 
@@ -215,67 +220,6 @@ class UserRepository {}
 
 ---
 
-## 静的解析の活用
-
-コンパイル時にエラーを検出し、実行時エラーを減らす：
-
-```bash
-# TypeScript strict mode
-{
-  "compilerOptions": {
-    "strict": true,
-    "noImplicitAny": true,
-    "strictNullChecks": true
-  }
-}
-```
-
-### 検出できるエラーの例
-
-- 未使用の変数
-- null/undefined の可能性
-- 型の不一致
-- 到達不能コード
-
-**実行前に検出できるエラーは、実行前に検出する。**
-
----
-
-## ソフトウェア品質特性（ISO 25010）
-
-「良いコード」を具体化するための8つの品質特性。AIへの指示にも有効。
-
-| 特性 | 意味 | 具体例 |
-|------|------|--------|
-| **機能適合性** | 要件を満たすか | 仕様通りの動作、エッジケース対応 |
-| **性能効率性** | 速度・リソース | レスポンス時間、メモリ使用量 |
-| **互換性** | 他システムとの連携 | API互換、データフォーマット |
-| **使用性** | ユーザビリティ | エラーメッセージ、操作性 |
-| **信頼性** | 障害時の動作 | リトライ、フォールバック |
-| **セキュリティ** | 認証・認可・暗号化 | 入力検証、権限チェック |
-| **保守性** | 変更容易性 | モジュール分離、テスト容易性 |
-| **移植性** | 環境間の移行 | 設定の外部化、依存の抽象化 |
-
-### AIへの指示に品質特性を明示する
-
-```
-❌ BAD: 「良いコードを書いて」
-✅ GOOD: 「保守性を重視して、テスト容易性の高いコードを書いて」
-✅ GOOD: 「信頼性を確保するため、外部API呼び出しにリトライ処理を入れて」
-```
-
-### 品質特性のトレードオフ
-
-すべてを最大化することはできない。プロジェクトの優先度を決める：
-
-```
-スタートアップ初期 → 機能適合性 > 保守性
-成長期 → 保守性 > 性能効率性
-大規模システム → 信頼性 = セキュリティ > 機能適合性
-```
-
----
-
 ## チェックリスト
 
 コードレビュー時に確認：
@@ -286,10 +230,10 @@ class UserRepository {}
 - [ ] 可変性が必要な理由を説明できるか
 - [ ] 境界（入力）でパースし、内部は型安全か
 - [ ] 事実と情報（計算結果）は分離されているか
+- [ ] 実行前に検出できるエラーは静的解析で検出しているか（strict mode、lint）
 
 ---
 
 ## 参考資料
 
 - [t_wada - 堅牢なコードを育てるための設計ヒント](https://speakerdeck.com/twada/growing-reliable-code-php-conference-fukuoka-2025)
-- [ミノ駆動 - AIの真の力を引き出すソフトウェア品質特性](https://speakerdeck.com/minodriven/ai-and-software-quality)
