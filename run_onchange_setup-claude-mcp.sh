@@ -24,4 +24,4 @@ add_mcp() {
 
 add_mcp chrome-devtools mcp add --scope user chrome-devtools -- npx -y chrome-devtools-mcp@latest
 add_mcp awslabs-docs mcp add --scope user awslabs-docs -e FASTMCP_LOG_LEVEL=ERROR -- uvx awslabs.aws-documentation-mcp-server@latest
-add_mcp drawio-diagrams mcp add --scope user drawio-diagrams -- npx drawio-mcp
+add_mcp drawio-diagrams mcp add --scope user drawio-diagrams -- npx -y @drawio/mcp@latest
