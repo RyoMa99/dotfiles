@@ -16,7 +16,8 @@ Plan モードで承認された計画に基づいてコードを変更する際
 
 ```bash
 # ベースブランチを最新化（Phase 0 で確認済みの状態を前提）
-git checkout main && git pull origin main
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q '.defaultBranchRef.name')
+git checkout $DEFAULT_BRANCH && git pull origin $DEFAULT_BRANCH
 
 # 作業ブランチを作成
 git checkout -b <prefix>/<slug>
@@ -92,7 +93,7 @@ gh pr create --title "<タイトル>" --body "<本文>"
 
 - PR タイトルは70文字以内、変更内容を簡潔に
 - 本文には `## Summary`（箇条書き）と `## Test plan`（検証チェックリスト）を含める
-- タスク0 で作成した作業ブランチから main 向けに作成する
+- タスク0 で作成した作業ブランチからデフォルトブランチ向けに作成する
 - ユーザーが「コミットのみ」「PR は後で」を選択した場合はスキップ
 
 ---

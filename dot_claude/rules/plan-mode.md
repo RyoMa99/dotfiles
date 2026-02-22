@@ -21,7 +21,8 @@ git fetch origin
 
 # 2. ベースブランチとリモートの差分を確認
 #    （ユーザーが特定ブランチを指定している場合はそのブランチ、なければデフォルトブランチ）
-git log --oneline HEAD..origin/main | head -20
+DEFAULT_BRANCH=$(gh repo view --json defaultBranchRef -q '.defaultBranchRef.name')
+git log --oneline HEAD..origin/$DEFAULT_BRANCH | head -20
 ```
 
 ### 判断基準
@@ -36,8 +37,6 @@ git log --oneline HEAD..origin/main | head -20
 
 `AskUserQuestion` で確認する（stash / commit / discard）。
 未コミットの変更を把握しないまま Phase 1 に進まない。
-
-> 作業ブランチの作成は実装フェーズのタスク0で行う（`implementation.md` 参照）。
 
 ---
 
@@ -84,7 +83,7 @@ Phase 1 で明確になったゴールに基づき、既存コードを調査す
    - `get_symbols_overview`: プロジェクト構造の把握
    - `find_symbol`: 関連クラス・関数の特定
    - `find_referencing_symbols`: 影響範囲の特定
-2. **grepai** - セマンティック検索で類似パターン発見（クエリは英語で）
+2. **grepai** - セマンティック検索で類似パターン発見
 3. **Grep / Glob** - パターンマッチによる検索
 
 ### 調査で明らかにすべきこと
@@ -249,11 +248,6 @@ Phase 3 の計画を、シニアエンジニアの視点で自己レビューす
    - タスクサイズは TDD サイクル（1タスク = 数回の RED-GREEN-REFACTOR）に適しているか
    - 各タスクがどの要件を満たすか追跡可能か
 
-### 過去の学びを参照
-
-レビュー時に以下を確認し、過去の失敗を繰り返さないようにする：
-- `{project}/.claude/rules/plan-review.md`（プロジェクト固有、存在する場合）
-
 ### 指摘の形式
 
 問題がある場合は **重要度 → 問題 → 理由 → 代替案** で提示する。
@@ -288,6 +282,4 @@ Phase 3 の計画を、シニアエンジニアの視点で自己レビューす
 
 - 問題がなければ `ExitPlanMode` でユーザーの承認を得る
 - Critical/Major があれば計画を修正し、再度レビューしてから `ExitPlanMode`
-- **反復は最大3回**。3回で解消しない場合はユーザーに判断を仰ぐ
-- Minor のみの場合は指摘を明記した上で `ExitPlanMode` してよい
 - 重要な学びがあれば plan-mode.md を直接改善するか、`/session-retrospective` で振り返る
