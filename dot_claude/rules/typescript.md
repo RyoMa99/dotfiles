@@ -21,9 +21,6 @@ export function createUserId(rawId: string): UserId {
 }
 ```
 
-- シンボルは **export しない**（型の嘘をモジュール内に閉じ込める）
-- 型の生成は **ファクトリ関数経由** に限定する
-
 ---
 
 ## Discriminated Union
@@ -54,9 +51,3 @@ function assertNonNull<T>(value: T | null | undefined, msg?: string): asserts va
 assertNonNull(user);
 user.name; // user: User（null | undefined が除外）
 ```
-
----
-
-## 関数引数には readonly を付ける
-
-配列・オブジェクト引数には `readonly` を付け、意図しない変更を防ぐ。
