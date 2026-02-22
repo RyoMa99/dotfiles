@@ -381,7 +381,7 @@ function generateId(randomFn = Math.random) {
 
 ---
 
-フロントエンド固有のテスト手法は @~/.claude/rules/web-frontend.md（フロントエンドテストセクション）を参照。
+フロントエンド固有のテスト手法は `/web-frontend` スキル（フロントエンドテストセクション）を参照。
 
 ---
 

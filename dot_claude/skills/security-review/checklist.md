@@ -78,10 +78,10 @@ React/Vue 等のモダンフレームワークはデフォルトで変数をエ�
 ```typescript
 // サニタイズする
 import DOMPurify from 'dompurify';
-<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />
+// dangerouslySetInnerHTML は DOMPurify.sanitize() でサニタイズした値のみ渡す
 
 // または、テキストとして扱う
-<div>{userInput}</div>
+// <div>{userInput}</div>
 ```
 
 #### DOM-based XSS 対策
@@ -96,12 +96,12 @@ element.textContent = userInput;
 
 ```typescript
 // ❌ BAD: javascript: スキームによる実行
-<a href={userInput}>リンク</a>
+// <a href={userInput}>リンク</a>
 
 // ✅ GOOD: スキームを http/https に限定
 const isSafeUrl = (url: string) =>
   /^https?:\/\//i.test(url) || url.startsWith('/');
-{isSafeUrl(userInput) && <a href={userInput}>リンク</a>}
+// isSafeUrl(userInput) && <a href={userInput}>リンク</a>
 ```
 
 ### 5. 認証・認可
@@ -517,7 +517,7 @@ const RESERVED_USERNAMES = [
 
 ## フロントエンド認証・認可
 
-関連: @~/.claude/rules/web-frontend.md
+関連: `/web-frontend` スキルを参照
 
 ### OIDC認証方式の比較
 
@@ -572,7 +572,7 @@ app.get('/api/:path(*)', async (req, res) => {
 
 ```typescript
 // フロントエンド: UX として非表示にする（バイパス可能）
-{user.role === 'admin' && <AdminPanel />}
+// user.role === 'admin' && <AdminPanel />
 
 // バックエンド: セキュリティとして検証する（バイパス不可）
 app.get('/api/admin/users', requireRole('admin'), (req, res) => {

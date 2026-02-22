@@ -13,7 +13,7 @@ allowed-tools: ["Bash", "Glob", "Grep", "Read", "Edit", "Write", "Task"]
 - コミットルール（test/feat/refactor の分離）
 - t_wada のテスト原則との統合
 
-詳細なテスト原則は @~/.claude/rules/testing.md を参照。
+詳細なテスト原則は `testing-principles.md` を Read して参照。
 
 ## When to Use This Skill
 

@@ -1,3 +1,9 @@
+---
+name: agent-team
+description: "Agent Team 編成パターン。役割ベース/思考スタイルベース/ステークホルダーベースの3パターン。チーム構成時に参照。"
+disable-model-invocation: false
+---
+
 # Agent Team 編成パターン
 
 Claude Code の Agent Team を組む際の編成パターンと選択指針。

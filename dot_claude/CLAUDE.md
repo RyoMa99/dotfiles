@@ -12,10 +12,9 @@
 
 ## コード品質
 
-詳細なガイドラインは `~/.claude/rules/` を参照：
-- @~/.claude/rules/robust-code.md - 堅牢なコードの設計原則
-- @~/.claude/rules/testing.md - テストの原則
-- @~/.claude/rules/security.md - セキュリティルール
+- @~/.claude/rules/robust-code.md - 堅牢なコードの設計原則（常時参照）
+- テストの原則 → `/TDD` スキル内の `testing-principles.md` を参照
+- セキュリティルール → `/security-review` スキル内の `checklist.md` を参照
 
 ## コミット規約
 
