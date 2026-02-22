@@ -1,298 +1,79 @@
 # ドメインモデリング リファレンス
 
-SKILL.md の詳細なコード例・チェックリスト・参考資料。
+SKILL.md の手法に対応するコード例と参考資料。
+
+---
+
+## コンテキスト境界の発見: 例
+
+### 「商品」という言葉のコンテキスト分割
+
+| コンテキスト | アクター | 目的 | 「商品」の意味 | ルール |
+|-------------|---------|------|-------------|--------|
+| 在庫 | 在庫スタッフ | 棚卸し・在庫調整 | 入出庫の対象物 | 入出庫・在庫調整ルール |
+| 配送 | 配送業者 | 商品の配送 | 配送物 | 配送経路・配送状況ルール |
+| 販売 | 営業担当 | 販売・売上管理 | 販売対象 | 価格・割引ルール |
+
+---
+
+## 再構築テクニック: コード例
+
+### 状態 → 別の型に分離（Always-Valid Model）
+
+```typescript
+// BEFORE: フラグ + ステータスで状態管理（再構築の兆候）
+interface Order {
+  isApproved: boolean;
+  isCancelled: boolean;
+  status: 0 | 1 | 2;
+  shippingStartedAt?: Date;  // 状態によって必須/不要が変わる
+}
+
+// AFTER: 状態ごとに型を分離
+type Order = DraftOrder | ConfirmedOrder | ShippingOrder;
+
+type DraftOrder = { kind: "draft"; items: Item[] };
+type ConfirmedOrder = { kind: "confirmed"; items: Item[]; confirmedAt: Date };
+type ShippingOrder = { kind: "shipping"; items: Item[]; confirmedAt: Date; shippingStartedAt: Date };
+
+function confirmOrder(draft: DraftOrder): ConfirmedOrder { /* ... */ }
+function shipOrder(confirmed: ConfirmedOrder): ShippingOrder { /* ... */ }
+```
+
+### 振る舞いから逆算してデータを抽出（スタンプ結合の解消）
+
+```typescript
+// BEFORE: 契約オブジェクト全体を渡すが一部しか使わない
+function calculateRevenue(contract: Contract): Money {
+  // contract.billingMethod と contract.billingDate しか使っていない
+}
+
+// AFTER: 真に必要なデータだけを値オブジェクトとして切り出す
+type BillingPolicy = { method: "lumpSum" | "installment"; billingDate: Date };
+
+function calculateRevenue(policy: BillingPolicy): Money { /* ... */ }
+```
 
 ---
 
 ## 直交性を高める分解: コード例
 
 ```typescript
-// BAD: 非直交（全組み合わせを列挙 = 乗算的）
-function getPrice(customerType: string, timeSlot: string, day: string): number {
-  if (customerType === "adult" && timeSlot === "late" && day === "weekday") return 1200;
-  if (customerType === "adult" && timeSlot === "late" && day === "weekend") return 1400;
+// BEFORE: 非直交（全組み合わせを列挙 = 乗算的）
+function getPrice(customerType: string, timeSlot: string): number {
+  if (customerType === "adult" && timeSlot === "late") return 1200;
   // ... 50パターン続く
 }
 
-// GOOD: 直交（各軸が独立 = 加算的）
+// AFTER: 直交（各軸が独立 = 加算的）
 function getBasePrice(): number { return 1800; }
 function getCustomerDiscount(type: CustomerType): number { /* 4パターン */ }
 function getTimeDiscount(slot: TimeSlot): number { /* 3パターン */ }
-function getSpecialPrice(date: Date): number | null { /* 例外: 映画の日 */ }
 
-function getPrice(type: CustomerType, slot: TimeSlot, date: Date): number {
-  const special = getSpecialPrice(date);
-  if (special !== null) return special;
+function getPrice(type: CustomerType, slot: TimeSlot): number {
   return getBasePrice() - getCustomerDiscount(type) - getTimeDiscount(slot);
 }
 ```
-
----
-
-## ベストプラクティス: コード例
-
-### 1. フラグ廃止 → OR導入
-
-```typescript
-// BAD: フラグで状態を表現
-interface Order {
-  isApproved: boolean;
-  isCancelled: boolean;
-  isShipped: boolean;
-}
-
-// GOOD: ORで状態を表現
-type Order = PendingOrder | ApprovedOrder | CancelledOrder | ShippedOrder;
-
-interface PendingOrder {
-  kind: "pending";
-  items: Item[];
-  orderedAt: Date;
-}
-
-interface ApprovedOrder {
-  kind: "approved";
-  items: Item[];
-  orderedAt: Date;
-  approvedAt: Date;
-  approvedBy: UserId;
-}
-```
-
-### 2. ステータスコード廃止 → 型と遷移の明示
-
-```typescript
-// BAD: 数値コードで状態管理
-interface Order {
-  status: 0 | 1 | 2; // 0:下書き、1:未承認、2:承認済み
-}
-
-// GOOD: 型で状態を定義し、振る舞いで遷移を明示
-type DraftOrder = { kind: "draft"; /* ... */ };
-type PendingOrder = { kind: "pending"; /* ... */ };
-type ApprovedOrder = { kind: "approved"; /* ... */ };
-
-function submitOrder(draft: DraftOrder): PendingOrder { /* ... */ }
-function approveOrder(pending: PendingOrder): ApprovedOrder { /* ... */ }
-```
-
-### 3. 条件判定に名前付与
-
-```typescript
-// BAD: マジックナンバーが埋もれる
-function processOrder(order: Order) {
-  if (order.totalAmount > 100000) {
-    requireManagerApproval(order);
-  }
-}
-
-// GOOD: 条件判定に名前を付ける
-type AmountCategory = "normal" | "highValue";
-
-function categorizeAmount(amount: number): AmountCategory {
-  return amount > 100000 ? "highValue" : "normal";
-}
-```
-
-### 4.「ほぼ同じdata」の整理
-
-**必須項目が異なる場合**: 共通部分を抽出しANDで合成
-
-```typescript
-interface OrderBase {
-  items: Item[];
-  customerId: CustomerId;
-}
-
-type DraftOrder = OrderBase & { kind: "draft" };
-type SubmittedOrder = OrderBase & { kind: "submitted"; submittedAt: Date };
-```
-
-**局所的な選択肢**: 差分をORに閉じ込める
-
-```typescript
-type PaymentMethod = CreditCard | BankTransfer | CashOnDelivery;
-
-interface Order {
-  items: Item[];
-  payment: PaymentMethod;
-}
-```
-
-**段階・責務の違い**: 状態として分離
-
-```typescript
-type UnvalidatedOrder = { /* 生データ */ };
-type ValidatedOrder = { /* 検証済みデータ */ };
-
-function validateOrder(input: UnvalidatedOrder): ValidatedOrder | ValidationError {
-  // ...
-}
-```
-
-### 5. 不変条件設計
-
-```typescript
-// BAD: オプショナルで曖昧に
-interface Customer {
-  name: string;
-  email?: string;
-  phone?: string;
-}
-
-// GOOD: 不変条件を型で強制
-type ContactInfo = { kind: "email"; email: Email } | { kind: "phone"; phone: Phone };
-
-interface Customer {
-  name: Name;
-  contact: ContactInfo;  // 必ず1つは必要
-}
-```
-
----
-
-## 振る舞い定義: コード例
-
-```typescript
-// ドメイン記述: 検証する = 未検証データ -> 検証済みデータ OR 検証エラー
-type ValidationResult = ValidatedData | ValidationError;
-
-function validate(input: UnvalidatedData): ValidationResult {
-  // 例外に頼らず、すべての入力に対して出力が保証される（全域性）
-}
-```
-
-### OR vs List の使い分け
-
-```typescript
-// OR: いずれか1つ（排他的）
-type Contact = Email | Phone;  // 両方持てない
-
-// List: 複数を同時に持てる（「少なくとも1つ」）
-type NonEmptyArray<T> = [T, ...T[]];
-type Contacts = NonEmptyArray<ContactMethod>;
-```
-
----
-
-## 型の粒度設計: コード例
-
-### 配送方法選択
-
-```typescript
-// BAD: 条件をコード内にハードコード
-function getShippingMethods(amount: number, region: string) {
-  if (amount >= 5000 && region === "domestic") {
-    return ["standard", "express", "nextday"];
-  }
-  // ...複雑な条件分岐
-}
-
-// GOOD: 区分を型で表現
-type AmountCategory = "under5000" | "5000to10000" | "over10000";
-type RegionCategory = "domestic" | "remote" | "international";
-type ShippingMethod = "standard" | "express" | "nextday";
-
-function getAvailableMethods(
-  amount: AmountCategory,
-  region: RegionCategory
-): ShippingMethod[] {
-  // 組み合わせごとに明確に定義
-}
-```
-
-### 会員ランク（パラメータ化）
-
-```typescript
-// BAD: 固定列挙（変更のたびにコード修正）
-type MemberRank = "bronze" | "silver" | "gold";
-
-// GOOD: パラメータ化（データで定義）
-interface RankDefinition {
-  name: string;
-  minSpending: number;
-  discountRate: number;
-  freeShippingThreshold: number;
-}
-
-const ranks: RankDefinition[] = [
-  { name: "bronze", minSpending: 0, discountRate: 0.05, freeShippingThreshold: 5000 },
-  { name: "silver", minSpending: 10000, discountRate: 0.10, freeShippingThreshold: 3000 },
-  { name: "gold", minSpending: 50000, discountRate: 0.15, freeShippingThreshold: 0 },
-];
-```
-
-### BMI判定（連続値の区分化）
-
-```typescript
-// Step 1: 出力は列挙可能か？ → No（BMI自体は連続値）
-// Step 2: 結果カテゴリに差異があるか？ → Yes（医学的基準で3区分）
-
-type BmiCategory = "underweight" | "normal" | "overweight";
-
-function categorizeBmi(bmi: number): BmiCategory {
-  if (bmi < 18.5) return "underweight";
-  if (bmi < 25) return "normal";
-  return "overweight";
-}
-
-function getHealthAdvice(category: BmiCategory): string {
-  switch (category) {
-    case "underweight": return "栄養摂取を増やしましょう";
-    case "normal": return "現状維持を心がけましょう";
-    case "overweight": return "運動と食事管理を推奨します";
-  }
-}
-```
-
-### テストへの活用
-
-定義した区分は**同値分割法の同値クラス**として直接利用できる。
-
-```typescript
-// 配送方法の例: 3(金額区分) × 3(地域区分) = 9パターン
-describe("getAvailableMethods", () => {
-  it.each([
-    ["under5000", "domestic", ["standard"]],
-    ["under5000", "remote", ["standard"]],
-    ["under5000", "international", []],
-    ["5000to10000", "domestic", ["standard", "express"]],
-    // ...全9パターン
-  ])("金額=%s, 地域=%s → %s", (amount, region, expected) => {
-    expect(getAvailableMethods(amount, region)).toEqual(expected);
-  });
-
-  // 境界値テスト
-  it("4999円は under5000", () => {
-    expect(categorizeAmount(4999)).toBe("under5000");
-  });
-  it("5000円は 5000to10000", () => {
-    expect(categorizeAmount(5000)).toBe("5000to10000");
-  });
-});
-```
-
----
-
-## チェックリスト
-
-### ドメインモデリング
-- [ ] 仕様表の背後に隠れた意図（WHY）を発見したか
-- [ ] 仕様の軸が直交しているか（変更が他の軸に波及しないか）
-- [ ] フラグをORに置き換えられないか
-- [ ] ステータスコードを型と遷移で表現できないか
-- [ ] 条件判定（マジックナンバー）に名前を付けたか
-- [ ] 「ほぼ同じdata」を適切に整理したか
-- [ ] 不変条件を型で強制しているか
-- [ ] 振る舞いの失敗ケースをORで明示したか
-- [ ] ORとListを適切に使い分けているか
-
-### 型の粒度設計
-- [ ] 出力の列挙可能性を確認したか
-- [ ] 結果カテゴリごとの差異（不変条件、後続処理、境界値）を検証したか
-- [ ] 入力のOR区分と中間区分型を適切に選択したか
-- [ ] 固定列挙とパラメータ化を適切に選択したか
-- [ ] 区分を同値クラスとしてテストに活用したか
 
 ---
 
