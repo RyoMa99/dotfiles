@@ -1,12 +1,4 @@
----
-name: security-review
-description: "Use when reviewing code changes for security vulnerabilities - secrets, injection, XSS, auth gaps"
-argument-hint: "[file-or-directory]"
-disable-model-invocation: false
-allowed-tools: ["Glob", "Grep", "Read", "Bash", "Task"]
----
-
-# Security Review Skill
+# Security Review
 
 変更差分を対象にセキュリティ観点でレビューするスキル。
 

@@ -1,11 +1,4 @@
----
-name: ui-check
-description: "Use after creating or editing UI components to validate accessibility, spacing, and typography"
-argument-hint: "[file-or-pattern]"
-allowed-tools: ["Glob", "Grep", "Read", "WebFetch", "AskUserQuestion"]
----
-
-# UI Check Skill
+# UI Check
 
 UIコンポーネントの技術的実装とビジュアルデザインを包括的にチェックする。
 

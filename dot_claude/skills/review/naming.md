@@ -1,12 +1,4 @@
----
-name: naming-review
-description: "Use when reviewing code naming quality against 7-stage naming evolution"
-argument-hint: "[file-or-directory]"
-disable-model-invocation: false
-allowed-tools: ["Glob", "Grep", "Read", "Task"]
----
-
-# Naming Review Skill
+# Naming Review
 
 kawasima氏の「命名のプロセス」に基づく進化的アプローチでコードの命名をレビューするスキル。
 

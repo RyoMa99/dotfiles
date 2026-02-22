@@ -76,32 +76,16 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 
 ### Step 3: レビュー
 
-全タスク完了後、変更ファイルを特定してレビューを実行する。
+全タスク完了後、`/review` スキルを実行する。
 
-#### 3-1. 変更ファイルの特定
+`/review` は以下を一括実行する:
+1. 変更ファイルの特定（git diff）
+2. Naming Review（常に実行）
+3. UI Check（UI 変更時のみ）
+4. Security Review（常に実行）
 
-```bash
-git diff --name-only HEAD
-git diff --name-only --cached
-git ls-files --others --exclude-standard
-```
-
-変更ファイル一覧をユーザーに提示する。
-
-#### 3-2. /naming-review（常に実行）
-
-変更されたソースファイル（テストファイル除外）を対象に `/naming-review` を実行する。
 Critical/Major の指摘があればユーザーに報告し、修正するか確認する。
-
-#### 3-3. /ui-check（UI 変更時のみ）
-
-変更ファイルに UI コンポーネント（`.tsx`, `.jsx`, `.vue`, `.svelte` 等）が含まれる場合のみ実行。
-該当ファイルがなければスキップし、スキップした旨を明記する。
-
-#### 3-4. /security-review（常に実行）
-
-変更ファイルを対象に `/security-review` を実行する。
-Critical 指摘がある場合は後続ステップをブロックし、修正を求める。
+Critical 指摘がある場合は後続ステップをブロックする。
 
 > レビューで Critical/Major 指摘があり修正した場合、Step 4 の検証を再実行する。
 

@@ -14,7 +14,7 @@
 
 - @~/.claude/rules/robust-code.md - 堅牢なコードの設計原則（常時参照）
 - テストの原則 → `/TDD` スキル内の `testing-principles.md` を参照
-- セキュリティルール → `/security-review` スキル内の `checklist.md` を参照
+- セキュリティルール → `/review` スキル内の `security-checklist.md` を参照
 
 ## コミット規約
 

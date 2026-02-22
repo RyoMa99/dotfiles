@@ -1,3 +1,7 @@
+---
+description: "Use when forming Agent Teams for design decisions, architecture reviews, or multi-perspective analysis"
+---
+
 # Agent Team 編成パターン
 
 Claude Code の Agent Team を組む際の選択指針。コストが高いため、不可逆な設計判断や多角的検証が必要な場面に限定する。
