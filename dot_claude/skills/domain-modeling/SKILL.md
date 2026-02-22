@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "Use when designing domain models with unclear concepts or complex business rules"
+description: "Use when: (1) the same term means different things to different actors, (2) a type is growing too many properties or has boolean flags for state, (3) spec tables have complex cross-cutting rules, or (4) business concepts need to be decomposed into types"
 disable-model-invocation: false
 ---
 
