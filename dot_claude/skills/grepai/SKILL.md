@@ -1,7 +1,7 @@
 ---
 name: grepai
 description: セマンティックコード検索にgrepaiを活用する。「〜のような」「〜する処理」「パターン」「似たコード」など意味ベースの検索で発動。
-user_invocable: true
+user-invocable: true
 ---
 
 # grepai Skill

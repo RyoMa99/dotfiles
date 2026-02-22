@@ -3,6 +3,12 @@ name: neta-trend-daily
 description: "トレンドネタ収集"
 disable-model-invocation: true
 user-invocable: true
+allowed-tools:
+  - Bash
+  - WebFetch
+  - Read
+  - Write
+  - Glob
 ---
 
 # トレンドネタ収集
@@ -225,8 +231,6 @@ ideasリポジトリで git add → commit → push を実行。
 ```bash
 cd "$(ghq root)/github.com/RyoMa99/ideas" && git add . && git commit -m "add: YYYY-MM-DD trend" && git push
 ```
-
-Co-Authored-By を付与すること。
 
 ## 注意事項
 

@@ -278,6 +278,3 @@ CLAUDE.md は「書いた瞬間から劣化し始める」前提で運用する�
 [hooks なら JSON、skills なら SKILL.md テンプレート、rules なら追記内容]
 ```
 
-## 既存スキルとの関係
-
-- `/record-business-knowledge` → 観点1（ドメイン知識）の詳細版として単独使用可能

@@ -1,6 +1,6 @@
 ---
 name: finish
-description: 実装完了前の検証を一括実行。naming-review → ui-check → テスト・型チェック・lint → 開発サーバー停止 → コミット方法確認。implementation.md Step 3-4 を自動化。
+description: 実装完了前の検証を一括実行。naming-review → ui-check → security-review → テスト・型チェック・lint → 開発サーバー停止 → コミット方法確認。implementation.md Step 3-4 を自動化。
 allowed-tools: ["Skill", "Bash", "Glob", "Grep", "Read", "AskUserQuestion"]
 ---
 
@@ -47,7 +47,18 @@ Skill: ui-check
 
 該当ファイルがなければスキップし、スキップした旨を明記する。
 
-### Step 4: 全体の整合性確認
+### Step 4: /security-review（常に実行）
+
+変更ファイルを対象に `/security-review` を実行する。
+
+```
+Skill: security-review
+引数: 変更されたソースファイル
+```
+
+Critical 指摘がある場合は後続ステップをブロックし、修正を求める。
+
+### Step 5: 全体の整合性確認
 
 プロジェクトの検証コマンドを実行する。以下の優先順で検出:
 
@@ -60,7 +71,7 @@ pnpm typecheck && pnpm lint && pnpm test
 
 **実際のコマンド出力を提示する。証拠なき「通りました」は禁止。**
 
-### Step 5: 開発サーバーの停止確認
+### Step 6: 開発サーバーの停止確認
 
 検証のために起動した開発サーバーが残っていないか確認する。
 
@@ -75,7 +86,7 @@ lsof -i :8787 -i :8788 -i :5173 -i :3000 -P 2>/dev/null | grep LISTEN
 lsof -ti :{port} | xargs kill
 ```
 
-### Step 6: 結果サマリーとコミット方法確認
+### Step 7: 結果サマリーとコミット方法確認
 
 全 Step の結果をまとめて提示し、コミット方法を確認する。
 
@@ -86,6 +97,7 @@ lsof -ti :{port} | xargs kill
 |------|------|
 | naming-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
 | ui-check | ✅ 問題なし / ⏭️ スキップ（UI変更なし） |
+| security-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
 | typecheck | ✅ |
 | lint | ✅ |
 | test | ✅ N tests passed |

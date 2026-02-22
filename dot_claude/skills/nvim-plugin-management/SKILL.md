@@ -64,9 +64,7 @@ require("lazy").setup({
 git add lua/plugins/<plugin-name>.lua lua/config/lazy.lua
 git commit -m "Add <plugin-name> plugin
 
-- <機能の説明>
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+- <機能の説明>"
 git push origin head
 git push sub head
 ```
@@ -93,9 +91,7 @@ rm lua/plugins/<plugin-name>.lua
 
 ```bash
 git add -A lua/plugins/ lua/config/lazy.lua
-git commit -m "Remove <plugin-name> plugin
-
-Co-Authored-By: Claude Opus 4.5 <noreply@anthropic.com>"
+git commit -m "Remove <plugin-name> plugin"
 git push origin head
 git push sub head
 ```
