@@ -7,6 +7,7 @@ setopt auto_param_slash       # ディレクトリ名の補完で末尾の / を
 setopt mark_dirs              # ファイル名の展開でディレクトリにマッチした場合 末尾に / を付加
 setopt correct                # スペルミス訂正
 setopt interactive_comments   # コマンドラインでも # 以降をコメントと見なす
+setopt ignore_eof             # Ctrl+D でシェルを終了しない（exit で明示的に終了）
 setopt magic_equal_subst      # コマンドラインの引数で --prefix=/usr などの = 以降でも補完できる
 
 # ==============================================================================

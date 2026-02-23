@@ -82,41 +82,21 @@ config.scrollback_lines = 5000
 -- ウィンドウ
 config.native_macos_fullscreen_mode = true
 
--- 非アクティブペインの視覚的区別
-config.inactive_pane_hsb = {
-  saturation = 0.5,
-  brightness = 0.4,
-}
-
 -- Option Key を Alt として使用（Esc+ 送信）
 config.send_composed_key_when_left_alt_is_pressed = false
 config.send_composed_key_when_right_alt_is_pressed = false
 
 -- ターミナル
 config.term = "xterm-256color"
+config.default_prog = { "/Users/rym/.local/bin/tmux-start" }
 
--- キーバインド（iTerm2から移植）
+-- キーバインド
 config.keys = {
-  -- ペイン分割（Cmd+D: 縦分割、Cmd+Shift+D: 横分割）
-  { key = "d", mods = "CMD", action = wezterm.action.SplitHorizontal({ domain = "CurrentPaneDomain" }) },
-  { key = "d", mods = "CMD|SHIFT", action = wezterm.action.SplitVertical({ domain = "CurrentPaneDomain" }) },
-  -- ペイン選択（Alt+Cmd+hjkl）
-  { key = "h", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Left") },
-  { key = "j", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Down") },
-  { key = "k", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Up") },
-  { key = "l", mods = "ALT|CMD", action = wezterm.action.ActivatePaneDirection("Right") },
-  -- スクロール（Cmd+j/k）
-  { key = "j", mods = "CMD", action = wezterm.action.ScrollByLine(1) },
-  { key = "k", mods = "CMD", action = wezterm.action.ScrollByLine(-1) },
-  -- ペイン入れ替え
-  { key = "s", mods = "CMD", action = wezterm.action.PaneSelect({ mode = "SwapWithActive" }) },
   -- Send Hex / Escape Sequences
   { key = "$", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x05") },  -- Ctrl+E（行末）
   { key = "0", mods = "ALT", action = wezterm.action.SendString("\x01") },  -- Ctrl+A（行頭）
   { key = "b", mods = "ALT", action = wezterm.action.SendString("\x1bb") },  -- 単語後退
   { key = "w", mods = "ALT", action = wezterm.action.SendString("\x1bf") },  -- 単語前進
-  -- ペインを閉じる（Cmd+W）
-  { key = "w", mods = "CMD", action = wezterm.action.CloseCurrentPane({ confirm = false }) },
   -- デフォルトキーバインド無効化（OS/Raycastに委譲）
   { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
   { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },

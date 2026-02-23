@@ -1,0 +1,16 @@
+#!/bin/zsh
+
+# ~/.config/tmux/default-project にプロジェクト名があれば tmuxinator で起動
+# なければ tmux の main セッションを開く
+
+local config="$HOME/.config/tmux/default-project"
+
+if [[ -f "$config" ]]; then
+  local project
+  project=$(<"$config")
+  if [[ -n "$project" ]] && command -v tmuxinator &>/dev/null; then
+    exec tmuxinator start "$project"
+  fi
+fi
+
+exec /opt/homebrew/bin/tmux new-session -A -s main
