@@ -2,4 +2,9 @@ name: private
 root: ~/
 
 windows:
-  - shell: ""
+  - main:
+      layout: main-vertical
+      panes:
+        - claude
+        -
+      post: tmux resize-pane -t 0 -x 80%
