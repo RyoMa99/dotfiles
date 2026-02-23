@@ -1,4 +1,6 @@
-# zsh customize
+# ==============================================================================
+# 1. シェルオプション
+# ==============================================================================
 setopt nobeep                 # ビープ音を鳴らさない
 setopt auto_param_keys        # カッコを自動補完
 setopt auto_param_slash       # ディレクトリ名の補完で末尾の / を自動的に付加し、次の補完に備える
@@ -7,11 +9,13 @@ setopt correct                # スペルミス訂正
 setopt interactive_comments   # コマンドラインでも # 以降をコメントと見なす
 setopt magic_equal_subst      # コマンドラインの引数で --prefix=/usr などの = 以降でも補完できる
 
-## history
+# ==============================================================================
+# 2. 履歴
+# ==============================================================================
 ## cf. https://zenn.dev/shota1995m/scraps/6ab5ee50a32cdb
 HISTFILE=~/.zsh_history
-HISTSIZE=10000 #メモリ上に保存する履歴の数
-SAVEHIST=10000 #履歴ファイルに保存されるイベントの最大数
+HISTSIZE=10000
+SAVEHIST=10000
 setopt share_history          # ヒストリの読み出しと書き込みを同時に行う
 setopt extended_history       # ヒストリにコマンド実行時間を含める
 setopt hist_expire_dups_first # ヒストリが削られる場合、以前入力した同じものを先に削除する
@@ -28,21 +32,34 @@ zle -N history-beginning-search-forward-end history-search-end
 bindkey "^[k" history-beginning-search-backward-end
 bindkey "^[j" history-beginning-search-forward-end
 
-### 履歴検索
-### cf. https://qiita.com/chatrate/items/02ad97b604722c6a8551
-function history-selection() {
-    BUFFER=`history -n 1 | tail -r  | awk '!a[$0]++' | fzf`
-    CURSOR=$#BUFFER
-    zle reset-prompt
-}
-zle -N history-selection
-bindkey "^R" history-selection
-
-# mise (activate: 対話シェル用、shims より優先)
-eval "$(mise activate zsh)"
-
+# ==============================================================================
+# 3. 環境変数 / PATH
+# ==============================================================================
+export GOPATH="$HOME/go"
+export PATH="$GOPATH/bin:$PATH"
+export PATH="/opt/homebrew/opt/php@8.3/bin:$PATH"
 export HOMEBREW_CLEANUP_MAX_AGE_DAYS=30
 
+# ==============================================================================
+# 4. ツール初期化
+# ==============================================================================
+## mise (activate: 対話シェル用、shims より優先)
+eval "$(mise activate zsh)"
+
+## zoxide - better cd
+## cf. https://github.com/ajeetdsouza/zoxide
+eval "$(zoxide init zsh)"
+alias cd='z'
+alias cdi='zi'
+[[ -n $CLAUDECODE ]] && unalias cd  # Claude Code内では組み込みcdを使用
+
+## starship - prompt
+## cf. https://starship.rs/ja-JP/
+eval "$(starship init zsh)"
+
+# ==============================================================================
+# 5. 補完
+# ==============================================================================
 ## auto suggestions
 ## cf. https://github.com/zsh-users/zsh-autosuggestions
 source "$HOMEBREW_PREFIX/share/zsh-autosuggestions/zsh-autosuggestions.zsh"
@@ -55,28 +72,14 @@ autoload bashcompinit && bashcompinit
 autoload -Uz compinit && compinit
 complete -C "$(mise where awscli)/bin/aws_completer" aws
 
-
-# better cd
-# cf. https://github.com/ajeetdsouza/zoxide
-## fzf
+# ==============================================================================
+# 6. fzf
+# ==============================================================================
 export FZF_DEFAULT_OPTS='--bind alt-j:down,alt-k:up'
 
-eval "$(zoxide init zsh)"
-alias cd='z'
-alias cdi='zi'
-[[ -n $CLAUDECODE ]] && unalias cd  # Claude Code内では組み込みcdを使用
-
-
-# prompt
-# cf. https://starship.rs/ja-JP/
-eval "$(starship init zsh)"
-
-# Go
-export GOPATH="$HOME/go"
-export PATH="$GOPATH/bin:$PATH"
-
-# alias
-
+# ==============================================================================
+# 7. エイリアス
+# ==============================================================================
 ## docker
 alias d='docker'
 alias dc='docker compose'
@@ -87,7 +90,7 @@ alias gf='git fetch'
 alias gw='git switch'
 alias gwc='git switch -c'
 alias gww='branch=$(git branch | fzf | sed "s/^[* ] //"); [ -n $branch ] && git switch $branch'
-alias gbr="git branch -vv | grep ': gone]' | awk '{print \$1}' | xargs git branch -D"
+alias gbr="git branch -vv | grep ': gone]' | awk '{print \$1}' | xargs git branch -d"
 alias gpl='git pull'
 alias gp='git push origin head'
 alias ga='git add'
@@ -115,9 +118,27 @@ alias du='dust'
 ## ファイル検索
 alias l='nnn'
 
+## clipboard
+alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
+alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
+
+# ==============================================================================
+# 8. 関数
+# ==============================================================================
+## 履歴検索
+## cf. https://qiita.com/chatrate/items/02ad97b604722c6a8551
+function history-selection() {
+    BUFFER=$(history -n 1 | tail -r | awk '!a[$0]++' | fzf --query "$BUFFER")
+    CURSOR=$#BUFFER
+    zle reset-prompt
+}
+zle -N history-selection
+bindkey "^R" history-selection
+
 ## リポジトリ移動
-alias repo='repo=$(ghq list | ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo"'
+alias repo='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && cd $(ghq root)/"$repo"'
 alias view='repo=$(ghq list | fzf --preview "bat --color=always --style=header,grid --line-range :80 $(ghq root)/{}/README.md"); [ -n "$repo" ] && gh repo view "$repo" --web'
+
 ghcr() {
   local visibility="--public"
   local repo_name=""
@@ -133,19 +154,13 @@ ghcr() {
   [ -n "$repo_name" ] && gh repo create "$repo_name" $visibility && ghq get https://github.com/RyoMa99/"$repo_name".git
 }
 
-## iterm2
-## cf. https://github.com/mozumasu/dotfiles/blob/main/.config/wezterm/keymaps.lua#L222
-test -e "${HOME}/.iterm2_shell_integration.zsh" && source "${HOME}/.iterm2_shell_integration.zsh" || true
-
-## clipboard
-alias cb='pbcopy'                           # パイプでコピー: echo "test" | cb
-alias lc='fc -e - | pbcopy'                 # 直前のコマンドを再実行して出力をコピー
-
-## local settings (machine-specific, not managed by chezmoi)
+# ==============================================================================
+# 9. ローカル設定 (machine-specific, not managed by chezmoi)
+# ==============================================================================
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
-## syntax highlight (must be at the end of .zshrc)
+# ==============================================================================
+# 10. Syntax Highlighting (※末尾必須)
+# ==============================================================================
 ## cf. https://github.com/zsh-users/zsh-syntax-highlighting
 source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
-
-export PATH="/opt/homebrew/opt/php@8.3/bin:$PATH"
