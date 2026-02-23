@@ -54,7 +54,7 @@ local function apply_appearance(window)
 
   if scheme then
     overrides.color_scheme = scheme
-    overrides.colors = nil
+    overrides.colors = { background = "#050508" }
   else
     overrides.color_scheme = nil
     overrides.colors = kanagawa_light
@@ -70,7 +70,7 @@ end)
 config.color_scheme = "Kanagawa (Gogh)"
 
 -- 透明度
-config.window_background_opacity = 0.55
+config.window_background_opacity = 0.75
 config.macos_window_background_blur = 20
 
 -- カーソル
