@@ -7,18 +7,20 @@ $git_state\
 \n$character\
 """
 
-# aws
-# terraform
-# docker
 right_format = """
+$aws\
+$terraform\
 $golang\
 $nodejs\
+$python\
+$ruby\
+$php\
 """
 
 continuation_prompt = '[/](fg:cyan)'
 
 [directory]
-home_symbol = ' ~'
+home_symbol = ' ~'
 truncation_length = 5
 truncation_symbol = '.../ '
 truncate_to_repo = false
@@ -40,11 +42,11 @@ format = ' [\[$symbol$branch(:$remote_branch)\]](fg:blue)'
 
 [git_status]
 conflicted = '[󱃞](fg:red)'
-stashed = '[](fg:yellow)'
+stashed = '[](fg:yellow)'
 deleted = '[󰺝](fg:yellow)'
-renamed = '[](fg:yellow)'
+renamed = '[](fg:yellow)'
 modified = '[󰲶](fg:yellow)'
-staged = '[++\($count\)](fg:cyan)'
+staged = '[++\($count\)](fg:cyan)'
 untracked = '[󰢤](fg:yellow)'
 ahead = ' [⇡${count}](fg:cyan)'
 behind = ' [⇣${count}](fg:red)'
@@ -54,11 +56,30 @@ style = 'fg:blue'
 [git_state]
 format = '[\[$state($progress_current/$progress_total)\]](fg:yellow)'
 
+[aws]
+format = '[$symbol $profile(\($region\))](fg:yellow)'
+symbol = ''
+
+[terraform]
+format = '[$symbol $version](fg:purple)'
+symbol = '󱁢'
+
 [golang]
 format = '[$symbol $version](fg:cyan)'
-symbol = ''
+symbol = ''
 
 [nodejs]
-style = "fg:green"
-format = " [$symbol$version]($style)"
+format = '[$symbol $version](fg:green)'
+symbol = ''
 
+[python]
+format = '[$symbol $version](fg:yellow)'
+symbol = ''
+
+[ruby]
+format = '[$symbol $version](fg:red)'
+symbol = ''
+
+[php]
+format = '[$symbol $version](fg:purple)'
+symbol = ''
