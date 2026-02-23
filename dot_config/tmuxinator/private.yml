@@ -1,10 +1,17 @@
 name: private
 root: ~/
 
+on_project_start: tmux set-option -g main-pane-width 90%
+
 windows:
   - main:
       layout: main-vertical
       panes:
         - claude
         -
-      post: tmux resize-pane -t 0 -x 80%
+  - ideas:
+      root: ~/repo/github.com/RyoMa99/ideas
+      layout: main-vertical
+      panes:
+        - claude
+        - nvim

@@ -134,6 +134,14 @@
     ],
     "PreToolUse": [
       {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/tmux-status-clear.sh"
+          }
+        ]
+      },
+      {
         "matcher": "AskUserQuestion|ExitPlanMode|EnterPlanMode",
         "hooks": [
           {
