@@ -156,12 +156,21 @@ ghcr() {
 }
 
 # ==============================================================================
-# 9. ローカル設定 (machine-specific, not managed by chezmoi)
+# 9. tmux popup
+# ==============================================================================
+if [[ -n "$TMUX_POPUP" ]]; then
+  _tmux_popup_close() { BUFFER="exit"; zle accept-line }
+  zle -N _tmux_popup_close
+  bindkey '^f' _tmux_popup_close
+fi
+
+# ==============================================================================
+# 10. ローカル設定 (machine-specific, not managed by chezmoi)
 # ==============================================================================
 [[ -f ~/.zshrc.local ]] && source ~/.zshrc.local
 
 # ==============================================================================
-# 10. Syntax Highlighting (※末尾必須)
+# 11. Syntax Highlighting (※末尾必須)
 # ==============================================================================
 ## cf. https://github.com/zsh-users/zsh-syntax-highlighting
 source "$HOMEBREW_PREFIX/share/zsh-syntax-highlighting/zsh-syntax-highlighting.zsh"
