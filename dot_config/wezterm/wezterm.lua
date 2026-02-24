@@ -100,10 +100,37 @@ config.keys = {
   -- デフォルトキーバインド無効化（OS/Raycastに委譲）
   { key = "k", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
   { key = "l", mods = "CTRL|SHIFT", action = wezterm.action.DisableDefaultAssignment },
+  -- フォントサイズ変更（Command+/-のデフォルトを無効化してAlt+/-に移動）
+  { key = "=", mods = "SUPER", action = wezterm.action.DisableDefaultAssignment },
+  { key = "+", mods = "SUPER|SHIFT", action = wezterm.action.DisableDefaultAssignment },
+  { key = "+", mods = "ALT|SHIFT", action = wezterm.action.IncreaseFontSize },
+  { key = "-", mods = "ALT", action = wezterm.action.DecreaseFontSize },
   -- Alt+Enterの全画面トグルを無効化（Claude Codeの改行に使用）
   { key = "Enter", mods = "ALT", action = wezterm.action.SendKey({ key = "Enter", mods = "ALT" }) },
-  -- スクロールバッククリア（入力行を上部に移動）
-  { key = "l", mods = "ALT", action = wezterm.action.ClearScrollback("ScrollbackAndViewport") },
+-- tmux ペインを閉じる（prefix + x を直接送信）
+  { key = "w", mods = "SUPER", action = wezterm.action.SendString("\x02x") },
+  -- tmux ペイン入れ替え（prefix + }/{ を直接送信）
+  { key = "s", mods = "SUPER", action = wezterm.action.SendString("\x02}") },
+  { key = "s", mods = "SUPER|SHIFT", action = wezterm.action.SendString("\x02{") },
+  -- tmux ペイン分割（prefix + -/| を直接送信）
+  { key = "-", mods = "SUPER", action = wezterm.action.SendString("\x02-") },
+  { key = "|", mods = "SUPER|SHIFT", action = wezterm.action.SendString("\x02|") },
+  -- tmux ペインリサイズ（prefix + HJKL を直接送信）
+  { key = "h", mods = "ALT", action = wezterm.action.SendString("\x02H") },
+  { key = "j", mods = "ALT", action = wezterm.action.SendString("\x02J") },
+  { key = "k", mods = "ALT", action = wezterm.action.SendString("\x02K") },
+  { key = "l", mods = "ALT", action = wezterm.action.SendString("\x02L") },
+  -- tmux ペイン移動（prefix + hjkl を直接送信）
+  { key = "h", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02h") },
+  { key = "j", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02j") },
+  { key = "k", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02k") },
+  { key = "l", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02l") },
+  -- tmux ウィンドウ追加・削除（prefix + c/& を直接送信）
+  { key = "n", mods = "CTRL", action = wezterm.action.SendString("\x02c") },
+  { key = "w", mods = "CTRL", action = wezterm.action.SendString("\x02&") },
+  -- tmux ウィンドウ移動（prefix + n/p を直接送信）
+  { key = "Tab", mods = "CTRL", action = wezterm.action.SendString("\x02n") },
+  { key = "Tab", mods = "CTRL|SHIFT", action = wezterm.action.SendString("\x02p") },
 }
 
 return config
