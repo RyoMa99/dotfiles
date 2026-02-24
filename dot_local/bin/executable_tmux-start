@@ -13,4 +13,4 @@ if [[ -f "$config" ]]; then
   fi
 fi
 
-exec /opt/homebrew/bin/tmux new-session -A -s main
+exec tmux new-session -A -s main
