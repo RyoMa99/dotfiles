@@ -116,10 +116,10 @@ config.keys = {
   { key = "-", mods = "SUPER", action = wezterm.action.SendString("\x02-") },
   { key = "|", mods = "SUPER|SHIFT", action = wezterm.action.SendString("\x02|") },
   -- tmux ペインリサイズ（prefix + HJKL を直接送信）
-  { key = "h", mods = "ALT", action = wezterm.action.SendString("\x02H") },
-  { key = "j", mods = "ALT", action = wezterm.action.SendString("\x02J") },
-  { key = "k", mods = "ALT", action = wezterm.action.SendString("\x02K") },
-  { key = "l", mods = "ALT", action = wezterm.action.SendString("\x02L") },
+  { key = "h", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x02H") },
+  { key = "j", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x02J") },
+  { key = "k", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x02K") },
+  { key = "l", mods = "ALT|SHIFT", action = wezterm.action.SendString("\x02L") },
   -- tmux ペイン移動（prefix + hjkl を直接送信）
   { key = "h", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02h") },
   { key = "j", mods = "ALT|SUPER", action = wezterm.action.SendString("\x02j") },
