@@ -88,7 +88,7 @@ config.send_composed_key_when_right_alt_is_pressed = false
 
 -- ターミナル
 config.term = "xterm-256color"
-config.default_prog = { "/Users/rym/.local/bin/tmux-start" }
+config.default_prog = { wezterm.home_dir .. "/.local/bin/tmux-start" }
 
 -- キーバインド
 config.keys = {
