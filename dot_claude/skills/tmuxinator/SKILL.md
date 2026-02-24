@@ -25,9 +25,14 @@ Trigger when user:
 
 ### Step 1: 対象ファイルの特定
 
-引数でファイル名が指定されていればそれを使う。なければ一覧を表示して選択させる。
+引数でファイル名が指定されていればそれを使う。なければ以下の順で判定する：
+
+1. `~/.config/tmux/default-project` を読み、現在のデフォルトプロジェクト名を取得する
+2. 対応する yml（`~/.config/tmuxinator/<project-name>.yml`）を優先対象とする
+3. default-project が空またはファイルが存在しない場合は一覧を表示して選択させる
 
 ```bash
+cat ~/.config/tmux/default-project 2>/dev/null
 ls ~/.config/tmuxinator/*.yml
 ```
 
