@@ -1,0 +1,11 @@
+name: work
+root: ~/
+
+on_project_start: tmux set-option -g main-pane-width 90%
+
+windows:
+  - main:
+      layout: main-vertical
+      panes:
+        - claude
+        -
