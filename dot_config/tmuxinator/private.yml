@@ -1,7 +1,7 @@
 name: private
 root: ~/
 
-on_project_start: tmux set-option -g main-pane-width 90%
+on_project_start: tmux set-option -g main-pane-width 80%
 
 windows:
   - main:
@@ -15,3 +15,9 @@ windows:
       panes:
         - claude
         - nvim
+  - zettel-server:
+      root: ~/repo/github.com/RyoMa99/zettel-server
+      layout: main-vertical
+      panes:
+        - claude
+        -
