@@ -107,6 +107,9 @@ config.keys = {
   { key = "-", mods = "ALT", action = wezterm.action.DecreaseFontSize },
   -- Alt+Enterの全画面トグルを無効化（Claude Codeの改行に使用）
   { key = "Enter", mods = "ALT", action = wezterm.action.SendKey({ key = "Enter", mods = "ALT" }) },
+  -- tmux ペインスクロール（半ページ、user-keys エスケープシーケンス経由で tmux に送信）
+  { key = "k", mods = "SUPER", action = wezterm.action.SendString("\x1b[34~") },
+  { key = "j", mods = "SUPER", action = wezterm.action.SendString("\x1b[35~") },
 -- tmux ペインを閉じる（prefix + x を直接送信）
   { key = "w", mods = "SUPER", action = wezterm.action.SendString("\x02x") },
   -- tmux ペイン入れ替え（prefix + }/{ を直接送信）
