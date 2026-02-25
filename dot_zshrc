@@ -71,7 +71,7 @@ FPATH="$HOMEBREW_PREFIX/share/zsh-completions:$FPATH"
 fpath=(${HOME}/.docker/completions $fpath)
 autoload bashcompinit && bashcompinit
 autoload -Uz compinit && compinit
-complete -C "$(mise where awscli)/bin/aws_completer" aws
+complete -C "$(mise where awscli)/.mise-bins/aws_completer" aws
 
 # ==============================================================================
 # 6. fzf
