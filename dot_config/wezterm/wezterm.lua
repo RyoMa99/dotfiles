@@ -110,6 +110,8 @@ config.keys = {
   -- tmux ペインスクロール（半ページ、user-keys エスケープシーケンス経由で tmux に送信）
   { key = "k", mods = "SUPER", action = wezterm.action.SendString("\x1b[34~") },
   { key = "j", mods = "SUPER", action = wezterm.action.SendString("\x1b[35~") },
+  -- Claude Code ステータスクリア（🤖 表示を消す）
+  { key = ".", mods = "SUPER", action = wezterm.action.SendString("\x1b[36~") },
 -- tmux ペインを閉じる（prefix + x を直接送信）
   { key = "w", mods = "SUPER", action = wezterm.action.SendString("\x02x") },
   -- tmux ペイン入れ替え（prefix + }/{ を直接送信）
