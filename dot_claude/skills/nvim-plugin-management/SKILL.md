@@ -104,6 +104,22 @@ git push sub head
 - **Mason**: LSPサーバーは別途`:MasonInstall <name>`でインストールが必要
 - **キーマップ**: `<Leader>`はスペースキー。説明は日本語で記述
 
+## ft 遅延読み込み時の注意
+
+`ft` でプラグインを読み込んでも、`setup()` だけでは表示が有効化されないプラグインがある（例: csvview.nvim は別途 `enable()` が必要）。プラグインの README で自動有効化の有無を確認し、必要なら `FileType` autocmd を `config` 内に追加する：
+
+```lua
+config = function(_, opts)
+  require("plugin").setup(opts)
+  vim.api.nvim_create_autocmd("FileType", {
+    pattern = { "csv" },
+    callback = function(args)
+      require("plugin").enable(args.buf)
+    end,
+  })
+end,
+```
+
 ## よく使う遅延読み込みパターン
 
 | パターン | 用途 |
