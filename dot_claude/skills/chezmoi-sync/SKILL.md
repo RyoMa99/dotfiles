@@ -118,13 +118,12 @@ chezmoi forget <ファイルパス>
 cd ~/.local/share/chezmoi && git add -A && git status
 ```
 
-変更内容を確認し、ユーザーにコミットメッセージの確認を取ってから：
+コミットメッセージは日本語で、変更内容を簡潔に記述する。
+**確認は取らずにそのままコミット＆プッシュする**（ユーザーが `/chezmoi-sync push` を実行した時点でプッシュの意図は明確）。
 
 ```bash
 cd ~/.local/share/chezmoi && git commit -m "<メッセージ>" && git push
 ```
-
-コミットメッセージは日本語で、変更内容を簡潔に記述する。
 
 ---
 
