@@ -51,5 +51,6 @@ require("lazy").setup({
     { import = "plugins.overlook" },
     { import = "plugins.gitlinker" },
     { import = "plugins.docsify" },
+    { import = "plugins.csvview" },
   },
 })
