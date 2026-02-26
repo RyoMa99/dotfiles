@@ -176,13 +176,17 @@ disable-model-invocation: false
 
 ## 手法: NotebookLM によるドメインモデル検証
 
-`/notebooklm` スキルで文献ノートブックに問い合わせる。フェーズごとに異なるノートブックを使い分ける。
+`/notebooklm` スキル（`notebooklm-py` CLI）で文献ノートブックに問い合わせる。フェーズごとに異なるノートブックを使い分ける。
 
 ### Phase 1: モデリング中 — DDD ノートブック
 
-**ノートブック**: https://notebooklm.google.com/notebook/593bbb11-cb90-4a81-a934-9cce0474a8d5
+**ノートブック ID**: `593bbb11-cb90-4a81-a934-9cce0474a8d5`（DDD）
 
 Bounded Context の分割、Aggregate 境界、状態遷移設計など、ドメインモデルの構造に関する設計課題を問い合わせる。
+
+```bash
+notebooklm ask "質問内容" --notebook 593bbb11-cb90-4a81-a934-9cce0474a8d5
+```
 
 **いつ使うか:**
 - 初期設計: Bounded Context 分割、コンテキストマップ、Aggregate 設計
@@ -199,8 +203,11 @@ Bounded Context の分割、Aggregate 境界、状態遷移設計など、ドメ
 
 ドメインモデルが固まった後、実装に移る前に別の視座から設計を揺さぶる。DDD の枠内では見えない改善点（並行性、イベント配信、読み書き分離）を発見するためのフェーズ。
 
-**ノートブック**: https://notebooklm.google.com/notebook/17a88c4a-8e2d-46b8-9cda-ffd6a7f84519
-（Event Sourcing / CQRS / Actor Model）
+**ノートブック ID**: `17a88c4a-8e2d-46b8-9cda-ffd6a7f84519`（CQRS/ES）
+
+```bash
+notebooklm ask "質問内容" --notebook 17a88c4a-8e2d-46b8-9cda-ffd6a7f84519
+```
 
 **いつ使うか:**
 - ドメインイベントを使う設計が確定した後（イベント配信の信頼性・パターン選定）
@@ -214,7 +221,7 @@ Bounded Context の分割、Aggregate 境界、状態遷移設計など、ドメ
 
 ### 共通ルール
 
-1つの質問に**前提条件（既に決まった設計）+ 具体的な問い**を含める。NotebookLM は毎回新規セッションのため、文脈を自己完結させる。
+1つの質問に**前提条件（既に決まった設計）+ 具体的な問い**を含める。会話は `notebooklm ask` で継続できるが、明示的に新規セッションを始めたい場合は `--new` フラグを使う。
 
 **重要**: 1回の回答で満足せず、回答の曖昧な点や追加の設計課題について**連続質問で深掘り**する。各回答を統合して設計書（`docs/design/`）にまとめる。
 
