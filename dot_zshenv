@@ -3,3 +3,6 @@ eval "$(/opt/homebrew/bin/brew shellenv)"
 
 # mise (shims: 非対話シェル用)
 export PATH="$HOME/.local/share/mise/shims:$PATH"
+
+# uv
+export PATH="/Users/ryoma.hatakenaka/.local/bin:$PATH"
