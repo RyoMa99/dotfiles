@@ -60,6 +60,15 @@ vim.opt.swapfile = false
 vim.keymap.set('i', 'jk', '<Esc>')
 vim.keymap.set('v', 'jk', '<Esc>')
 
+-- レジスタを汚さない削除
+vim.keymap.set("n", "x", '"_x', { desc = "削除(レジスタ保持)" })
+vim.keymap.set({ "n", "v" }, "<Leader>d", '"_d', { desc = "削除(レジスタ保持)" })
+vim.keymap.set({ "n", "v" }, "<Leader>D", '"_D', { desc = "行末まで削除(レジスタ保持)" })
+
+-- yank レジスタからペースト（直前の削除に影響されない）
+vim.keymap.set({ "n", "v" }, "<Leader>p", '"0p', { desc = "yank内容をペースト(後)" })
+vim.keymap.set({ "n", "v" }, "<Leader>P", '"0P', { desc = "yank内容をペースト(前)" })
+
 -- 折り返しトグル
 vim.keymap.set("n", "<Leader>tw", "<cmd>set wrap!<cr>", { desc = "折り返し切替" })
 vim.keymap.set("n", "<Leader>tt", "<cmd>terminal zsh -li<cr>", { desc = "ターミナルを開く" })

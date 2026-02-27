@@ -99,3 +99,39 @@ const { data: users } = useQuery({ queryKey: ['users'], queryFn: fetchUsers });
 ```
 
 詳細は `component-design.md` のテストセクションを参照。
+
+---
+
+## ヘルスチェック（react-doctor）
+
+React プロジェクトの健全性を診断する。60以上のルール（セキュリティ、パフォーマンス、正確性、アクセシビリティ）と dead code 検出を実行し、0〜100 のスコアで評価する。
+
+### 実行タイミング
+
+| 場面 | コマンド | 目的 |
+|------|---------|------|
+| 新機能の実装完了後 | `react-doctor . --verbose` | 導入した問題の早期発見 |
+| リファクタリング前 | `react-doctor . --verbose` | 現状のベースラインスコアを記録 |
+| PR レビュー時 | `react-doctor . --diff main --verbose` | 変更ファイルのみスキャン |
+| スコア確認のみ | `react-doctor . --score` | 素早くヘルススコアを取得 |
+
+### スコア基準
+
+| スコア | 評価 | 対応 |
+|--------|------|------|
+| 75〜100 | Great | 問題なし |
+| 50〜74 | Needs work | Warning を優先的に対処 |
+| 0〜49 | Critical | Error を最優先で修正 |
+
+### 設定ファイル
+
+プロジェクトルートに `react-doctor.config.json` を配置して、ルールやファイルを除外できる：
+
+```json
+{
+  "ignore": {
+    "rules": ["除外するルール名"],
+    "files": ["src/generated/**"]
+  }
+}
+```
