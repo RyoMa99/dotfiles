@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "Use when: (1) the same term means different things to different actors, (2) a type is growing too many properties or has boolean flags for state, (3) spec tables have complex cross-cutting rules, or (4) business concepts need to be decomposed into types"
+description: "Use when: (1) the same term means different things to different actors, (2) a type is growing too many properties or has boolean flags for state, (3) spec tables have complex cross-cutting rules, (4) business concepts need to be decomposed into types, or (5) introducing new types, enums, or discriminated unions that represent domain concepts"
 disable-model-invocation: false
 ---
 
@@ -178,46 +178,7 @@ disable-model-invocation: false
 
 `/notebooklm` スキル（`notebooklm-py` CLI）で文献ノートブックに問い合わせる。フェーズごとに異なるノートブックを使い分ける。
 
-### Phase 1: モデリング中 — DDD ノートブック
-
-**ノートブック ID**: `593bbb11-cb90-4a81-a934-9cce0474a8d5`（DDD）
-
-Bounded Context の分割、Aggregate 境界、状態遷移設計など、ドメインモデルの構造に関する設計課題を問い合わせる。
-
-```bash
-notebooklm ask "質問内容" --notebook 593bbb11-cb90-4a81-a934-9cce0474a8d5
-```
-
-**いつ使うか:**
-- 初期設計: Bounded Context 分割、コンテキストマップ、Aggregate 設計
-- モデル改善: 既存モデルの再構築兆候を検知した際の設計方針検証
-- 判断の裏付け: 複数の設計選択肢がある場合の根拠確認
-
-**質問の流れ（初期設計の場合）:**
-1. Bounded Context の分割案（機能一覧を添えて）
-2. 各コンテキスト内の Aggregate 境界（エンティティ一覧と関係を添えて）
-3. ドメインイベントと状態遷移の型設計
-4. Repository 層の実装パターン（言語・フレームワーク固有）
-
-### Phase 2: モデリング後 — 別視点からの設計レビュー
-
-ドメインモデルが固まった後、実装に移る前に別の視座から設計を揺さぶる。DDD の枠内では見えない改善点（並行性、イベント配信、読み書き分離）を発見するためのフェーズ。
-
-**ノートブック ID**: `17a88c4a-8e2d-46b8-9cda-ffd6a7f84519`（CQRS/ES）
-
-```bash
-notebooklm ask "質問内容" --notebook 17a88c4a-8e2d-46b8-9cda-ffd6a7f84519
-```
-
-**いつ使うか:**
-- ドメインイベントを使う設計が確定した後（イベント配信の信頼性・パターン選定）
-- 1つの集約に複数の非同期プロセスが書き込む構造が見えた時（ロック競合の予兆）
-- 読み取りと書き込みのアクセスパターンが大きく異なる時
-
-**問いの例:**
-- 「この集約設計で、AI の非同期処理3つが並行更新する。楽観ロック競合を避ける軽量なアプローチは？」
-- 「ドメインイベントを ApplicationEventPublisher で発行しているが、信頼性の問題はないか？」
-- 「この Read/Write パターンに対して CQRS の Read Model 分離は妥当か？Event Sourcing まで必要か？」
+ノートブック ID とフェーズ別の使い方は `reference.md` の「NotebookLM ノートブック一覧」を参照。
 
 ### 共通ルール
 

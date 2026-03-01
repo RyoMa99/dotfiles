@@ -1,6 +1,6 @@
 ---
 name: tbls-doc
-description: "Use when generating database schema documentation via tbls"
+description: "Use when generating database schema documentation, ER diagrams, or table definitions via tbls. Also use when the user mentions 'DB docs', 'schema docs', 'ER diagram', or 'table definitions'"
 allowed-tools: ["Bash", "AskUserQuestion", "Read"]
 ---
 

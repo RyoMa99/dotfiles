@@ -1,6 +1,6 @@
 ---
 name: session-retrospective
-description: "Use when ending a development session to capture learnings across 6 perspectives"
+description: "Use when ending a development session to capture learnings across 7 perspectives"
 user-invocable: true
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestion"]
 ---
@@ -9,7 +9,7 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestio
 
 # Session Retrospective
 
-セッションの振り返りを6つの観点で構造的に行い、得られた知見を適切な保存先に振り分ける。
+セッションの振り返りを7つの観点で構造的に行い、得られた知見を適切な保存先に振り分ける。
 
 ## When to Use
 
@@ -17,7 +17,7 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestio
 - `/session-retrospective` コマンド
 - 「振り返って」「まとめて」と依頼
 
-## 6つの観点
+## 7つの観点
 
 | # | 観点 | 検出対象 | 保存先 |
 |---|------|---------|--------|
