@@ -13,6 +13,7 @@
     "OTEL_RESOURCE_ATTRIBUTES": "OVERRIDE_IN_SETTINGS_LOCAL_JSON"
   },
   "permissions": {
+    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(git:*)",
       "Bash(gh:*)",

@@ -1,0 +1,52 @@
+#!/bin/bash
+# Anthropic ステータスを取得し、tmux status-right 向けに短い文字列を出力する。
+# キャッシュにより API 呼び出しは CACHE_TTL 秒に1回に抑える。
+
+CACHE_FILE="/tmp/tmux-anthropic-status.cache"
+CACHE_TTL=120  # 2分
+
+# キャッシュが新鮮ならそのまま出力
+if [[ -f "$CACHE_FILE" ]]; then
+  age=$(( $(date +%s) - $(stat -f %m "$CACHE_FILE") ))
+  if (( age < CACHE_TTL )); then
+    cat "$CACHE_FILE"
+    exit 0
+  fi
+fi
+
+CC_ID="yyzkbfz2thpt"          # Claude Code
+API_ID="k8w3r06qmzrp"         # Claude API (api.anthropic.com)
+
+status_emoji() {
+  case "$1" in
+    operational)           echo "🟢" ;;
+    degraded_performance)  echo "🟡" ;;
+    partial_outage)        echo "🟠" ;;
+    major_outage)          echo "🔴" ;;
+    *)                     echo "⚪" ;;
+  esac
+}
+
+fetch_and_format() {
+  components=$(xh --ignore-stdin --follow GET https://status.anthropic.com/api/v2/components.json 2>/dev/null)
+  incidents=$(xh --ignore-stdin --follow GET https://status.anthropic.com/api/v2/incidents/unresolved.json 2>/dev/null)
+
+  cc_status=$(echo "$components" | jq -r --arg id "$CC_ID" '.components[] | select(.id == $id) | .status // empty' 2>/dev/null)
+  api_status=$(echo "$components" | jq -r --arg id "$API_ID" '.components[] | select(.id == $id) | .status // empty' 2>/dev/null)
+
+  cc_emoji=$(status_emoji "$cc_status")
+  api_emoji=$(status_emoji "$api_status")
+
+  # CC/API に影響するインシデントの有無
+  has_incident=$(echo "$incidents" | jq -r --arg cc "$CC_ID" --arg api "$API_ID" \
+    '[.incidents[] | select(.components[]?.id == $cc or .components[]?.id == $api)] | length' 2>/dev/null)
+
+  incident_icon=""
+  [[ "$has_incident" -gt 0 ]] 2>/dev/null && incident_icon=" ⚠️"
+
+  echo "CC:${cc_emoji} API:${api_emoji}${incident_icon}"
+}
+
+result=$(fetch_and_format)
+echo -n "$result" > "$CACHE_FILE"
+echo -n "$result"

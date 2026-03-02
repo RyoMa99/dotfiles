@@ -180,6 +180,9 @@ diff <(ls ~/.claude/skills/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/skill
 
 # ルール
 diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/ | sort) || true
+
+# ローカルスクリプト
+diff <(ls ~/.local/bin/ | sort) <(ls ~/.local/share/chezmoi/dot_local/bin/ | sed 's/^executable_//' | sort) || true
 ```
 
 ### Step 3: ファイル内容の比較
@@ -194,6 +197,11 @@ diff \
 diff \
   <(cd ~/.claude/rules && find . -name "*.md" -exec md5 {} \; | sort) \
   <(cd ~/.local/share/chezmoi/dot_claude/rules && find . -name "*.md" -exec md5 {} \; | sort) || true
+
+# ローカルスクリプト
+diff \
+  <(cd ~/.local/bin && find . -type f -exec md5 {} \; | sort) \
+  <(cd ~/.local/share/chezmoi/dot_local/bin && find . -type f -exec md5 {} \; | sed 's/executable_//' | sort) || true
 ```
 
 ### Step 4: 外部管理スキルの確認
@@ -226,6 +234,7 @@ cd ~/.local/share/chezmoi && git status && git log --oneline -5
 ### 同期済み
 - skills: N/N
 - rules: N/N
+- scripts (.local/bin): N/N
 
 ### 推奨アクション
 - `/chezmoi-sync push` で変更を反映
