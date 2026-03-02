@@ -56,7 +56,22 @@ chezmoi diff
 chezmoi apply
 ```
 
-### Step 4: 孤立ファイル検出
+### Step 4: ツールインストール（mise）
+
+Step 1 の pull で `~/.config/mise/config.toml` に変更があった場合、未インストールのツールをインストールする。
+
+```bash
+# mise config に変更があったか確認（pull 前後の diff）
+cd ~/.local/share/chezmoi && git diff HEAD~1..HEAD -- dot_config/mise/config.toml
+```
+
+差分がある場合：
+
+```bash
+mise install
+```
+
+### Step 5: 孤立ファイル検出
 
 リモートで削除されたがローカルに残っているファイルを検出する。
 
