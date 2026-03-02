@@ -105,7 +105,7 @@ chezmoi が管理対象としている各ディレクトリについて、ロー
 
 ```bash
 # スキル（.chezmoiexternal.toml で外部管理されているものは除外）
-diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep -oP '(?<=skills/)\w+' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null) | sort -u) || true
+diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null | grep 'skills/' | sed 's/.*skills\///' | tr -d '"]') | sort -u) || true
 
 # ルール
 diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/ | sort) || true
