@@ -92,9 +92,11 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 
 ---
 
-### Step 3: レビュー
+### Step 3: レビュー + コード簡素化
 
-全タスク完了後、`/review` スキルを実行する。
+全タスク完了後、`/review` → `/simplify` の順で実行する。
+
+#### 3-1. `/review`（読み取り専用）
 
 `/review` は以下を一括実行する:
 1. 変更ファイルの特定（git diff）
@@ -103,9 +105,29 @@ slug はケバブケースで簡潔に。計画の内容から適切な prefix �
 4. Security Review（常に実行）
 
 Critical/Major の指摘があればユーザーに報告し、修正するか確認する。
-Critical 指摘がある場合は後続ステップをブロックする。
+Critical 指摘がある場合は `/simplify` に進まず、修正を先に行う。
 
-> レビューで Critical/Major 指摘があり修正した場合、Step 4 の検証を再実行する。
+#### 3-2. コミット（push しない）
+
+`/review` の指摘が解消された後、`/simplify` に入る前に現時点の変更をコミットする。
+`/simplify` の自動修正が意図しない結果になった場合に `git reset` で戻せるようにするため。
+
+```bash
+git add <変更ファイル>
+git commit -m "feat: [タスク内容の要約]"
+# push はしない
+```
+
+#### 3-3. `/simplify`（自動修正あり）
+
+コミット後、`/simplify` を実行する。
+
+`/simplify` は3つの並列エージェントで変更差分を分析し、問題を自動修正する:
+1. Code Reuse Review（既存ユーティリティとの重複検出）
+2. Code Quality Review（冗長な状態、コピペ、抽象化漏れ等）
+3. Efficiency Review（不要な計算、並列化の見落とし、メモリリーク等）
+
+> `/review` で修正 → `/simplify` で修正 → Step 4 で検証、の流れにより安全に品質を担保する。
 
 ---
 
@@ -146,6 +168,7 @@ lsof -i :8787 -i :8788 -i :5173 -i :3000 -P 2>/dev/null | grep LISTEN
 | naming-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
 | ui-check | ✅ 問題なし / ⏭️ スキップ（UI変更なし） |
 | security-review | ✅ 問題なし / ⚠️ N件の指摘（修正済み） |
+| simplify | ✅ クリーン / ⚠️ N件修正済み |
 | typecheck | ✅ |
 | lint | ✅ |
 | test | ✅ N tests passed |
@@ -182,6 +205,8 @@ gh pr create --title "<タイトル>" --body "<本文>"
 
 ## 注意事項
 
-- Step 3 で Critical 指摘があり修正した場合、Step 4 を再実行する
+- Step 3 で `/review` の Critical 指摘があり修正した場合、`/simplify` から再開する
+- Step 3 で `/simplify` がコードを修正した場合、Step 4 の検証で安全性を確認する
 - CLAUDE.md にプロジェクト固有の検証手順がある場合はそれも実行する
-- レビューはレビュー+検証のみ。コード編集は各レビュースキルの指摘に基づいてユーザー承認後に行う
+- `/review` は読み取り専用（指摘のみ）。コード編集はユーザー承認後に行う
+- `/simplify` は自動修正あり。修正結果は Step 4 の typecheck/lint/test で検証される
