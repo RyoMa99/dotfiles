@@ -97,7 +97,29 @@ find ~/.claude -type f -name "*.md" | sort
 chezmoi diff
 ```
 
-差分があるファイルを一覧表示する。差分がなければ終了。
+差分があるファイルを一覧表示する。
+
+### Step 1.5: 未管理ファイルの検出
+
+chezmoi が管理対象としている各ディレクトリについて、ローカルに存在するが chezmoi 未追跡のファイルを検出する。
+
+```bash
+# スキル（.chezmoiexternal.toml で外部管理されているものは除外）
+diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep -oP '(?<=skills/)\w+' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null) | sort -u) || true
+
+# ルール
+diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/ | sort) || true
+
+# ローカルスクリプト
+diff <(ls ~/.local/bin/ | sort) <(ls ~/.local/share/chezmoi/dot_local/bin/ | sed 's/^executable_//' | sort) || true
+
+# nvim プラグイン設定
+diff <(ls ~/.config/nvim/lua/plugins/ | sort) <(ls ~/.local/share/chezmoi/dot_config/nvim/lua/plugins/ | sort) || true
+```
+
+未管理ファイルがあればユーザーに `chezmoi add` するか確認する。
+Step 1 の `chezmoi diff` に差分がなくても、未管理ファイルがあれば続行する。
+両方とも差分なし・未管理なしの場合のみ終了。
 
 ### Step 2: 変更ファイルの反映
 
@@ -183,6 +205,9 @@ diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/
 
 # ローカルスクリプト
 diff <(ls ~/.local/bin/ | sort) <(ls ~/.local/share/chezmoi/dot_local/bin/ | sed 's/^executable_//' | sort) || true
+
+# nvim プラグイン設定
+diff <(ls ~/.config/nvim/lua/plugins/ | sort) <(ls ~/.local/share/chezmoi/dot_config/nvim/lua/plugins/ | sort) || true
 ```
 
 ### Step 3: ファイル内容の比較
@@ -235,6 +260,7 @@ cd ~/.local/share/chezmoi && git status && git log --oneline -5
 - skills: N/N
 - rules: N/N
 - scripts (.local/bin): N/N
+- nvim plugins: N/N
 
 ### 推奨アクション
 - `/chezmoi-sync push` で変更を反映
