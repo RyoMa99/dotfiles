@@ -21,7 +21,6 @@
 
 # Claude Code: external skills (managed by upstream repos)
 .claude/skills/notebooklm
-.claude/skills/skill-creator
 
 # tmuxinator: machine-local config
 .config/tmuxinator/work.yml
