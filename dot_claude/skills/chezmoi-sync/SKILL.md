@@ -121,11 +121,33 @@ chezmoi add <ファイルパス>
 chezmoi forget <ファイルパス>
 ```
 
-### Step 4: Brewfile の更新（該当時のみ）
+### Step 4: Brewfile の差分検出
 
-`brew install` / `brew uninstall` を実行した場合：
-1. `~/.local/share/chezmoi/dot_Brewfile` に `brew "パッケージ名"` や `cask "アプリ名"` を追加・削除
-2. 必要なら `tap "タップ名"` も追加
+Brewfile と実際の brew 状態を比較し、差分があればユーザーに提示する。
+
+```bash
+# Brewfile に記載されているが未インストールのパッケージ
+brew bundle check --file=~/.Brewfile --verbose 2>&1 | grep "needs to be installed"
+
+# インストール済みだが Brewfile に未記載のパッケージ（追加候補）
+brew bundle cleanup --file=~/.Brewfile 2>&1
+```
+
+#### 差分がある場合
+
+検出結果をユーザーに表示し、対応を `AskUserQuestion` で確認する：
+
+| 差分の種類 | 選択肢 |
+|-----------|--------|
+| **未記載のパッケージ** | Brewfile に追加 / 無視（意図的に管理外） |
+| **未インストールのパッケージ** | `brew install` する / Brewfile から削除 |
+
+Brewfile に追加する場合：
+1. `~/.local/share/chezmoi/dot_Brewfile` に `brew "パッケージ名"` / `cask "アプリ名"` を追加
+2. サードパーティ tap が必要なら `brew info <パッケージ名>` で tap を特定し、`tap "タップ名"` も追加
+3. `chezmoi apply ~/.Brewfile` でローカルにも反映
+
+差分がなければそのまま Step 5 に進む。
 
 ### Step 5: コミット & プッシュ
 
