@@ -6,6 +6,28 @@ chezmoi で管理する dotfiles リポジトリ。
 
 ```bash
 chezmoi init <repo>
+```
+
+### テンプレート変数の設定
+
+`~/.config/chezmoi/chezmoi.toml` にマシン固有の値を設定する：
+
+```toml
+[data]
+  tmuxProject = "work"
+  gitUserName = "your-name"
+  gitUserEmail = "your-email@example.com"
+```
+
+| 変数 | 説明 | 用途 |
+|------|------|------|
+| `tmuxProject` | tmux のデフォルトプロジェクト名 | tmux 設定 |
+| `gitUserName` | Git のユーザー名 | `.gitconfig` |
+| `gitUserEmail` | Git のメールアドレス | `.gitconfig` |
+
+設定後に適用：
+
+```bash
 chezmoi apply
 ```
 
