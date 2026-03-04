@@ -1,0 +1,16 @@
+#!/bin/bash
+# Install agent skills via npx skills add
+# hash: {{ include "dot_claude/skills/.agent-skills-list" | sha256sum }}
+
+set -euo pipefail
+
+if ! command -v npx &>/dev/null; then
+  echo "skip: npx not found"
+  exit 0
+fi
+
+while IFS= read -r line; do
+  [[ -z "$line" || "$line" == \#* ]] && continue
+  echo "install: $line"
+  npx --yes skills add "$line" --global --all --yes
+done < "{{ .chezmoi.sourceDir }}/dot_claude/skills/.agent-skills-list"

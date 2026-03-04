@@ -1,0 +1,3 @@
+# npx skills add で管理するスキルパッケージ一覧
+# 行を追加すると次回 chezmoi apply 時に自動インストールされる
+vercel-labs/agent-skills
