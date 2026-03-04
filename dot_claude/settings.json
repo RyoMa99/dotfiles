@@ -13,7 +13,6 @@
     "OTEL_RESOURCE_ATTRIBUTES": "OVERRIDE_IN_SETTINGS_LOCAL_JSON"
   },
   "permissions": {
-    "defaultMode": "acceptEdits",
     "allow": [
       "Bash(git:*)",
       "Bash(gh:*)",
@@ -110,7 +109,11 @@
       "mcp__plugin_serena_serena__activate_project",
       "mcp__plugin_serena_serena__read_file"
     ],
-    "deny": ["Bash(rm -rf:*)", "Bash(rm --recursive --force:*)"]
+    "deny": [
+      "Bash(rm -rf:*)",
+      "Bash(rm --recursive --force:*)"
+    ],
+    "defaultMode": "acceptEdits"
   },
   "hooks": {
     "PostToolUse": [
@@ -227,8 +230,9 @@
     "figma@claude-plugins-official": true,
     "superpowers@claude-plugins-official": true,
     "sentry@claude-plugins-official": true,
-    "claude-md-management@claude-plugins-official": true
+    "claude-md-management@claude-plugins-official": true,
+    "slack@claude-plugins-official": true
   },
-  "language": "Japanese",
-  "outputStyle": "Learning"
+  "outputStyle": "Learning",
+  "language": "Japanese"
 }
