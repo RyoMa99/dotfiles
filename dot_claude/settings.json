@@ -140,6 +140,15 @@
             "command": "$HOME/.claude/hooks/go-lint-fix.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/terraform-fmt.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
