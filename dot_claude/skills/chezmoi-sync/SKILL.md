@@ -104,8 +104,8 @@ chezmoi diff
 chezmoi が管理対象としている各ディレクトリについて、ローカルに存在するが chezmoi 未追跡のファイルを検出する。
 
 ```bash
-# スキル（.chezmoiexternal.toml で外部管理されているものは除外）
-diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null | grep 'skills/' | sed 's/.*skills\///' | tr -d '"]') | sort -u) || true
+# スキル（.chezmoiexternal.toml で外部管理 + ~/.agents/skills/ 由来の symlink を除外）
+diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null | grep 'skills/' | sed 's/.*skills\///' | tr -d '"]') <(ls ~/.agents/skills/ 2>/dev/null) | sort -u) || true
 
 # ルール
 diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/ | sort) || true
@@ -155,6 +155,7 @@ PKGS=$(brew bundle check --file=~/.Brewfile --verbose 2>&1 \
   | grep "needs to be installed" \
   | sed 's/ needs to be installed or updated\.//' \
   | sed 's/^→ Cask //' \
+  | sed 's/^→ Formula //' \
   | sed 's/^→ //')
 
 # 未インストールと outdated を分離
@@ -220,8 +221,8 @@ chezmoi diff
 ### Step 2: ディレクトリ構造の比較
 
 ```bash
-# スキル
-diff <(ls ~/.claude/skills/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) || true
+# スキル（.chezmoiexternal.toml で外部管理 + ~/.agents/skills/ 由来の symlink を除外）
+diff <(ls ~/.claude/skills/ | sort) <(cat <(ls ~/.local/share/chezmoi/dot_claude/skills/ | sort) <(grep '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml 2>/dev/null | grep 'skills/' | sed 's/.*skills\///' | tr -d '"]') <(ls ~/.agents/skills/ 2>/dev/null) | sort -u) || true
 
 # ルール
 diff <(ls ~/.claude/rules/ | sort) <(ls ~/.local/share/chezmoi/dot_claude/rules/ | sort) || true
