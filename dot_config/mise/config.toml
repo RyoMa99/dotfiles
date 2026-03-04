@@ -1,4 +1,6 @@
 [tools]
+actionlint = "latest"
+go = "1.26.0"
 golangci-lint = "latest"
 "pipx:neovim-remote" = "latest"
 "npm:ccusage" = "latest"
