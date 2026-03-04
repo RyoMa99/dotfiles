@@ -62,7 +62,7 @@ return {
           analyses = {
             unusedparams = true,
           },
-          staticcheck = true,
+          staticcheck = false, -- golangci-lint側で実行
           gofumpt = true,
         },
       },

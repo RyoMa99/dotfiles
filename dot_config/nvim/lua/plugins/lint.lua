@@ -5,12 +5,13 @@ return {
     local lint = require("lint")
     local nvim_dir = vim.fn.expand("~/.config/nvim")
 
-    -- プロジェクトルートの検出
+    -- プロジェクトルートの検出（ファイル・ディレクトリ両対応）
     local function find_project_root(patterns)
       local path = vim.fn.expand("%:p:h")
       while path ~= "/" do
         for _, pattern in ipairs(patterns) do
-          if vim.fn.filereadable(path .. "/" .. pattern) == 1 then
+          local target = path .. "/" .. pattern
+          if vim.fn.filereadable(target) == 1 or vim.fn.isdirectory(target) == 1 then
             return path
           end
         end
@@ -43,17 +44,43 @@ return {
       return find_project_root({ ".prettierrc", ".prettierrc.js", ".prettierrc.cjs", ".prettierrc.json", ".prettierrc.yml", "prettier.config.js", "prettier.config.cjs" }) ~= nil
     end
 
-    local function has_phpstan()
-      return find_project_root({ "phpstan.neon", "phpstan.neon.dist", "phpstan.dist.neon" }) ~= nil
+    -- .gitルートから下方向にファイルを探す（モノレポ対応）
+    local function find_downward_from_git(match_fn)
+      local git_root = find_project_root({ ".git" })
+      if not git_root then return nil end
+      local results = vim.fs.find(match_fn, { path = git_root, type = "file", limit = 1 })
+      return results[1]
+    end
+
+    local function find_golangci_lint_config()
+      return find_downward_from_git(function(name)
+        return name:match("^%.golangci%.") ~= nil
+      end)
+    end
+
+    local function find_phpstan_config()
+      return find_downward_from_git(function(name)
+        return name == "phpstan.neon" or name == "phpstan.neon.dist" or name == "phpstan.dist.neon"
+      end)
     end
 
     -- プロジェクトのvendor/binからPHPバイナリを探す
     local function find_php_bin(name)
+      -- 上方向に最寄りのcomposer.jsonを探す
       local project_root = find_project_root({ "composer.json" })
       if project_root then
         local vendor_bin = project_root .. "/vendor/bin/" .. name
         if vim.fn.executable(vendor_bin) == 1 then
           return vendor_bin, project_root
+        end
+      end
+      -- 見つからない場合、.gitルートから下方向に探す
+      local composer_path = find_downward_from_git(function(n) return n == "composer.json" end)
+      if composer_path then
+        local composer_dir = vim.fn.fnamemodify(composer_path, ":h")
+        local vendor_bin = composer_dir .. "/vendor/bin/" .. name
+        if vim.fn.executable(vendor_bin) == 1 then
+          return vendor_bin, composer_dir
         end
       end
       return nil, nil
@@ -198,6 +225,46 @@ return {
       end,
     }
 
+    -- golangci-lint のカスタム定義（v2）
+    lint.linters.golangci_lint = {
+      cmd = "golangci-lint",
+      stdin = false,
+      args = { "run", "--output.json.path=stdout", "--show-stats=false" },
+      stream = "stdout",
+      ignore_exitcode = true,
+      append_fname = false,
+      parser = function(output, bufnr)
+        if output == "" then
+          return {}
+        end
+        local ok, decoded = pcall(vim.json.decode, output)
+        if not ok then
+          return {}
+        end
+        local diagnostics = {}
+        local bufname = vim.api.nvim_buf_get_name(bufnr)
+        local cwd = lint.linters.golangci_lint.cwd or vim.fn.getcwd()
+        for _, issue in ipairs(decoded.Issues or {}) do
+          local filename = issue.Pos and issue.Pos.Filename or ""
+          local abs_filename = vim.fn.fnamemodify(cwd .. "/" .. filename, ":p")
+          if bufname == abs_filename then
+            local severity = vim.diagnostic.severity.WARN
+            if issue.Severity == "error" then
+              severity = vim.diagnostic.severity.ERROR
+            end
+            table.insert(diagnostics, {
+              lnum = (issue.Pos and issue.Pos.Line or 1) - 1,
+              col = (issue.Pos and issue.Pos.Column or 1) - 1,
+              severity = severity,
+              message = issue.Text,
+              source = "golangci-lint(" .. (issue.FromLinter or "") .. ")",
+            })
+          end
+        end
+        return diagnostics
+      end,
+    }
+
     lint.linters_by_ft = {
       markdown = { "textlint" },
     }
@@ -220,8 +287,21 @@ return {
               lint.try_lint({ "eslint_nvim" })
             end
           end
+        elseif ft == "go" then
+          local config_path = find_golangci_lint_config()
+          if config_path and vim.fn.executable("golangci-lint") == 1 then
+            local module_root = find_project_root({ "go.mod" })
+            if module_root then
+              lint.linters.golangci_lint.cwd = module_root
+              lint.linters.golangci_lint.args = {
+                "run", "--output.json.path=stdout", "--show-stats=false", "--config", config_path,
+              }
+              lint.try_lint({ "golangci_lint" })
+            end
+          end
         elseif ft == "php" then
-          if has_phpstan() then
+          local config_path = find_phpstan_config()
+          if config_path then
             local bin, project_root = find_php_bin("phpstan")
             if bin and project_root then
               lint.linters.phpstan.cmd = bin
