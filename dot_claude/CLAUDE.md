@@ -4,7 +4,7 @@
 
 ### 設計・計画（Plan モード）
 
-@~/.claude/rules/plan-mode.md に従う（意図の明確化 → コードベース調査 → 計画策定）
+`plan-mode.md` に従う（意図の明確化 → コードベース調査 → 計画策定）
 
 ### 実装・完了
 
@@ -12,15 +12,28 @@
 
 ## コード品質
 
-- @~/.claude/rules/robust-code.md - 堅牢なコードの設計原則（常時参照）
-- @~/.claude/rules/layered-architecture.md - 三層＋ドメインモデルの設計原則（常時参照）
-- テストの原則 → `/TDD` スキル内の `testing-principles.md` を参照
-- セキュリティルール → `/review` スキル内の `security-checklist.md` を参照
+### 常時参照（`~/.claude/rules/` から自動ロード）
+
+- `robust-code.md` - 堅牢なコードの設計原則
+- `layered-architecture.md` - 三層＋ドメインモデルの設計原則
+
+### スキル起動時に参照
+
+- テストの原則 → `/TDD` スキル内の `testing-principles.md`
+- セキュリティルール → `/review` スキル内の `security-checklist.md`
 
 ## コミット規約
 
 - コミットメッセージは日本語で書く
 - 末尾に `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` を付ける
+- コミットメッセージは `git commit -F -` で stdin から渡す（サブシェル `$(cat <<'EOF' ...)` を避ける）:
+  ```bash
+  git commit -F - <<'EOF'
+  feat: 機能追加
+
+  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
+  EOF
+  ```
 
 ## ツール
 
@@ -29,7 +42,11 @@
   1. **Playwright CLI**（認証不要時）- Bash 1回で完結、コンテキスト最小
   2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
   3. **chrome-devtools MCP**（Claude in Chrome が使えない時のフォールバック）
-- Playwright CLI は `$(mise which playwright)` でパスを解決して実行する
+- mise で管理するツール（playwright 等）は直接コマンド名で実行する（`.zshenv` で shims が PATH に設定済み）
+- **サブシェル `$(...)` を避ける**: コマンド出力を引数に埋め込む `$(...)` より、以下を優先する:
+  - stdin 経由で渡す（`-F -` + heredoc、パイプ）
+  - `mise exec --` でラップする
+  - Bash ツールを複数回に分けて実行し、前回の出力を次の引数に使う
 
 ## コミュニケーション
 
