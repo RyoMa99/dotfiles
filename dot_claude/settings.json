@@ -131,6 +131,15 @@
             "command": "$HOME/.claude/hooks/biome-fix.sh"
           }
         ]
+      },
+      {
+        "matcher": "Edit|Write",
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/go-lint-fix.sh"
+          }
+        ]
       }
     ],
     "PreToolUse": [
