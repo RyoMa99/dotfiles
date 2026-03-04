@@ -58,11 +58,11 @@ chezmoi apply
 
 ### Step 4: ツールインストール（mise）
 
-Step 1 の pull で `~/.config/mise/config.toml` に変更があった場合、未インストールのツールをインストールする。
+Step 1 の pull で `~/.config/mise/config.toml` または `~/.tool-versions` に変更があった場合、未インストールのツールをインストールする。
 
 ```bash
-# mise config に変更があったか確認（pull 前後の diff）
-git -C ~/.local/share/chezmoi diff HEAD~1..HEAD -- dot_config/mise/config.toml
+# mise 関連ファイルに変更があったか確認（pull 前後の diff）
+git -C ~/.local/share/chezmoi diff HEAD~1..HEAD -- dot_config/mise/config.toml dot_tool-versions
 ```
 
 差分がある場合：
@@ -71,7 +71,24 @@ git -C ~/.local/share/chezmoi diff HEAD~1..HEAD -- dot_config/mise/config.toml
 mise install
 ```
 
-### Step 5: 孤立ファイル検出
+### Step 5: パッケージインストール（Brewfile）
+
+Step 1 の pull で `~/.Brewfile` に変更があった場合、Brewfile を元にパッケージをインストールする。
+
+```bash
+# Brewfile に変更があったか確認（pull 前後の diff）
+git -C ~/.local/share/chezmoi diff HEAD~1..HEAD -- dot_Brewfile
+```
+
+差分がない場合はスキップ。差分がある場合：
+
+```bash
+brew bundle install --file=~/.Brewfile
+```
+
+インストール結果を報告する。`brew bundle install` は未インストールのパッケージのみをインストールし、既存パッケージのアップグレードは行わない。
+
+### Step 6: 孤立ファイル検出
 
 リモートで削除されたがローカルに残っているファイルを検出する。
 
