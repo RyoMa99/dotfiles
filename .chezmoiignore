@@ -19,8 +19,9 @@
 .claude/telemetry
 .claude/todos
 
-# Claude Code: external skills (managed by upstream repos)
+# Claude Code: external skills (managed by upstream repos or npx skills add)
 .claude/skills/notebooklm
+.claude/skills/electron
 
 # tmuxinator: machine-local config
 .config/tmuxinator/work.yml
