@@ -19,9 +19,15 @@
 .claude/telemetry
 .claude/todos
 
-# Claude Code: external skills (managed by upstream repos or npx skills add)
+# Claude Code: external skills (managed by .chezmoiexternal.toml)
 .claude/skills/notebooklm
-.claude/skills/electron
+
+# Claude Code: agent skills (managed by npx skills add via run_once script)
+{{ if stat (joinPath .chezmoi.homeDir ".agents/skills") -}}
+{{ range (output "ls" (joinPath .chezmoi.homeDir ".agents/skills") | trim | splitList "\n") -}}
+.claude/skills/{{ . }}
+{{ end -}}
+{{ end -}}
 
 # tmuxinator: machine-local config
 .config/tmuxinator/work.yml
