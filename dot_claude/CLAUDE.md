@@ -53,7 +53,7 @@
   2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
   3. **chrome-devtools MCP**（Claude in Chrome が使えない時のフォールバック）
 - mise で管理するツール（playwright 等）は直接コマンド名で実行する（`.zshenv` で shims が PATH に設定済み）
-- **`"-..."` のクォートを避ける**: Bash コマンドで `-` 始まりの文字列をクォートすると「Command contains quoted characters in flag names」警告が出る。`echo "---"` → `echo ---` のようにクォート不要な文字列はクォートしない
+- IMPORTANT: **Bash コマンドでダッシュ文字列をクォートしない**。`echo "---"` や `echo "----"` のように `-` のみで構成される文字列をクォートすると「Command contains quoted characters in flag names」警告が出る。**必ず** `echo ---` のようにクォートなしで書く。区切り線を出力したい場合は `printf '%s\n' ---` も可。この規則はすべての `-` 始まりリテラル（`"--foo"` 等）にも適用する
 - **サブシェル `$(...)` を避ける**: コマンド出力を引数に埋め込む `$(...)` より、以下を優先する:
   - stdin 経由で渡す（`-F -` + heredoc、パイプ）
   - `mise exec --` でラップする
