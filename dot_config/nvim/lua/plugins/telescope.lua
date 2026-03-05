@@ -24,7 +24,7 @@ return {
           if dir == "." then
             return tail
           end
-          return tail .. "  " .. dir
+          return tail .. " │ " .. dir
         end,
         layout_strategy = "horizontal",
         layout_config = {
