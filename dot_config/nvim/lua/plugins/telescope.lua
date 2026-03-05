@@ -17,6 +17,15 @@ return {
     local telescope = require("telescope")
     telescope.setup({
       defaults = {
+        borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+        path_display = function(_, path)
+          local tail = vim.fn.fnamemodify(path, ":t")
+          local dir = vim.fn.fnamemodify(path, ":h")
+          if dir == "." then
+            return tail
+          end
+          return tail .. "  " .. dir
+        end,
         layout_strategy = "horizontal",
         layout_config = {
           horizontal = {
@@ -24,9 +33,32 @@ return {
           },
         },
         file_ignore_patterns = {
-          "node_modules",
-          ".git/",
+          "%.git/",
+          "node_modules/",
+          "vendor/",
+          "%.bundle/",
+          "__pycache__/",
+          "%.venv/",
+          "venv/",
+          "%.eggs/",
+          "%.egg%-info/",
+          "target/",       -- Rust/Java
+          "build/",        -- Gradle/CMake
+          "dist/",         -- JS bundler output
+          "%.gradle/",
+          "%.m2/",
+          "Pods/",         -- CocoaPods
+          "%.DS_Store",
           "%.lock",
+        },
+      },
+      pickers = {
+        find_files = {
+          hidden = true,
+          no_ignore = true,
+        },
+        live_grep = {
+          additional_args = { "--no-ignore", "--hidden" },
         },
       },
     })
