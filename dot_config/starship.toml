@@ -8,6 +8,7 @@ $git_state\
 """
 
 right_format = """
+$aws\
 $terraform\
 $golang\
 $nodejs\
@@ -55,26 +56,30 @@ style = 'fg:blue'
 [git_state]
 format = '[\[$state($progress_current/$progress_total)\]](fg:yellow)'
 
+[aws]
+format = '[$symbol $profile(\($region\))](fg:yellow)'
+symbol = ''
+
 [terraform]
 format = '[$symbol $version](fg:purple)'
 symbol = '󱁢'
 
 [golang]
 format = '[$symbol $version](fg:cyan)'
-symbol = ''
+symbol = ''
 
 [nodejs]
 format = '[$symbol $version](fg:green)'
-symbol = ''
+symbol = ''
 
 [python]
 format = '[$symbol $version](fg:yellow)'
-symbol = ''
+symbol = ''
 
 [ruby]
 format = '[$symbol $version](fg:red)'
-symbol = ''
+symbol = ''
 
 [php]
 format = '[$symbol $version](fg:purple)'
-symbol = ''
+symbol = ''
