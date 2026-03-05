@@ -16,48 +16,13 @@
 
 - `robust-code.md` - 堅牢なコードの設計原則
 - `layered-architecture.md` - 三層＋ドメインモデルの設計原則
+- `tools.md` - ツール選択・設定・既知の注意点
+- `commit-conventions.md` - コミットメッセージ規約
 
 ### スキル起動時に参照
 
 - テストの原則 → `/TDD` スキル内の `testing-principles.md`
 - セキュリティルール → `/review` スキル内の `security-checklist.md`
-
-## コミット規約
-
-- コミットメッセージは日本語で書く
-- 末尾に `Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>` を付ける
-- コミットメッセージは `git commit -F -` で stdin から渡す（サブシェル `$(...)` は heredoc のネストでパース不具合を起こすため避ける）:
-  ```bash
-  # GOOD: -F - で stdin から渡す
-  git commit -F - <<'EOF'
-  feat: 機能追加
-
-  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-  EOF
-  ```
-  ```bash
-  # BAD: サブシェル $(cat <<'EOF' ...) を使わない
-  git commit -m "$(cat <<'EOF'
-  feat: 機能追加
-
-  Co-Authored-By: Claude Opus 4.6 <noreply@anthropic.com>
-  EOF
-  )"
-  ```
-
-## ツール
-
-- HTTP リクエストは `curl` ではなく `xh` を使用
-- ブラウザ操作の優先順位:
-  1. **Playwright CLI**（認証不要時）- Bash 1回で完結、コンテキスト最小
-  2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
-  3. **chrome-devtools MCP**（Claude in Chrome が使えない時のフォールバック）
-- mise で管理するツール（playwright 等）は直接コマンド名で実行する（`.zshenv` で shims が PATH に設定済み）
-- Bash コマンドでダッシュ文字列をクォートしない。`echo "---"` のように `-` のみの文字列をクォートすると「Command contains quoted characters in flag names」警告が出る。`echo ---` や `printf '%s\n' ---` のようにクォートなしで書く。`"--foo"` 等の `-` 始まりリテラルも同様
-- サブシェル `$(...)` を避ける（heredoc ネスト時のパースエラー防止）。以下を優先する:
-  - stdin 経由で渡す（`-F -` + heredoc、パイプ）
-  - `mise exec --` でラップする
-  - Bash ツールを複数回に分けて実行し、前回の出力を次の引数に使う
 
 ## コミュニケーション
 
