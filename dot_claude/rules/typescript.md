@@ -11,7 +11,7 @@ globs: ["*.ts", "*.tsx"]
 
 ## Branded Type は unique symbol 方式
 
-IMPORTANT: 文字列キー `{ __brand__: "..." }` は使わない（補完汚染・型安全性の穴）。
+文字列キー `{ __brand__: "..." }` は使わない（補完汚染・型安全性の穴があるため）。
 
 ```typescript
 const userIdBrand = Symbol();
@@ -40,7 +40,7 @@ function EmojiIcon(symbol: string): EmojiIcon { return { kind: "emoji", symbol }
 
 ## assertion function を使う
 
-IMPORTANT: 前提条件の表明には assertion function（`asserts value is T`）を使う。
+前提条件の表明には assertion function（`asserts value is T`）を使う。
 if ガードで早期 return するより assertion function を優先する。型の絞り込みが後続コードに伝播し、呼び出し元の型安全性が向上する。
 
 ```typescript
