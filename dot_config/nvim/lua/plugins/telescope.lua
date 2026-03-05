@@ -18,6 +18,14 @@ return {
     telescope.setup({
       defaults = {
         borderchars = { "─", "│", "─", "│", "┌", "┐", "┘", "└" },
+        path_display = function(_, path)
+          local tail = vim.fn.fnamemodify(path, ":t")
+          local dir = vim.fn.fnamemodify(path, ":h")
+          if dir == "." then
+            return tail
+          end
+          return tail .. "  " .. dir
+        end,
         layout_strategy = "horizontal",
         layout_config = {
           horizontal = {
