@@ -77,6 +77,108 @@ function getPrice(type: CustomerType, slot: TimeSlot): number {
 
 ---
 
+## ドメインサービスの完全性と純粋性: コード例
+
+### アプローチ C: 判断をアプリ層に引き上げ（推奨）
+
+```kotlin
+// ドメインサービス: 純粋。外部依存なし。判断に必要なデータは引数で受け取る
+class EmailUniquenessChecker {
+    fun check(email: Email, alreadyExists: Boolean): EmailUniquenessResult {
+        return if (alreadyExists) EmailUniquenessResult.Duplicate
+               else EmailUniquenessResult.Unique
+    }
+}
+
+// アプリケーション層: Read（Repository呼び出し）と判断（ドメインサービス）を分離
+class RegisterUserUseCase(
+    private val userRepo: UserRepository,
+    private val checker: EmailUniquenessChecker
+) {
+    fun execute(command: RegisterUserCommand) {
+        val exists = userRepo.existsByEmail(command.email)  // インフラ層の責務
+        val result = checker.check(command.email, exists)    // 純粋なドメイン判断
+        // ...
+    }
+}
+```
+
+### アプローチ B-2: 高階関数でインフラを隠蔽（完全性を優先する場合）
+
+```kotlin
+// ドメインサービス: Repository に直接依存しないが、関数経由で外部依存は残る
+class EmailUniquenessChecker {
+    fun check(email: Email, existsCheck: (Email) -> Boolean): EmailUniquenessResult {
+        return if (existsCheck(email)) EmailUniquenessResult.Duplicate
+               else EmailUniquenessResult.Unique
+    }
+}
+
+// アプリケーション層: インフラエラーのハンドリングはここに閉じる
+class RegisterUserUseCase(
+    private val userRepo: UserRepository,
+    private val checker: EmailUniquenessChecker
+) {
+    fun execute(command: RegisterUserCommand) {
+        val result = checker.check(command.email) { e -> userRepo.existsByEmail(e) }
+        // ...
+    }
+}
+```
+
+### アプローチ B-1: Repository 直接注入（簡易だが純粋性を犠牲）
+
+```kotlin
+// ドメインサービス: Repository に直接依存。インフラエラーがドメインに混入する
+class EmailUniquenessChecker(private val userRepo: UserRepository) {
+    fun check(email: Email): EmailUniquenessResult {
+        val exists = userRepo.existsByEmail(email)  // DB接続エラーが混入
+        return if (exists) EmailUniquenessResult.Duplicate else EmailUniquenessResult.Unique
+    }
+}
+```
+```
+
+### 調整系ドメインサービス（Write 排除）+ modifiedEntities パターン
+
+```kotlin
+// ドメインサービス: 判断と生成のみ。永続化しない
+class TransferPolicy {
+    fun evaluate(from: Account, to: Account, amount: Money): TransferResult {
+        from.withdraw(amount)  // ドメインエラーのみ発生しうる
+        to.deposit(amount)
+        return TransferResult.of(from, to)
+    }
+}
+
+// 戻り値: 個別アクセスを封じ、保存忘れを型レベルで防止
+class TransferResult private constructor(
+    private val from: Account,
+    private val to: Account
+) {
+    fun modifiedAccounts(): List<Account> = listOf(from, to)
+
+    companion object {
+        fun of(from: Account, to: Account) = TransferResult(from, to)
+    }
+}
+
+// アプリケーション層: I/O の調整役
+class TransferUseCase(
+    private val repo: AccountRepository,
+    private val policy: TransferPolicy
+) {
+    fun execute(command: TransferCommand) {
+        val from = repo.findById(command.fromId)   // インフラエラーはここ
+        val to = repo.findById(command.toId)       // インフラエラーはここ
+        val result = policy.evaluate(from, to, command.amount)  // ドメインエラーだけ
+        result.modifiedAccounts().forEach { repo.save(it) }     // 一括保存
+    }
+}
+```
+
+---
+
 ## NotebookLM ノートブック一覧
 
 ### Phase 1: モデリング中 — DDD ノートブック

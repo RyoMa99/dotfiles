@@ -1,6 +1,6 @@
 ---
 name: domain-modeling
-description: "Use when: (1) the same term means different things to different actors, (2) a type is growing too many properties or has boolean flags for state, (3) spec tables have complex cross-cutting rules, (4) business concepts need to be decomposed into types, or (5) introducing new types, enums, or discriminated unions that represent domain concepts"
+description: "Use when: (1) the same term means different things to different actors, (2) a type is growing too many properties or has boolean flags for state, (3) spec tables have complex cross-cutting rules, (4) business concepts need to be decomposed into types, (5) introducing new types, enums, or discriminated unions that represent domain concepts, or (6) multiple aggregates need coordinated updates or consistency guarantees"
 disable-model-invocation: false
 ---
 
@@ -8,7 +8,7 @@ disable-model-invocation: false
 
 新しい機能（概念）を追加する際に、ドメインモデルの**検知・判断・構築・検証**を一貫して行うスキル。
 
-関連: `robust-code.md`（型による予防的設計、完全性）
+関連: `robust-code.md`（型による予防的設計、完全性）、`authorization.md`（認可設計。Specification の認可応用、DDD Trilemma との関係）
 
 ---
 
@@ -94,6 +94,7 @@ disable-model-invocation: false
 - **状態 → 別の型に分離**: boolean flags / status code → 状態ごとの Discriminated Union（Always-Valid Model）
 - **振る舞いから逆算してデータを抽出**: スタンプ結合を解消し、真に必要なデータだけを値オブジェクトとして切り出す
 - **曖昧な Service → 具体的な役割**: `UserDomainService` → `UserDuplicationChecker`, `UserApprover`
+- **ドメインサービスの Read/Write 分類**: ドメインサービスを「判断系（Read）」と「調整系（Write）」に分類し、Repository との関係を明確にする。詳細は「手法: ドメインサービスの完全性と純粋性」を参照
 
 ---
 
@@ -171,6 +172,98 @@ disable-model-invocation: false
 - **`reconstruct()`**: DB から復元。バリデーションなし（DB に入っている時点で検証済み）。status 文字列から適切な型にマッピング
 
 `reconstruct()` はインフラ層の Repository 実装からのみ呼び出す。ユースケース層からは `create()` のみ使用する。
+
+---
+
+## 手法: ドメインサービスの完全性と純粋性（DDD Trilemma）
+
+ドメインサービスに Repository を注入すべきかは、**DDD Trilemma**（Khorikov）として整理する。完全性・純粋性・パフォーマンスの3属性のうち、**同時に2つしか達成できない**。
+
+| アプローチ | 完全性 | 純粋性 | パフォーマンス | 犠牲 |
+|---|---|---|---|---|
+| A: 全データをメモリに読み込み | o | o | x | 不要なデータも取得。大規模で破綻 |
+| B: ドメイン層に Repository 注入 | o | x | o | インフラエラーがドメインに混入 |
+| C: 判断をドメイン層とアプリ層で分割 | x | o | o | 一部ロジックがアプリ層に漏れる |
+
+> **Khorikov の推奨: アプローチ C**（純粋性 + パフォーマンス）。外部依存の混入がドメインロジックの複雑さを増幅するため、完全性の妥協を受け入れる。DDD・関数型プログラミング・ユニットテストが収束する選択。
+
+### ドメインサービスの Read/Write 分類
+
+ドメインサービスを「判断系」と「調整系」に分類する。
+
+- **判断系**: ビジネスルール判定のために集合に対する情報が必要（重複チェック、予約枠の空き確認等）。1つのエンティティでは判断できないルール。Repository を注入するか否かは下記アプローチ選択に依存する
+- **調整系（Write は常に排除）**: 複数集約の生成・更新を行う。Repository による**永続化はアプリケーション層に委譲**し、ドメインサービスはオブジェクトの生成・状態変更のみ行う（ファクトリの役割に徹する）
+
+### 判断系ドメインサービスのアプローチ選択
+
+判断系でも Repository を注入するかは、トリレンマのどの2属性を優先するかで決まる。
+
+| アプローチ | 手法 | 選んだ2属性 | 犠牲 |
+|------|------|--------|--------|
+| B-1 | Repository を直接注入して Read | 完全性 + パフォーマンス | 純粋性（インフラエラー混入） |
+| B-2 | 高階関数でインフラを隠蔽（`existsCheck: (Email) -> Boolean` をアプリ層から渡す） | 完全性 + パフォーマンス | 純粋性（緩和されるが依存は残る） |
+| C | Read 処理ごとアプリケーション層に引き上げ | 純粋性 + パフォーマンス | 完全性（ロジックがアプリ層に分散） |
+| A | 必要なデータを事前に全取得してドメインに渡す | 完全性 + 純粋性 | パフォーマンス |
+
+> **推奨: アプローチ C を基本方針とし、完全性の妥協が許容できない場合に B-2 にフォールバック。** B-1（直接注入）は最も簡易だが純粋性の喪失が最大。A はデータ量が小さい場合のみ現実的。
+
+### 注意: Repository Read と CQRS Query の区別
+
+ドメインサービスでの Read（コマンド側）と CQRS の Query（クエリ側）は別物。
+
+- **コマンド側の Read**: 書き込みの前提となる状態取得。`findById` 程度に限定。ドメインモデルを返す
+- **クエリ側の Read**: 画面表示・レポート用。JOIN、ページング等を自由に。DTO を返す
+
+ドメインサービスで行う Read はあくまでコマンドフロー内のビジネスルール判定用であり、画面表示用のクエリをドメインサービスで行うのは CQRS 違反。
+
+---
+
+## 手法: 複数集約の整合性確保
+
+Aggregate 境界を決めた後、集約を跨ぐ更新の整合性をどう確保するかを判断する。
+
+### 判断フロー
+
+```
+複数集約を更新する必要がある
+    │
+    ├─ 同一トランザクションで十分か？
+    │   ├─ Yes → 戻り値の型で保存忘れ防止（modifiedEntities パターン）
+    │   │         副作用パターンが 3 箇所以上に増えた？
+    │   │           ├─ Yes → 同期ドメインイベント（コード整理目的）
+    │   │           └─ No  → modifiedEntities で十分
+    │   └─ No（外部 API・重い非同期処理あり）
+    │         → Outbox パターン（結果整合性）※ CQRS/ES ノートブックで詳細確認
+    │
+    └─ ドメインサービスで判断が必要か？
+        ├─ Read のみ → 判断系ドメインサービス（上記「完全性と純粋性」参照）
+        └─ Write あり → アプリケーション層に委譲
+```
+
+### modifiedEntities パターン
+
+複数集約を更新する調整系ドメインサービスの戻り値で、変更済みエンティティを一括返却し個別アクセスを封じる。アプリケーション層は `forEach { repo.save(it) }` するだけで、片方だけ save する事故を型レベルで防ぐ。
+
+### 同期ドメインイベント vs Outbox パターン
+
+| | 同期ドメインイベント | Outbox パターン |
+|---|---|---|
+| 目的 | コードの関心分離（モジュール分割） | 時間と故障の物理的分離 |
+| トランザクション | 同一（リスナー失敗で全体ロールバック） | 別（結果整合性） |
+| 適用場面 | 同一 DB 内の軽量な副作用 | 外部 API・メール送信・重い非同期処理 |
+| コスト | 中（Spring `@EventListener` 等） | 高（Outbox テーブル + ポーリング基盤） |
+
+> 同期イベントのリスナーで外部 I/O を行うと**共倒れリスク**（連鎖障害）が発生する。外部 I/O がある場合は必ず Outbox や非同期メッセージングを使う。
+
+### 優先度の目安
+
+| 優先度 | 手法 | 導入基準 |
+|--------|------|----------|
+| P0 | 調整系ドメインサービスから Write を排除 | 常に適用。コスト低。異論なし |
+| P0 | 判断系ドメインサービスのアプローチ選択（トリレンマ） | 常に意識的に選択。推奨は C（純粋性優先） |
+| P1 | modifiedEntities パターン | 複数集約の同一トランザクション更新がある場合 |
+| P2a | 同期ドメインイベント | 集約間の副作用パターンが 3 箇所以上 |
+| P2b | Outbox パターン | 外部 API・重い非同期処理がある場合 |
 
 ---
 
