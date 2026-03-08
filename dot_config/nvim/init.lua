@@ -113,5 +113,13 @@ vim.keymap.set("n", "gy", function()
   end
 end, { desc = "リンクURLをコピー" })
 
+-- mo: Markdown をブラウザでプレビュー（git root を --target に使用）
+vim.keymap.set("n", "<Leader>md", function()
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  local target = git_root and vim.fn.fnamemodify(git_root, ":t") or "default"
+  local file_path = vim.fn.expand("%:p")
+  vim.fn.jobstart({ "mo", file_path, "--target", target }, { detach = true })
+end, { desc = "mo で現在のファイルをプレビュー" })
+
 -- lazy.nvim
 require("config.lazy")
