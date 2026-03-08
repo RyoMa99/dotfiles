@@ -1,9 +1,12 @@
 #!/bin/bash
-# Anthropic ステータスを取得し、tmux status-right 向けに短い文字列を出力する。
+# Anthropic サービスステータス + Claude Code 使用量を tmux status-right に表示する。
 # キャッシュにより API 呼び出しは CACHE_TTL 秒に1回に抑える。
 
 CACHE_FILE="/tmp/tmux-anthropic-status.cache"
 CACHE_TTL=120  # 2分
+
+USAGE_CACHE_FILE="/tmp/tmux-claude-usage.cache"
+USAGE_CACHE_TTL=360  # 6分（usage API は頻繁に変わらない）
 
 # キャッシュが新鮮ならそのまま出力
 if [[ -f "$CACHE_FILE" ]]; then
@@ -27,7 +30,37 @@ status_emoji() {
   esac
 }
 
-fetch_and_format() {
+# 利用率に応じた tmux カラー（#[fg=colorN]）
+usage_color() {
+  local pct=$1
+  if (( pct >= 80 )); then
+    echo "#[fg=colour196]"  # 赤
+  elif (( pct >= 50 )); then
+    echo "#[fg=colour214]"  # 黄
+  else
+    echo "#[fg=colour114]"  # 緑
+  fi
+}
+
+# リセット時刻を "HH:MM" 形式に変換（Asia/Tokyo）
+format_reset_time() {
+  local iso_time="$1"
+  if [[ -z "$iso_time" || "$iso_time" == "null" ]]; then
+    echo ""
+    return
+  fi
+  # UTC の ISO 8601 文字列から日時部分を抽出し JST に変換
+  local datetime_part="${iso_time%%.*}"  # 小数秒以降を除去
+  datetime_part="${datetime_part%%+*}"   # +00:00 を除去
+  local epoch
+  epoch=$(TZ=UTC date -j -f "%Y-%m-%dT%H:%M:%S" "$datetime_part" +%s 2>/dev/null)
+  if [[ -n "$epoch" ]]; then
+    TZ=Asia/Tokyo date -j -f %s "$epoch" +"%m/%d %H:%M" 2>/dev/null
+  fi
+}
+
+fetch_service_status() {
+  local components incidents cc_status api_status cc_emoji api_emoji has_incident incident_icon
   components=$(xh --ignore-stdin --follow GET https://status.anthropic.com/api/v2/components.json 2>/dev/null)
   incidents=$(xh --ignore-stdin --follow GET https://status.anthropic.com/api/v2/incidents/unresolved.json 2>/dev/null)
 
@@ -37,7 +70,6 @@ fetch_and_format() {
   cc_emoji=$(status_emoji "$cc_status")
   api_emoji=$(status_emoji "$api_status")
 
-  # CC/API に影響するインシデントの有無
   has_incident=$(echo "$incidents" | jq -r --arg cc "$CC_ID" --arg api "$API_ID" \
     '[.incidents[] | select(.components[]?.id == $cc or .components[]?.id == $api)] | length' 2>/dev/null)
 
@@ -47,6 +79,83 @@ fetch_and_format() {
   echo "CC:${cc_emoji} API:${api_emoji}${incident_icon}"
 }
 
-result=$(fetch_and_format)
+fetch_usage() {
+  # usage キャッシュが有効ならそれを使う
+  if [[ -f "$USAGE_CACHE_FILE" ]]; then
+    local usage_age
+    usage_age=$(( $(date +%s) - $(stat -f %m "$USAGE_CACHE_FILE") ))
+    if (( usage_age < USAGE_CACHE_TTL )); then
+      cat "$USAGE_CACHE_FILE"
+      return
+    fi
+  fi
+
+  # macOS Keychain から OAuth トークンを取得
+  local creds access_token
+  creds=$(security find-generic-password -s "Claude Code-credentials" -w 2>/dev/null)
+  if [[ -z "$creds" ]]; then
+    echo ""
+    return
+  fi
+  access_token=$(echo "$creds" | jq -r '.claudeAiOauth.accessToken // empty' 2>/dev/null)
+  if [[ -z "$access_token" ]]; then
+    echo ""
+    return
+  fi
+
+  # Usage API を呼び出し
+  local response
+  response=$(xh --ignore-stdin --follow GET https://api.anthropic.com/api/oauth/usage \
+    "Authorization:Bearer ${access_token}" \
+    "anthropic-beta:oauth-2025-04-20" 2>/dev/null)
+
+  if [[ -z "$response" ]]; then
+    echo ""
+    return
+  fi
+
+  # 利用率を抽出（パーセント整数値）
+  local five_h seven_d five_h_reset seven_d_reset
+  five_h=$(echo "$response" | jq -r '.five_hour.utilization // 0' 2>/dev/null)
+  seven_d=$(echo "$response" | jq -r '.seven_day.utilization // 0' 2>/dev/null)
+  five_h_reset=$(echo "$response" | jq -r '.five_hour.resets_at // empty' 2>/dev/null)
+  seven_d_reset=$(echo "$response" | jq -r '.seven_day.resets_at // empty' 2>/dev/null)
+
+  # 小数を整数に丸める（6.0 → 6）
+  local five_pct seven_pct
+  five_pct=$(awk "BEGIN { printf \"%d\", ${five_h:-0} }")
+  seven_pct=$(awk "BEGIN { printf \"%d\", ${seven_d:-0} }")
+
+  # リセット時刻
+  local five_reset_str seven_reset_str
+  five_reset_str=$(format_reset_time "$five_h_reset")
+  seven_reset_str=$(format_reset_time "$seven_d_reset")
+
+  # tmux フォーマットで出力
+  local five_color seven_color reset_color
+  five_color=$(usage_color "$five_pct")
+  seven_color=$(usage_color "$seven_pct")
+  reset_color="#[default]"
+
+  local usage_str=""
+  usage_str+="${five_color}5h:${five_pct}%${reset_color}"
+  [[ -n "$five_reset_str" ]] && usage_str+="(${five_reset_str})"
+  usage_str+=" ${seven_color}7d:${seven_pct}%${reset_color}"
+  [[ -n "$seven_reset_str" ]] && usage_str+="(${seven_reset_str})"
+
+  echo -n "$usage_str" > "$USAGE_CACHE_FILE"
+  echo -n "$usage_str"
+}
+
+# メイン
+service_status=$(fetch_service_status)
+usage_info=$(fetch_usage)
+
+if [[ -n "$usage_info" ]]; then
+  result="${service_status} ${usage_info}"
+else
+  result="$service_status"
+fi
+
 echo -n "$result" > "$CACHE_FILE"
 echo -n "$result"
