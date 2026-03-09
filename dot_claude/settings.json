@@ -181,6 +181,15 @@
             "command": "$HOME/.claude/hooks/notify-stop.sh"
           }
         ]
+      },
+      {
+        "hooks": [
+          {
+            "type": "command",
+            "command": "$HOME/.claude/hooks/pushcut-hook.sh",
+            "timeout": 300
+          }
+        ]
       }
     ],
     "Stop": [

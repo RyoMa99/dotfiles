@@ -29,5 +29,8 @@
 {{ end -}}
 {{ end -}}
 
+# claude-watch: secrets (managed by run_once script)
+.config/claude-watch/config.json
+
 # tmuxinator: machine-local config
 .config/tmuxinator/work.yml
