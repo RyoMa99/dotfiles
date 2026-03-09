@@ -56,6 +56,13 @@ vim.opt.wrap = false
 -- swap無効
 vim.opt.swapfile = false
 
+-- 外部変更の自動検出・リロード
+vim.opt.autoread = true
+vim.api.nvim_create_autocmd({ "FocusGained", "BufEnter" }, {
+  pattern = "*",
+  command = "checktime",
+})
+
 -- keymap
 vim.keymap.set('i', 'jk', '<Esc>')
 vim.keymap.set('v', 'jk', '<Esc>')

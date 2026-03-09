@@ -6,6 +6,8 @@ return {
     { "-", "<cmd>Oil<cr>", desc = "親ディレクトリを開く" },
   },
   opts = {
+    -- ファイルシステムの変更を監視して自動更新
+    watch_for_changes = true,
     -- 隠しファイルを表示
     view_options = {
       show_hidden = true,
