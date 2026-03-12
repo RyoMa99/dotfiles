@@ -114,7 +114,6 @@
     ],
     "defaultMode": "acceptEdits"
   },
-  "model": "opus[1m]",
   "hooks": {
     "PostToolUse": [
       {
