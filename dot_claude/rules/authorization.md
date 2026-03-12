@@ -135,20 +135,59 @@ Entity にアクセス制御を持たせない理由:
 | Specification | **検証**用途（`isSatisfiedBy`） | **選択**用途（WHERE 句導出） |
 | エラー | 403 Forbidden（明示的な拒否） | データが見えない（暗黙のフィルタ） |
 
-### 二重管理問題の判断
+### コマンド側とクエリ側のルール関係
+
+コマンド側（操作権限）とクエリ側（可視性）の認可ルールの関係を見極め、適切に統合または分離する。
 
 ```
-コマンド側とクエリ側で同じ認可ルールか？
+コマンド側とクエリ側のルールの関係は？
     │
-    ├─ 異なる（操作権限 vs データ可視性）
-    │   → 別の関心事として個別設計。二重管理ではない
+    ├─ 同一（同じ述語で判定）
+    │   例: 「自部署のデータのみ」が編集にも一覧にも適用
+    │   → 1つの Specification から検証/選択の両用途に導出
+    │       ├─ ORM あり → JPA Specification / QueryDSL で WHERE 句自動生成
+    │       ├─ ORM なし → AccessScope 等の共通定義から両側に導出
+    │       └─ DB レベル → Row-Level Security（PostgreSQL RLS 等）
     │
-    └─ 同じ（「自部署のデータのみ」等）
-        ├─ Specification の検証/選択 両用途で統一可能？
-        │   ├─ Yes → JPA Specification / QueryDSL で WHERE 句自動生成
-        │   └─ No  → AccessScope 等の共通定義から両側に導出
-        └─ DB レベルで制御可能？
-            → Row-Level Security（PostgreSQL RLS 等）
+    ├─ 包含関係（可視性 ⊇ 操作権限）← 実務で最も多い
+    │   例: 「関連部署のイベントは見えるが、編集は自部署のみ」
+    │   → 狭い方（操作権限）から広い方（可視性）を導出する構造にする
+    │   → 包含関係が壊れると「操作できるが見えない」矛盾が生じるため
+    │
+    └─ 独立（変更が互いに影響しない）
+        例: 操作権限は「手配権限フラグ」、可視性は「部署」で判定
+        → 別の関心事として個別設計。無理に統合しない
+```
+
+**見分け方**: コマンド側のルールを変えたとき、クエリ側も必ず同時に変わるか？ → Yes なら同一、No なら独立。片方が変わったらもう片方も追随すべきなら包含関係。
+
+#### 包含関係の実装パターン
+
+```kotlin
+// 狭い方（操作権限）から広い方（可視性）を導出
+class EventAccessScope(val actor: ActorContext) {
+    // 操作可能な範囲（狭い）
+    fun editableFilter(): Predicate =
+        deptEquals(actor.deptId).and(hasPermission(Permission.TEHAI))
+
+    // 可視範囲（広い）= 操作可能範囲 + 閲覧のみの範囲
+    fun visibleFilter(): Predicate =
+        editableFilter().or(relatedDepts(actor.deptId))
+}
+```
+
+または AccessLevel で統合:
+
+```kotlin
+enum class AccessLevel { NONE, VIEW, EDIT }
+
+class EventAccessResolver(val actor: ActorContext) {
+    fun resolve(event: Event): AccessLevel = when {
+        event.deptId == actor.deptId && actor.permission.tehai -> EDIT
+        event.deptId in actor.relatedDeptIds -> VIEW
+        else -> NONE
+    }
+}
 ```
 
 > Evans 原典: Specification は「検証」「選択」「要求に応じた構築」の3用途を持つ。同一の Specification からコマンド側の判定とクエリ側の WHERE 句を導出するのは DDD の思想に合致する。
