@@ -7,17 +7,17 @@ windows:
   - main:
       layout: main-vertical
       panes:
-        - claude
+        - claude --enable-auto-mode
         -
   - ideas:
       root: ~/repo/github.com/RyoMa99/ideas
       layout: main-vertical
       panes:
-        - claude
+        - claude --enable-auto-mode
         - nvim
   - zettel-server:
       root: ~/repo/github.com/RyoMa99/zettel-server
       layout: main-vertical
       panes:
-        - claude
+        - claude --enable-auto-mode
         -
