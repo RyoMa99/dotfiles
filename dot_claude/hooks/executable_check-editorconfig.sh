@@ -33,9 +33,26 @@ if [[ "$FILE_PATH" == */.claude/* ]]; then
   fi
 fi
 
-# editorconfig-checker を実行
-if ! editorconfig-checker "${EC_OPTS[@]}" "$FILE_PATH" 2>&1; then
-  echo "EditorConfig violations found in $FILE_PATH" >&2
+# editorconfig-checker を実行（gcc 形式で行番号を取得、ANSI カラーコード除去）
+EC_RAW=$(editorconfig-checker -f gcc "${EC_OPTS[@]}" "$FILE_PATH" 2>&1)
+EC_EXIT=$?
+EC_OUTPUT=$(echo "$EC_RAW" | sed $'s/\033\\[[0-9;]*m//g')
+if [ $EC_EXIT -ne 0 ]; then
+  {
+    echo "EditorConfig violations in $FILE_PATH:"
+    echo "$EC_OUTPUT" | grep ': error:' | while IFS= read -r line; do
+      # gcc format: file:line:col: error: message
+      LINE_NUM=$(echo "$line" | sed -E 's/.*:([0-9]+):[0-9]+: error:.*/\1/')
+      ERROR_MSG=$(echo "$line" | sed -E 's/.*: error: //')
+      if [ "$LINE_NUM" -gt 0 ] 2>/dev/null; then
+        LINE_CONTENT=$(sed -n "${LINE_NUM}p" "$FILE_PATH")
+        echo "  L${LINE_NUM}: ${ERROR_MSG}"
+        echo "    > ${LINE_CONTENT}"
+      else
+        echo "  ${ERROR_MSG}"
+      fi
+    done
+  } >&2
   exit 2
 fi
 
