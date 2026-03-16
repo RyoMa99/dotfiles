@@ -15,6 +15,12 @@ windows:
       panes:
         - claude --enable-auto-mode
         - nvim
+  - go-feed:
+      root: ~/repo/github.com/RyoMa99/go-feed
+      layout: main-vertical
+      panes:
+        - claude --enable-auto-mode
+        - nvim
   - zettel-server:
       root: ~/repo/github.com/RyoMa99/zettel-server
       layout: main-vertical
