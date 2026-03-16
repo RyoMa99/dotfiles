@@ -9,7 +9,7 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestio
 
 # Session Retrospective
 
-セッションの振り返りを7つの観点で構造的に行い、得られた知見を適切な保存先に振り分ける。
+セッションの振り返りを8つの観点で構造的に行い、得られた知見を適切な保存先に振り分ける。
 
 ## When to Use
 
@@ -89,9 +89,22 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestio
 保存する項目を選んでください（例: D1, T1, A1 / all / none）
 ```
 
-### Step 3: ユーザー承認 → Step 4: 振り分け実行 → Step 5: 完了報告
+### Step 3: ユーザー承認
 
-承認された項目のみ保存。保存先の詳細は `reference.md` を参照。
+レポートを提示し、保存する項目をユーザーに選択してもらう（例: D1, T1, R1 / all / none）。
+
+### Step 4: 振り分け実行
+
+承認された項目のみ保存する。保存先の詳細は `reference.md` を参照。
+
+**RDRA 成果物の更新が承認された場合:**
+1. `docs/rdra/overview.md` を直接編集（REQ / BR / UC 等の追加・修正）
+2. `/rdra` の更新フローに従いトレーサビリティを再検証（依存チェーンの整合性確認）
+3. 重要な判断を伴う変更であれば `/adr` での記録も提案
+
+### Step 5: 完了報告
+
+保存結果をユーザーに報告する。
 
 ## 重要なルール
 
