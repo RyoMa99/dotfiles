@@ -2,13 +2,21 @@
 
 ## 作業フロー
 
+### 要求分析（新規システム・大規模新機能時）
+
+`/rdra` スキルで RDRA 3.0 + EARS による上流分析を実施する（アクター → ゴール → 業務フロー → 要件）
+
 ### 設計・計画（Plan モード）
 
-`plan-mode.md` に従う（意図の明確化 → コードベース調査 → 計画策定）
+`plan-mode.md` に従う（上流チェック → 意図の明確化 → コードベース調査 → 計画策定）
 
 ### 実装・完了
 
 計画承認後は `/implementation` スキルを実行する（ガードレール先行 → タスク単位実装 → 検証 → 完了）
+
+### 成果物の管理方針
+
+`artifacts.md` に従う。Why は残す（RDRA, ADR）、How は捨てる（計画ファイル → PR description に統合）
 
 ## コード品質
 
@@ -16,11 +24,14 @@
 
 - `robust-code.md` - 堅牢なコードの設計原則
 - `layered-architecture.md` - 三層＋ドメインモデルの設計原則
+- `artifacts.md` - 成果物の耐久性と管理方針
 - `tools.md` - ツール選択・設定・既知の注意点
 - `commit-conventions.md` - コミットメッセージ規約
 
 ### スキル起動時に参照
 
+- 要求分析 → `/rdra` スキル内の `ears-reference.md`
+- 画面仕様 → `/screen-spec` スキル
 - テストの原則 → `/TDD` スキル内の `testing-principles.md`
 - セキュリティルール → `/review` スキル内の `security-checklist.md`
 
