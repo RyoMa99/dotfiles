@@ -1,6 +1,6 @@
 ---
 name: session-retrospective
-description: "Use when ending a development session to capture learnings across 7 perspectives"
+description: "Use when ending a development session to capture learnings across 8 perspectives"
 user-invocable: true
 allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestion"]
 ---
@@ -26,7 +26,7 @@ allowed-tools: ["Bash", "Read", "Write", "Edit", "Glob", "Grep", "AskUserQuestio
 | 3 | **自動化機会** | 繰り返しパターン、定型操作 | hooks / skills / rules |
 | 4 | **既存知識の更新** | 陳腐化した情報、矛盾する知見 | 該当ルールファイルを更新 |
 | 5 | **プロジェクト CLAUDE.md** | 不足したコンテキスト | `./CLAUDE.md` or `.claude.local.md` |
-| 6 | **見積もりの妥当性** | 計画時の見積もりと実装結果の乖離 | `plan-review-learnings.md` or `plan-mode.md` |
+| 6 | **見積もりの妥当性** | 計画時の見積もりと実装結果の乖離 | `plan-mode.md`（プロセス改善時） |
 | 7 | **RDRA 成果物の鮮度** | 実装を通じて発見した要件・業務フローの変化 | `docs/rdra/overview.md` |
 | 8 | **設計負債** | ゼロベース再設計で発見した設計の歪み | GitHub Issue（リファクタ） |
 

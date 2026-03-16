@@ -25,7 +25,7 @@
 | 命名 | `~/.claude/rules/naming.md` |
 | 型設計 | `~/.claude/rules/type-granularity.md` |
 | ドメインモデリング | `~/.claude/rules/domain-modeling.md` |
-| プランレビュー | `~/.claude/rules/plan-review-learnings.md` |
+| プランレビュー | `~/.claude/rules/plan-mode.md`（プロセス改善として直接反映） |
 | Claude Code 環境固有の回避策 | `~/.claude/rules/troubleshooting.md` |
 | その他 | 既存ファイルに該当なければ新規ファイルを提案 |
 
