@@ -50,7 +50,7 @@ require("lazy").setup({
     { import = "plugins.which-key" },
     { import = "plugins.overlook" },
     { import = "plugins.gitlinker" },
-    { import = "plugins.arto" },
+
     { import = "plugins.csvview" },
     { import = "plugins.dial" },
   },
