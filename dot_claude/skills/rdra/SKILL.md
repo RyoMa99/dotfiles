@@ -1,6 +1,7 @@
 ---
 name: rdra
 description: "RDRA 3.0に基づく要求分析。新規システムや大規模新機能で、ビジネスの Why を構造化する。「要求分析して」「RDRAで整理して」「アクターとゴールを洗い出して」「業務フローを作って」など。plan-mode の Phase 1 で上流分析が必要と判断された場合にも参照される。"
+disable-model-invocation: true
 ---
 
 # RDRA（Relationship Driven Requirement Analysis）

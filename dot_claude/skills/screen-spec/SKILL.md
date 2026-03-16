@@ -1,6 +1,7 @@
 ---
 name: screen-spec
 description: "画面仕様書を作成する。画面単位・コンポーネント単位で Markdown 形式の仕様書を生成する。「画面仕様書を作って」「この画面の仕様をまとめて」「UIの仕様を書いて」など。RDRA のビジネスユースケースから画面レベルの仕様に落とし込む際に使う。"
+disable-model-invocation: true
 ---
 
 # 画面仕様書（Screen Spec）
