@@ -191,15 +191,20 @@ AskUserQuestion でコミット方法を確認:
 - コミット + プッシュ + PR 作成
 - コミットしない（変更のみ残す）
 
-#### 4-4. PR 作成（選択時）
+#### 4-4. 計画ファイルの削除
+
+どのコミット方法を選択した場合でも、計画ファイルを削除する（git 履歴には Step 0 のコミットで残っている）。
+
+```bash
+git rm -r docs/plan/ 2>/dev/null && git commit -m "chore: 計画ファイルを削除（実装完了）"
+```
+
+#### 4-5. PR 作成（選択時）
 
 PR 作成時、計画の内容を PR description の `## Plan` セクションに統合する。
 これにより計画ファイルを永続的に保持する必要がなくなる（`artifacts.md` 参照）。
 
 ```bash
-# 計画ファイルを削除（git 履歴には Step 0 のコミットで残っている）
-git rm -r docs/plan/ 2>/dev/null && git commit -m "chore: 計画ファイルを削除（実装完了）"
-
 git push -u origin <branch-name>
 gh pr create --title "<タイトル>" --body "<本文>"
 ```
@@ -214,7 +219,8 @@ gh pr create --title "<タイトル>" --body "<本文>"
 ## Plan
 - **ゴール**: [計画のゴール]
 - **タスク性質**: [探索的 / 既知パターン / 高リスク]
-- **関連要件**: REQ-xxx（RDRA がある場合）
+- **関連要件**: REQ-xxx / UC-xxx（RDRA がある場合）
+- **見積もりメモ**: [タスク性質、重視/軽視した観点、理由]
 
 ### タスク一覧
 1. [タスク名]: [概要]
@@ -225,6 +231,7 @@ gh pr create --title "<タイトル>" --body "<本文>"
 ```
 
 - Step 0 で作成した作業ブランチからデフォルトブランチ向けに作成する
+- 見積もりメモを PR description に含めることで、session-retrospective で参照可能にする
 
 ---
 

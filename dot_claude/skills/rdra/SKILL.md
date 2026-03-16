@@ -329,6 +329,12 @@ docs/rdra/
 
 > 規模が大きくなり overview.md が肥大化したら、インデックス + 詳細ページに分離する（`usecases/UC-001.md` 等）。最初から分割する必要はない。
 
+> 画面の詳細仕様（`/screen-spec`）は RDRA 中に作成する必要はない。ここでは画面・イベントの一覧（SCR-xxx, EVT-xxx）を特定するのみ。詳細仕様は実装フェーズで必要になった時点で作成する。
+
+### 次のステップ
+
+RDRA 完了後、実装に進むには plan-mode（`EnterPlanMode`）に入る。RDRA の GOAL / REQ / UC を参照しながら、plan-mode Phase 1 でスコープを定義し、Phase 3 でタスクの受入条件（GWT）を EARS 要件から導出する。
+
 #### overview.md の構成
 
 ```markdown
