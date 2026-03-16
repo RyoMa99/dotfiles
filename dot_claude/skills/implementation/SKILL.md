@@ -56,6 +56,18 @@ git commit -m "plan: [計画タイトル]"
 
 > 計画ファイルは実装完了後に削除する（Step 4-4 参照）。削除後も `git log --diff-filter=D -- docs/plan/` で履歴を追える。
 
+#### ADR のコミット（plan-mode で確定した場合）
+
+plan-mode Phase 2 で設計選択肢を比較して ADR の内容を会話内で確定した場合、ここでファイルに書き出してコミットする（plan-mode 内ではファイル保存不可のため）。
+
+```bash
+# ADR がある場合
+mkdir -p docs/adr/
+# ADR ファイルを書き出し
+git add docs/adr/
+git commit -m "adr: [ADR タイトル]"
+```
+
 ---
 
 ### Step 1: ガードレール先行
