@@ -575,7 +575,7 @@ const handleClick = () => {
 
 ### Action パターン（汎用コンポーネント設計）
 
-汎用コンポーネントが `action` prop を受け取り、内部で `startTransition` を適用。アプリ全体で一貫した非同期 UX を実現する。
+汎用コンポーネントが `action` prop を受け取り、内部で `startTransition` を適用。アプリ全体で一貫した非同期 UX を実現する。命名を `onClick` ではなく `action` にすることで「Transition として実行される」契約を型レベルで表現する。
 
 ```tsx
 function Button({ action, children }: ButtonProps) {
@@ -594,6 +594,8 @@ function Button({ action, children }: ButtonProps) {
   router.navigate('/');
 }}>ログイン</Button>
 ```
+
+**isPending のスコープ問題**: action パターンでは `isPending` が Button 内部に閉じるため、外側のコンポーネントから transition 中かどうかを知れない。解決策として、同じ state 更新を**複数の `startTransition` で囲む**ことができる。外側でも `startTransition` を使えば、そこでも `isPending` を取得できる。
 
 ### useOptimistic
 
@@ -616,7 +618,7 @@ Transition + Suspense により、ネットワーク速度に応じた UX が自
 | 中速（150ms〜1s） | Transition が前画面を維持、完了後に切替 |
 | 低速（>1s） | Suspense フォールバック表示 |
 
-参考: [uhyo - React 19時代のコンポーネント設計ベストプラクティス](https://speakerdeck.com/uhyo/react-19shi-dai-nokonponentoshe-ji-besutopurakuteisu) / [rickhanlonii/async-react](https://github.com/rickhanlonii/async-react)
+参考: [uhyo - React 19時代のコンポーネント設計ベストプラクティス](https://speakerdeck.com/uhyo/react-19shi-dai-nokonponentoshe-ji-besutopurakuteisu) / [rickhanlonii/async-react](https://github.com/rickhanlonii/async-react) / [KAKEHASHI - Async Reactの設計思想とSignalの違いをTransitionを中心に考える](https://kakehashi-dev.hatenablog.com/entry/2026/03/17/090000)
 
 ---
 
