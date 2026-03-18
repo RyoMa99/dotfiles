@@ -270,7 +270,35 @@ diff \
   <(cd ~/.local/share/chezmoi/dot_local/bin && find . -type f -exec md5 {} \; | sed 's/executable_//' | sort) || true
 ```
 
-### Step 4: 外部管理スキルの確認
+### Step 4: Brewfile の差分検出
+
+Brewfile と実際の brew 状態を比較する。
+
+```bash
+# Brewfile に記載されているが未インストール or outdated のパッケージを取得
+PKGS=$(brew bundle check --file=~/.Brewfile --verbose 2>&1 \
+  | grep "needs to be installed" \
+  | sed 's/ needs to be installed or updated\.//' \
+  | sed 's/^→ Cask //' \
+  | sed 's/^→ Formula //' \
+  | sed 's/^→ //')
+
+# 未インストールと outdated を分離
+for pkg in $PKGS; do
+  if brew list "$pkg" &>/dev/null || brew list --cask "$pkg" &>/dev/null; then
+    echo "outdated: $pkg"
+  else
+    echo "missing: $pkg"
+  fi
+done
+
+# インストール済みだが Brewfile に未記載のパッケージ（追加候補）
+brew bundle cleanup --file=~/.Brewfile 2>&1
+```
+
+レポートの「差分あり」セクションに結果を含める。
+
+### Step 5: 外部管理スキルの確認
 
 ```bash
 grep -A2 '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml
@@ -278,13 +306,13 @@ grep -A2 '^\[' ~/.local/share/chezmoi/.chezmoiexternal.toml
 
 外部管理のスキルはローカルにのみ存在して正常。
 
-### Step 5: chezmoi ソースリポジトリの状態
+### Step 6: chezmoi ソースリポジトリの状態
 
 ```bash
 git -C ~/.local/share/chezmoi status && git -C ~/.local/share/chezmoi log --oneline -5
 ```
 
-### Step 6: レポート出力
+### Step 7: レポート出力
 
 以下の形式でレポートを表示：
 
