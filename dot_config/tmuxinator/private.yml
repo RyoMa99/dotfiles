@@ -21,6 +21,12 @@ windows:
       panes:
         - claude --enable-auto-mode
         - nvim
+  - claude-watch-relay:
+      root: ~/repo/github.com/RyoMa99/claude-watch-relay
+      layout: main-vertical
+      panes:
+        - claude --enable-auto-mode
+        - nvim
   - zettel-server:
       root: ~/repo/github.com/RyoMa99/zettel-server
       layout: main-vertical
