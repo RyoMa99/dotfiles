@@ -34,6 +34,7 @@
 - 画面仕様 → `/screen-spec` スキル
 - テストの原則 → `/TDD` スキル内の `testing-principles.md`
 - セキュリティルール → `/review` スキル内の `security-checklist.md`
+- 認可設計 → `/authorization` スキル（モデル選定・層配置・構造的強制）
 
 ## コミュニケーション
 
