@@ -1,6 +1,6 @@
 ---
 name: golang
-description: "Use when developing Go applications - error handling, logging, concurrency patterns, and testing. Triggers on Go code editing, module setup, or when discussing Go-specific design decisions like error propagation, structured logging with slog, or goroutine management."
+description: "Use when developing Go applications - error handling, logging, concurrency patterns, transactions, and testing. Triggers on Go code editing, module setup, or when discussing Go-specific design decisions like error propagation, structured logging with slog, goroutine management, repository/transaction patterns, or Unit of Work."
 ---
 
 参照ファイル:
@@ -214,6 +214,78 @@ assert.Equal(t, "alice@example.com", user.Email)
 
 ---
 
+## トランザクション管理: DBTX + Unit of Work
+
+Go にはフレームワークレベルのトランザクション管理（Spring の `@Transactional` 等）がない。
+`database/sql` の `*sql.DB`（コネクションプール）と `*sql.Tx`（トランザクション）の共通 interface を軸に、段階的に抽象度を上げる。
+
+### DBTX interface
+
+`*sql.DB` と `*sql.Tx` の共通メソッドを interface にまとめる。Store（Repository 実装）は `DBTX` に依存し、通常時は `*sql.DB`、トランザクション時は `*sql.Tx` を受け取る。
+
+```go
+type DBTX interface {
+    ExecContext(ctx context.Context, query string, args ...any) (sql.Result, error)
+    QueryRowContext(ctx context.Context, query string, args ...any) *sql.Row
+    QueryContext(ctx context.Context, query string, args ...any) (*sql.Rows, error)
+}
+```
+
+> sqlc を使う場合、sqlc が生成する `DBTX` interface をそのまま活用できる。
+
+### 段階的な導入判断
+
+```
+トランザクションが複数の Repository をまたぐか？
+    │
+    ├─ No → Stage 2: 単一 Repository のトランザクション
+    │        Repository interface に Tx メソッドを追加
+    │        大半のケースはここで十分
+    │
+    └─ Yes → まず集約境界を疑う
+              │
+              ├─ 集約を見直せば1つに収まる → Stage 2
+              ├─ 結果整合性（イベント駆動）で済む → Stage 2 + 非同期処理
+              └─ 即時の原子性が必要 → Stage 3: Unit of Work
+```
+
+### Stage 2: 単一 Repository のトランザクション
+
+Repository interface にコールバック形式の `Tx` メソッドを追加。実装側で `*sql.DB` から `*sql.Tx` を取り出し、同一 Store インスタンスを再構築して渡す。
+
+```go
+// アプリケーションサービス層（interface 定義）
+type BookStore interface {
+    Get(ctx context.Context, id int64) (Book, error)
+    DecrementStock(ctx context.Context, id int64) error
+    Tx(ctx context.Context, fn func(BookStore) error) error
+}
+```
+
+### Stage 3: Unit of Work
+
+複数 Repository を単一トランザクションで束ねる。UoW が1つの `*sql.Tx` から全 Store を構築し、原子性を保証する。
+
+```go
+// アプリケーションサービス層
+type Stores struct {
+    Books  book.Store
+    Orders order.Store
+}
+
+type UnitOfWork interface {
+    RunInTx(ctx context.Context, fn func(Stores) error) error
+}
+```
+
+UoW の実装はデータソース層（`internal/infra/`）に配置する（`layered-architecture.md` の依存性逆転: データソース層 → アプリケーションサービス層の interface）。
+
+### ctx 経由のトランザクション伝播は避ける
+
+`context.WithValue` でトランザクションを伝播させるパターン（Transactor パターン）は、型安全性が失われ、トランザクション境界が暗黙的になる。明示的な引数渡し（DBTX / UoW コールバック）を優先する。
+
+---
+
 ## チェックリスト
 
 Go コードレビュー時に確認：
@@ -233,8 +305,16 @@ Go コードレビュー時に確認：
 - [ ] `internal/` で外部公開を制限しているか
 - [ ] interface は利用者側で定義しているか
 - [ ] パッケージ間の循環依存がないか
+- [ ] トランザクション境界が集約と一致しているか（複数集約をまたぐ場合は UoW を検討）
+- [ ] ctx 経由でトランザクションを暗黙に伝播していないか
 
 ### テスト
 - [ ] Table-Driven Tests で網羅的にテストしているか
 - [ ] `require` と `assert` を適切に使い分けているか
 - [ ] テストヘルパーに `t.Helper()` を付けているか
+
+---
+
+## 参考
+
+- [rednafi - Repositories, transactions, and unit of work in Go](https://rednafi.com/go/repo-txn-uow/) — DBTX + UoW パターンの段階的導入
