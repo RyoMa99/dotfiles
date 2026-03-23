@@ -2,7 +2,6 @@
 actionlint = "latest"
 golangci-lint = "latest"
 "pipx:neovim-remote" = "latest"
-"npm:ccusage" = "latest"
 "npm:playwright" = "latest"
 "npm:react-doctor" = "latest"
 pnpm = "latest"
