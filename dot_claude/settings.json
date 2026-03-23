@@ -242,6 +242,10 @@
     "slack@claude-plugins-official": true,
     "coderabbit@claude-plugins-official": true
   },
+  "statusLine": {
+    "type": "command",
+    "command": "~/.claude/statusline.sh"
+  },
   "outputStyle": "Learning",
   "language": "Japanese"
 }
