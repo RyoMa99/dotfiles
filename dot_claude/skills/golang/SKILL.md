@@ -51,6 +51,24 @@ if user.Name != "Alice" {
 }
 ```
 
+### 開発ツールは `go tool` で管理
+
+リポジトリ単位の開発ツールは `go install`（グローバル）ではなく `go tool`（Go 1.24+）を使う。`go.mod` でバージョンが管理され、チーム全員が同じバージョンを使える。
+
+```bash
+go get -tool gotest.tools/gotestsum   # go.mod に tool ディレクティブ追加
+go tool gotestsum --watch ./...        # 実行
+```
+
+### テストランナー: gotestsum
+
+`go test` の代わりに `gotestsum` を使う。出力が見やすく、`--watch` でファイル監視付きテスト実行ができる。
+
+```bash
+go tool gotestsum ./...              # 通常実行
+go tool gotestsum --watch ./...      # ファイル監視
+```
+
 ### 最初からテーブル駆動テスト + t.Run
 
 ケースが1つでもテーブル駆動で書く。結局ケースは増えるので、最初から構造化しておく。
