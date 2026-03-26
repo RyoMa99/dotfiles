@@ -116,6 +116,14 @@ chezmoi diff
 
 差分があるファイルを一覧表示する。
 
+**IMPORTANT: `chezmoi diff` の出力方向**:
+`chezmoi diff` は「ソース（chezmoi リポジトリ）をローカルに適用したらどうなるか」を示す。
+Push モードではローカルが正（ローカルの変更を chezmoi に反映する）なので、diff の意味は**逆に読む**必要がある：
+- `-` 行（赤）= chezmoi ソースにあるがローカルにない → ローカルで**削除された**
+- `+` 行（緑）= ローカルにあるが chezmoi ソースにない → ローカルで**追加された**
+
+コミットメッセージはローカル側の変更を基準に記述すること（Step 5 参照）。
+
 ### Step 1.5: 未管理ファイルの検出
 
 chezmoi が管理対象としている各ディレクトリについて、ローカルに存在するが chezmoi 未追跡のファイルを検出する。
@@ -217,6 +225,13 @@ git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi status
 
 コミットメッセージは日本語で、変更内容を簡潔に記述する。
 **確認は取らずにそのままコミット＆プッシュする**（ユーザーが `/chezmoi-sync push` を実行した時点でプッシュの意図は明確）。
+
+**コミットメッセージの生成ルール**:
+Step 1 の `chezmoi diff` 出力を参照し、**ローカル側の変更**を基準に記述する（diff の方向に注意）。
+- `chezmoi diff` の `-` 行 → ローカルで削除されたもの
+- `chezmoi diff` の `+` 行 → ローカルで追加されたもの
+
+例: diff で `-"ralph-loop@claude-plugins-official": true` と表示された場合、ローカルでは削除済みなので「ralph-loop プラグインを削除」と記述する。
 
 ```bash
 git -C ~/.local/share/chezmoi commit -F - <<'EOF'
