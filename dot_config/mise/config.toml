@@ -1,6 +1,7 @@
 [tools]
 actionlint = "latest"
 golangci-lint = "latest"
+"pipx:keepercommander" = "latest"
 "pipx:neovim-remote" = "latest"
 "npm:playwright" = "latest"
 "npm:react-doctor" = "latest"
