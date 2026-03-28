@@ -40,6 +40,8 @@
       "Bash(defaults read:*)",
       "Bash(system_profiler:*)",
       "Bash(exiftool:*)",
+      "Bash(copilot:*)",
+      "Bash(gemini:*)",
       "Bash(katana:*)",
       "Bash(ghq root:*)",
       "Bash(plutil:*)",
