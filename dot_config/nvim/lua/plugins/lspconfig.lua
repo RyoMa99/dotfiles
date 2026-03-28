@@ -5,6 +5,7 @@ return {
     "mason.nvim",
     "mason-lspconfig.nvim",
     "hrsh7th/cmp-nvim-lsp",
+    "b0o/SchemaStore.nvim",
   },
   config = function()
     local capabilities = require("cmp_nvim_lsp").default_capabilities()
