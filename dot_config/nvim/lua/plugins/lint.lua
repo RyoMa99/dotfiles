@@ -289,15 +289,24 @@ return {
           end
         elseif ft == "go" then
           local config_path = find_golangci_lint_config()
-          if config_path and vim.fn.executable("golangci-lint") == 1 then
-            local module_root = find_project_root({ "go.mod" })
-            if module_root then
+          local module_root = find_project_root({ "go.mod" })
+          if config_path and module_root then
+            -- go tool（go.mod管理）を優先、なければPATH上のgolangci-lintにフォールバック
+            local has_go_tool = vim.fn.system("cd " .. vim.fn.shellescape(module_root) .. " && go tool golangci-lint version 2>/dev/null")
+            if vim.v.shell_error == 0 then
+              lint.linters.golangci_lint.cmd = "go"
+              lint.linters.golangci_lint.cwd = module_root
+              lint.linters.golangci_lint.args = {
+                "tool", "golangci-lint", "run", "--output.json.path=stdout", "--show-stats=false", "--config", config_path,
+              }
+            elseif vim.fn.executable("golangci-lint") == 1 then
+              lint.linters.golangci_lint.cmd = "golangci-lint"
               lint.linters.golangci_lint.cwd = module_root
               lint.linters.golangci_lint.args = {
                 "run", "--output.json.path=stdout", "--show-stats=false", "--config", config_path,
               }
-              lint.try_lint({ "golangci_lint" })
             end
+            lint.try_lint({ "golangci_lint" })
           end
         elseif ft == "php" then
           local config_path = find_phpstan_config()
