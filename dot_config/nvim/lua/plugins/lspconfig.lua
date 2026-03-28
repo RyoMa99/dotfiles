@@ -123,11 +123,20 @@ return {
       capabilities = capabilities,
       settings = {
         yaml = {
-          schemas = {
-            ["https://json.schemastore.org/github-workflow.json"] = "/.github/workflows/*",
-            ["https://raw.githubusercontent.com/compose-spec/compose-spec/master/schema/compose-spec.json"] = "compose*.yaml",
-            ["https://taskfile.dev/schema.json"] = "Taskfile*.yaml",
+          schemaStore = {
+            enable = false, -- SchemaStore.nvim 側で管理するため無効化
+            url = "",
           },
+          schemas = require("schemastore").yaml.schemas({
+            extra = {
+              {
+                description = "Taskfile",
+                fileMatch = { "Taskfile*.yaml", "Taskfile*.yml" },
+                name = "Taskfile",
+                url = "https://taskfile.dev/schema.json",
+              },
+            },
+          }),
         },
       },
     }
