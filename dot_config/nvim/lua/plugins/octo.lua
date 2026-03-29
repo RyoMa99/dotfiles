@@ -1,5 +1,7 @@
 return {
   "pwntester/octo.nvim",
+  -- TODO: LockedEventFragment 未定義バグの修正待ち (pwntester/octo.nvim#1453)
+  commit = "7967322",
   cmd = "Octo",
   dependencies = {
     "nvim-lua/plenary.nvim",
