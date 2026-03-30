@@ -1,4 +1,5 @@
 [tools]
+neovim = "0.11.7" # 0.12.0 は nvim-treesitter の conceal_line で crash するため固定 (2026-03-31)
 actionlint = "latest"
 golangci-lint = "latest"
 "pipx:keepercommander" = "latest"
@@ -6,3 +7,5 @@ golangci-lint = "latest"
 "npm:playwright" = "latest"
 "npm:react-doctor" = "latest"
 pnpm = "latest"
+"npm:@googleworkspace/cli" = "latest"
+gcloud = "latest"

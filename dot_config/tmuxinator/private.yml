@@ -19,8 +19,9 @@ windows:
       root: ~/repo/github.com/RyoMa99/go-feed
       layout: main-vertical
       panes:
+        - nvim
         - claude --enable-auto-mode
-        -
+        - task test:watch
   - claude-watch-relay:
       root: ~/repo/github.com/RyoMa99/claude-watch-relay
       layout: main-vertical
