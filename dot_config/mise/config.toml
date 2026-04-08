@@ -8,5 +8,5 @@ golangci-lint = "latest"
 "npm:react-doctor" = "latest"
 pnpm = "latest"
 "npm:@googleworkspace/cli" = "latest"
-"npm:@anthropic-ai/claude-code" = "2.1.89" # ここ数日レスポンスの精度が悪いため固定 (2026-04-06)
+"npm:@anthropic-ai/claude-code" = "latest"
 gcloud = "latest"
