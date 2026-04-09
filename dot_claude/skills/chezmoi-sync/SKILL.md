@@ -218,7 +218,7 @@ Brewfile に追加する場合：
 git -C ~/.local/share/chezmoi add -A && git -C ~/.local/share/chezmoi status
 ```
 
-コミットメッセージは日本語で、変更内容を簡潔に記述する。
+コミットメッセージは日本語で、`git diff --cached` の差分内容とユーザーが行った変更の意図に基づいて記述する。
 **確認は取らずにそのままコミット＆プッシュする**（ユーザーが `/chezmoi-sync push` を実行した時点でプッシュの意図は明確）。
 
 **コミットメッセージの生成ルール**:
