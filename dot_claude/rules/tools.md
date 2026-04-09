@@ -10,7 +10,7 @@ Claude Code 環境でのツール選択・設定・既知の注意点。
 
 ## HTTP クライアント: xh
 
-- `curl` ではなく `xh` を使用
+- `curl` ではなく `xh` を使用（`curl` は `xh` へのエイリアス設定済み）
 - Claude Code の Bash 環境では `--ignore-stdin` を必ず付ける（stdin が接続された状態で実行されるため `--raw` と競合する）
 
 ```bash
@@ -39,7 +39,7 @@ jina.ai の Reader API が JavaScript レンダリング後のコンテンツを
 ## ブラウザ操作
 
 優先順位:
-1. **Playwright CLI**（認証不要時）- Bash 1回で完結、コンテキスト最小
+1. **agent-browser**（認証不要時）- Bash 1コマンド = 1アクション、snapshot でアクセシビリティツリー取得
 2. **Claude in Chrome**（認証必要時）- ユーザーのセッション活用
 3. **chrome-devtools MCP**（Claude in Chrome が使えない時のフォールバック）
 
@@ -47,7 +47,7 @@ jina.ai の Reader API が JavaScript レンダリング後のコンテンツを
 
 ## ランタイム管理: mise
 
-- mise で管理するツール（playwright 等）は直接コマンド名で実行する（`.zshenv` で shims が PATH に設定済み）
+- mise で管理するツール（agent-browser 等）は直接コマンド名で実行する（`.zshenv` で shims が PATH に設定済み）
 
 ---
 
