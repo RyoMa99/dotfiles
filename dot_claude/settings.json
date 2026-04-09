@@ -247,5 +247,6 @@
     "coderabbit@claude-plugins-official": true
   },
   "outputStyle": "Learning",
-  "language": "Japanese"
+  "language": "Japanese",
+  "effortLevel": "max"
 }
