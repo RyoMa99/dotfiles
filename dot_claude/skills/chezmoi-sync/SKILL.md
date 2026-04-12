@@ -139,7 +139,48 @@ diff <(ls ~/.config/nvim/lua/plugins/ | sort) <(ls ~/.local/share/chezmoi/dot_co
 
 未管理ファイルがあればユーザーに `chezmoi add` するか確認する。
 Step 1 の `chezmoi diff` に差分がなくても、未管理ファイルがあれば続行する。
-両方とも差分なし・未管理なしの場合のみ終了。
+両方とも差分なし・未管理なしの場合のみ終了（Step 1.6 の MCP チェックは実施する）。
+
+### Step 1.6: MCP サーバー設定の整合性チェック
+
+`claude mcp` で登録されている user スコープの MCP サーバーと、chezmoi の `run_onchange_setup-claude-mcp.sh` の内容を比較する。
+
+```bash
+# 登録済みの user スコープ MCP サーバー（plugin:* は除外）
+REGISTERED=$(claude mcp list 2>/dev/null | grep -v '^plugin:' | grep -v '^claude\.ai' | grep -v '^Checking' | grep ':' | sed 's/:.*//')
+
+# chezmoi スクリプトで管理されているサーバー
+MANAGED=$(grep '^add_mcp ' ~/.local/share/chezmoi/run_onchange_setup-claude-mcp.sh | awk '{print $2}')
+```
+
+**チェック 1: サーバー一覧の差分**
+
+```bash
+diff <(echo "$REGISTERED" | sort) <(echo "$MANAGED" | sort) || true
+```
+
+- 登録済みだが chezmoi 未管理 → `run_onchange_setup-claude-mcp.sh` への追加を提案
+- chezmoi 管理だが未登録 → 削除されたか確認
+
+**チェック 2: 起動引数の差分**
+
+各サーバーについて、`claude mcp get <name>` の Args と `run_onchange_setup-claude-mcp.sh` 内の引数を比較する。
+
+```bash
+for name in $MANAGED; do
+  # 登録済みの実際の引数
+  actual_args=$(claude mcp get "$name" 2>/dev/null | grep 'Args:' | sed 's/.*Args: //')
+  # スクリプト内の引数（-- 以降を抽出）
+  script_args=$(grep "^add_mcp $name " ~/.local/share/chezmoi/run_onchange_setup-claude-mcp.sh | sed 's/.* -- //')
+  if [ "$actual_args" != "$script_args" ]; then
+    echo "DRIFT: $name"
+    echo "  actual: $actual_args"
+    echo "  script: $script_args"
+  fi
+done
+```
+
+差分がある場合、ユーザーに `run_onchange_setup-claude-mcp.sh` を更新するか確認する。
 
 ### Step 2: 変更ファイルの反映
 
@@ -315,6 +356,10 @@ brew bundle cleanup --file=~/.Brewfile 2>&1
 ```
 
 レポートの「差分あり」セクションに結果を含める。
+
+### Step 4.5: MCP サーバー設定の整合性チェック
+
+Push モードの Step 1.6 と同じチェックを実施する。差分がある場合はレポートの「差分あり」セクションに含める。
 
 ### Step 5: 外部管理スキルの確認
 
