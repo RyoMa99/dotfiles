@@ -162,22 +162,25 @@ diff <(echo "$REGISTERED" | sort) <(echo "$MANAGED" | sort) || true
 - 登録済みだが chezmoi 未管理 → `run_onchange_setup-claude-mcp.sh` への追加を提案
 - chezmoi 管理だが未登録 → 削除されたか確認
 
-**チェック 2: 起動引数の差分**
+**チェック 2: 起動コマンド + 引数の差分**
 
-各サーバーについて、`claude mcp get <name>` の Args と `run_onchange_setup-claude-mcp.sh` 内の引数を比較する。
+各サーバーについて、`claude mcp get <name>` の Command + Args を結合し、`run_onchange_setup-claude-mcp.sh` 内の `-- ` 以降と比較する。
 
 ```bash
-for name in $MANAGED; do
-  # 登録済みの実際の引数
-  actual_args=$(claude mcp get "$name" 2>/dev/null | grep 'Args:' | sed 's/.*Args: //')
+while IFS= read -r name; do
+  # 登録済みの実際のコマンド（Command + Args を結合）
+  mcp_info=$(claude mcp get "$name" 2>/dev/null)
+  actual_cmd=$(echo "$mcp_info" | grep 'Command:' | sed 's/.*Command: //')
+  actual_args=$(echo "$mcp_info" | grep 'Args:' | sed 's/.*Args: //')
+  actual="${actual_cmd} ${actual_args}"
   # スクリプト内の引数（-- 以降を抽出）
-  script_args=$(grep "^add_mcp $name " ~/.local/share/chezmoi/run_onchange_setup-claude-mcp.sh | sed 's/.* -- //')
-  if [ "$actual_args" != "$script_args" ]; then
+  script=$(grep "^add_mcp $name " ~/.local/share/chezmoi/run_onchange_setup-claude-mcp.sh | sed 's/.* -- //')
+  if [ "$actual" != "$script" ]; then
     echo "DRIFT: $name"
-    echo "  actual: $actual_args"
-    echo "  script: $script_args"
+    echo "  registered: $actual"
+    echo "  script:     $script"
   fi
-done
+done <<< "$MANAGED"
 ```
 
 差分がある場合、ユーザーに `run_onchange_setup-claude-mcp.sh` を更新するか確認する。
