@@ -1,0 +1,23 @@
+{
+  "skill_name": "db-design",
+  "evals": [
+    {
+      "id": 1,
+      "prompt": "注文テーブルに payment_status と shipping_status カラムを追加したいんだけど、マイグレーション書いて。ALTER TABLE orders ADD COLUMN payment_status VARCHAR(20), ADD COLUMN shipping_status VARCHAR(20); でいいかな",
+      "expected_output": "ステータス横増殖のアンチパターンを指摘し、イベントテーブル分離を提案する",
+      "files": []
+    },
+    {
+      "id": 2,
+      "prompt": "タスク管理機能を作ってる。tasks テーブルに is_approved BOOLEAN, is_published BOOLEAN, is_archived BOOLEAN を追加するマイグレーションを作成して",
+      "expected_output": "Boolean フラグ増殖のアンチパターンを指摘し、排他的なステータスカラムまたはイベントテーブルを提案する",
+      "files": []
+    },
+    {
+      "id": 3,
+      "prompt": "社内の経費申請を管理するテーブルを新しく設計したい。フローは 申請→審査中→承認/却下 で、却下された場合は修正して再申請できる。テーブル設計をお願い",
+      "expected_output": "5ステップに従い、イベント列挙→リソース/イベント分離→遷移図定義の順で設計を進める",
+      "files": []
+    }
+  ]
+}

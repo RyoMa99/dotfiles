@@ -7,30 +7,30 @@ windows:
   - main:
       layout: main-vertical
       panes:
-        - claude --enable-auto-mode
+        - claude
         -
   - ideas:
       root: ~/repo/github.com/RyoMa99/ideas
       layout: main-vertical
       panes:
-        - claude --enable-auto-mode
+        - claude
         -
   - go-feed:
       root: ~/repo/github.com/RyoMa99/go-feed
       layout: main-vertical
       panes:
         - nvim
-        - claude --enable-auto-mode
+        - claude
         - task test:watch
   - claude-watch-relay:
       root: ~/repo/github.com/RyoMa99/claude-watch-relay
       layout: main-vertical
       panes:
-        - claude --enable-auto-mode
+        - claude
         -
   - zettel-server:
       root: ~/repo/github.com/RyoMa99/zettel-server
       layout: main-vertical
       panes:
-        - claude --enable-auto-mode
+        - claude
         -
