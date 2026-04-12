@@ -10,92 +10,117 @@ NASA、Airbus、Bosch、Intel、Siemens 等が採用。
 ## 基本構造
 
 ```
-While [optional precondition], when [optional trigger], the [system name] shall [response]
+<状態> の間、<トリガー> のとき、<システム> は <応答> しなければならない
 ```
+
+「しなければならない」は英語の "shall" に相当し、義務的要件を示す。
 
 ---
 
 ## 6パターン
 
-### 1. Ubiquitous（常時有効）
+### 1. 常時適用型（Ubiquitous）
 
 キーワードなし。システムが常に満たすべき制約。
 
+**テンプレート**: `<システム> は <応答> しなければならない`
+
 ```
-The system shall encrypt all stored passwords using bcrypt with a minimum cost factor of 12.
-The system shall respond to all API requests within 500ms under normal load.
+システムは、保存されたすべてのパスワードを bcrypt（コストファクター12以上）で暗号化しなければならない。
+システムは、通常負荷において全 API リクエストに 500ms 以内で応答しなければならない。
 ```
 
-### 2. Event-driven（イベント駆動）
+### 2. イベント駆動型（Event-driven）
 
-キーワード: **When**
+キーワード: **〜のとき**
 
 特定のトリガーが発生したときの動作。
 
+**テンプレート**: `<トリガー> のとき、<システム> は <応答> しなければならない`
+
 ```
-When the user submits the registration form with valid data,
-the system shall create the user account and send a verification email.
+ユーザーが有効なデータで登録フォームを送信したとき、
+システムはユーザーアカウントを作成し、認証メールを送信しなければならない。
 
-When a payment transaction fails,
-the system shall log the failure details and notify the operations team.
+決済トランザクションが失敗したとき、
+システムは障害の詳細をログに記録し、運用チームに通知しなければならない。
 ```
 
-### 3. State-driven（状態駆動）
+### 3. 状態駆動型（State-driven）
 
-キーワード: **While**
+キーワード: **〜の間**
 
 特定の状態が継続している間の制約。
 
+**テンプレート**: `<状態> の間、<システム> は <応答> しなければならない`
+
 ```
-While the system is in maintenance mode,
-the system shall reject all write operations and display a maintenance notice.
+システムがメンテナンスモードの間、
+システムはすべての書き込み操作を拒否し、メンテナンス通知を表示しなければならない。
 
-While a user session is active,
-the system shall refresh the authentication token every 15 minutes.
+ユーザーセッションが有効の間、
+システムは 15 分ごとに認証トークンをリフレッシュしなければならない。
 ```
 
-### 4. Optional features（オプション機能）
+### 4. オプション機能型（Optional features）
 
-キーワード: **Where**
+キーワード: **〜がある場合**
 
 特定のオプションが有効な場合の動作。
 
+**テンプレート**: `<機能／条件> がある場合、<システム> は <応答> しなければならない`
+
 ```
-Where two-factor authentication is enabled,
-the system shall require a verification code after password entry.
+二要素認証が有効の場合、
+システムはパスワード入力後に確認コードを要求しなければならない。
 
-Where the premium plan is active,
-the system shall allow up to 100 concurrent API connections.
+プレミアムプランの契約がある場合、
+システムは最大 100 の同時 API 接続を許可しなければならない。
 ```
 
-### 5. Unwanted behavior（異常系）
+### 5. 異常系（Unwanted behavior）
 
-キーワード: **If...then**
+キーワード: **〜の場合**
 
 望まない状態が発生した場合の対処。
 
-```
-If the database connection is lost,
-then the system shall retry up to 3 times with exponential backoff
-and return a 503 status if all retries fail.
+**テンプレート**: `<望まない状態> の場合、<システム> は <応答> しなければならない`
 
-If the uploaded file exceeds the maximum size limit,
-then the system shall reject the upload and display the maximum allowed size.
+```
+データベース接続が失われた場合、
+システムは指数バックオフで最大 3 回リトライし、
+すべて失敗したときは 503 ステータスを返さなければならない。
+
+アップロードファイルが最大サイズを超過した場合、
+システムはアップロードを拒否し、許容最大サイズを表示しなければならない。
 ```
 
-### 6. Complex（複合）
+### 6. 複合型（Complex）
 
 複数のキーワードを組み合わせる。
 
-```
-While the system is processing a batch job,
-when a new high-priority request arrives,
-the system shall queue the batch job and process the high-priority request first.
+**テンプレート**: `<状態> の間、<トリガー> のとき、<システム> は <応答> しなければならない`（等）
 
-Where audit logging is enabled,
-when a user modifies a protected resource,
-the system shall record the actor, action, resource, and timestamp.
 ```
+バッチジョブ処理中の間、高優先度リクエストが到着したとき、
+システムはバッチジョブをキューに入れ、高優先度リクエストを先に処理しなければならない。
+
+監査ログが有効の場合、ユーザーが保護リソースを変更したとき、
+システムは操作者・操作・リソース・タイムスタンプを記録しなければならない。
+```
+
+---
+
+## パターン別キーワード一覧
+
+| パターン | キーワード | 英語対応 |
+|---------|-----------|---------|
+| 常時適用型 | （なし） | — |
+| イベント駆動型 | 〜のとき | When |
+| 状態駆動型 | 〜の間 | While |
+| オプション機能型 | 〜がある場合 | Where |
+| 異常系 | 〜の場合 | If...then |
+| 複合型 | 上記の組み合わせ | — |
 
 ---
 
@@ -108,8 +133,8 @@ the system shall record the actor, action, resource, and timestamp.
 **REQ-001 (EARS)**:
 
 ```
-When the user submits the registration form with valid data,
-the system shall create the user account and send a verification email.
+ユーザーが有効なデータで登録フォームを送信したとき、
+システムはユーザーアカウントを作成し、認証メールを送信しなければならない。
 ```
 
 **導出される GWT**:
@@ -144,11 +169,11 @@ EARS 要件1つにつき、以下を検討する:
 
 | EARS パターン | GWT の GIVEN に入りやすい条件 |
 |-------------|---------------------------|
-| Event-driven (When) | トリガーの前提状態（認証済み、未認証、権限あり/なし等） |
-| State-driven (While) | 状態の開始/終了境界、状態遷移中のエッジケース |
-| Optional (Where) | オプション ON/OFF、オプション間の組み合わせ |
-| Unwanted (If...then) | 障害の種類・程度（部分障害、完全障害、タイムアウト） |
-| Complex | 各キーワードの条件の組み合わせ |
+| イベント駆動型（〜のとき） | トリガーの前提状態（認証済み、未認証、権限あり/なし等） |
+| 状態駆動型（〜の間） | 状態の開始/終了境界、状態遷移中のエッジケース |
+| オプション機能型（〜がある場合） | オプション ON/OFF、オプション間の組み合わせ |
+| 異常系（〜の場合） | 障害の種類・程度（部分障害、完全障害、タイムアウト） |
+| 複合型 | 各キーワードの条件の組み合わせ |
 
 ---
 
@@ -156,3 +181,4 @@ EARS 要件1つにつき、以下を検討する:
 
 - Alistair Mavin, EARS: Easy Approach to Requirements Syntax (2009)
 - https://alistairmavin.com/ears/
+- https://qiita.com/NaokiIshimura/items/490faa689a44c161070f

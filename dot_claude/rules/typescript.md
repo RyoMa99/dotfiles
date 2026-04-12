@@ -13,6 +13,8 @@ globs: ["*.ts", "*.tsx"]
 
 文字列キー `{ __brand__: "..." }` は使わない（補完汚染・型安全性の穴があるため）。
 
+`as Brand` キャストはパーサ／ファクトリ関数内でのみ使用する。検証ロジックと `as` キャストが同じ関数に閉じていれば、型の保証がその関数の正しさだけに依存する。散在すると「この `as` の前に検証は済んでいるか？」を呼び出し元ごとに確認する必要が生じ、Parse, don't Validate の利点が失われる。
+
 ```typescript
 const userIdBrand = Symbol();
 export type UserId = string & { [userIdBrand]: unknown };
