@@ -8,6 +8,7 @@ disable-model-invocation: false
 - `react-patterns.md` — React 固有の State 管理、Hooks、Async React、React Hook Form
 - `component-design.md` — テスト戦略、フォームバリデーション、パフォーマンス、Storybook
 - `css-layout.md` — CSS レイアウト、レスポンシブ、Design Tokens
+- `japanese-typography.md` — 日本語組版（行間・字間・和欧混植・禁則処理・コンテキスト別設定）
 
 パフォーマンス最適化時のみ参照:
 - `rendering-performance.md` — 大量 DOM のレンダリング最適化（イベント委譲、ステート配置、仮想化、CSS パフォーマンス）
