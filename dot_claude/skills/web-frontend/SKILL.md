@@ -9,6 +9,9 @@ disable-model-invocation: false
 - `component-design.md` — テスト戦略、フォームバリデーション、パフォーマンス、Storybook
 - `css-layout.md` — CSS レイアウト、レスポンシブ、Design Tokens
 
+パフォーマンス最適化時のみ参照:
+- `rendering-performance.md` — 大量 DOM のレンダリング最適化（イベント委譲、ステート配置、仮想化、CSS パフォーマンス）
+
 # Web フロントエンド設計原則
 
 関連: `robust-code.md` ルール（型による予防的設計）
