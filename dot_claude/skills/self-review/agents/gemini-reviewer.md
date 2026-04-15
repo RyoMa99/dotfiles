@@ -7,30 +7,43 @@ Gemini CLI のヘッドレスモードでコードレビューを実行する。
 
 ## 実行方法
 
-### tracked ファイルの差分がある場合
+### 差分の前処理
 
-差分情報をパイプで渡し、Gemini にレビューさせる:
-
-```bash
-cd <作業ディレクトリ> && git diff | gemini -p "以下のコード差分をレビューしてください。設計品質・バグリスク・可読性・セキュリティの観点で指摘をお願いします。各指摘に重要度（Critical/Major/Minor/Nit）、場所（ファイル:行番号）、問題、提案を含めてください。指摘がなければ「特に問題ありません」と報告してください。"
-```
-
-### untracked（新規）ファイルのみの場合
-
-`git diff` が空になるため、ファイル内容を直接渡す:
+大きな差分はそのまま渡すと処理が遅くなるため、前処理する:
 
 ```bash
-cd <作業ディレクトリ> && cat <対象ファイル> | gemini -p "以下のTypeScriptコードをレビューしてください。設計品質・バグリスク・可読性・セキュリティの観点で指摘をお願いします。各指摘に重要度（Critical/Major/Minor/Nit）、場所（ファイル:行番号）、問題、提案を含めてください。指摘がなければ「特に問題ありません」と報告してください。"
+# 差分の行数を確認
+DIFF_LINES=$(<diff取得コマンド> | wc -l)
+
+if [ "$DIFF_LINES" -gt 500 ]; then
+  # 500行超: stat（ファイル一覧+変更行数）のみ渡す
+  DIFF=$(<diff取得コマンド> --stat)
+  PROMPT_SUFFIX="（差分が大きいため統計情報のみ。重大な構造上の問題に集中してください）"
+else
+  DIFF=$(<diff取得コマンド>)
+  PROMPT_SUFFIX=""
+fi
 ```
 
-### レビュー対象に応じたコマンド
+### コマンド
+
+```bash
+cd <作業ディレクトリ> && <diff取得コマンド> | head -500 | gemini -p "コード差分をレビュー。Critical/Majorのみ、最大5件。各指摘: 重要度、ファイル:行、問題、提案。問題なければ「なし」。${PROMPT_SUFFIX}"
+```
+
+### レビュー対象に応じた diff 取得コマンド
 
 | 対象 | コマンド |
 |------|---------|
-| diff | `git diff` をパイプ |
-| staged | `git diff --cached` をパイプ |
-| branch | `git diff origin/main...HEAD` をパイプ |
-| PR #N | `gh pr diff N` をパイプ |
+| diff | `git diff` |
+| staged | `git diff --cached` |
+| branch | `git diff origin/main...HEAD` |
+| PR #N | `gh pr diff N` |
+
+## タイムアウト
+
+Bash ツールの `timeout` パラメータを **120000**（120秒）に設定する。
+タイムアウトした場合は「Gemini: タイムアウト（120秒）」と報告する。
 
 ## 注意事項
 

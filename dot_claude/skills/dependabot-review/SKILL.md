@@ -19,11 +19,17 @@ allowed-tools: ["Bash(gh:*)", "Bash(git:*)", "Bash(jq:*)", "Grep", "Glob", "Read
 
 ## 実行フロー
 
-### 1. 対象 PR の収集
+### 1. 対象リポジトリの特定と PR の収集
 
 ```bash
-gh pr list --author "app/dependabot" --state open --json number,title,labels,body
+# カレントディレクトリのリポジトリを特定（以降すべての gh コマンドで -R を使用）
+REPO=$(gh repo view --json nameWithOwner -q '.nameWithOwner')
+
+# 対象 PR を収集
+gh pr list -R "$REPO" --author "app/dependabot" --state open --json number,title,labels,body
 ```
+
+以降のすべての `gh` コマンドは `-R "$REPO"` を付けて実行する。
 
 引数でフィルタ可能:
 - `$ARGUMENTS` が `patch` / `minor` / `major` → その種別のみ処理
