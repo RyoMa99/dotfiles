@@ -181,4 +181,3 @@ EARS 要件1つにつき、以下を検討する:
 
 - Alistair Mavin, EARS: Easy Approach to Requirements Syntax (2009)
 - https://alistairmavin.com/ears/
-- https://qiita.com/NaokiIshimura/items/490faa689a44c161070f
