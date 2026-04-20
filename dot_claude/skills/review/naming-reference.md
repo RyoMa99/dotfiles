@@ -38,6 +38,32 @@ function processData(data) { ... }
 function applesauce(order) { /* TODO: 適切な名前に */ }
 ```
 
+**applesauce 手続きの意図**:
+
+```typescript
+// Before: 一見何か言っているように見えるが実は誤解を招く名前
+class OrderManager { ... }
+function processOrder() { ... }
+
+// Step 1: applesauce へ明示的に降格（誤った安心感を剥がす）
+class Applesauce { ... }
+function applesauce() { ... }
+// ここで commit
+
+// Step 2: 1つの真実を名前に反映して Honest へ
+class probably_OrderPersistence_AndStuff { ... }
+function probably_parseOrderXml_AndStuff() { ... }
+```
+
+**直接 Honest へ進めてよい例外**:
+
+```typescript
+// 1行の文脈から意味が明白な場合
+for (const d of documents) {
+  //      ^ applesauce を経由せず直接 `doc` / `document` へ
+}
+```
+
 ### Stage 3: Honest
 
 主要な作用は反映しているが、副作用が隠れている。
@@ -50,6 +76,17 @@ function insertUser(user) {
 }
 ```
 
+**不確実性マーカー付き Honest**: 全作用が未把握の段階では、以下のマーカーで不確実性を名前に表明する。
+
+```typescript
+// 把握済み: DB への何かの書き込み
+// 未把握: 他にも作用があるかもしれない
+function probably_writeUserToDatabase_AndStuff(user) { ... }
+```
+
+- `probably_` プレフィックス: 推測の範囲（テストで確認後に除去）
+- `_AndStuff` サフィックス: 未把握の残余作用（追跡が進んだら具体化）
+
 ### Stage 4: Honest and Complete
 
 全ての作用を名前に含めている。名前が長くなる。
@@ -59,6 +96,22 @@ function insertUserAndSendWelcomeEmailAndTrackAnalytics(user) { ... }
 ```
 
 **これは問題のサイン** → Stage 5 で分割が必要。
+
+**Stage 3 → Stage 4 の反復**:
+
+```typescript
+// 反復1: _AndStuff の中身を1つ特定
+probably_writeUserToDatabase_AndStuff
+→ probably_writeUserToDatabaseAndSendEmail_AndStuff
+
+// 反復2: さらに特定
+→ probably_writeUserToDatabaseAndSendEmailAndTrackAnalytics_AndStuff
+
+// 反復3: _AndStuff が空になったことを確認（テストで検証）
+→ writeUserToDatabaseAndSendEmailAndTrackAnalytics  // probably_ と _AndStuff が外れた
+```
+
+**ゴール**: 名前だけ見て挙動が復元できる完全性。長さは美徳。
 
 ### Stage 5: Does the Right Thing
 
