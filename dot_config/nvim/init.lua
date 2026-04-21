@@ -121,11 +121,19 @@ vim.keymap.set("n", "gy", function()
 end, { desc = "リンクURLをコピー" })
 
 -- mo: Markdown をブラウザでプレビュー（git root を --target に使用）
+-- vim.system() は stdin をデフォルトで閉じるため、mo が stdin 待ちに入らない。
+-- jobstart() のリスト/文字列形式はどちらも stdin パイプが開いたままになるので不可。
 vim.keymap.set("n", "<Leader>md", function()
-  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
-  local target = git_root and vim.fn.fnamemodify(git_root, ":t") or "default"
   local file_path = vim.fn.expand("%:p")
-  vim.fn.jobstart({ "mo", file_path, "--target", target }, { detach = true })
+  if file_path == "" then
+    vim.notify("保存済みのファイルがありません", vim.log.levels.ERROR)
+    return
+  end
+  local git_root = vim.fn.systemlist("git rev-parse --show-toplevel")[1]
+  local target = (vim.v.shell_error == 0 and git_root)
+    and vim.fn.fnamemodify(git_root, ":t")
+    or "default"
+  vim.system({ "mo", file_path, "--target", target }, { detach = true })
 end, { desc = "mo で現在のファイルをプレビュー" })
 
 -- lazy.nvim
