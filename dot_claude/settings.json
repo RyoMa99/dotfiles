@@ -17,7 +17,6 @@
       "Bash(gh:*)",
       "Bash(ghq:*)",
       "Bash(lazygit:*)",
-
       "Bash(pnpm:*)",
       "Bash(npm:*)",
       "Bash(npx:*)",
@@ -26,39 +25,29 @@
       "Bash(pipx list:*)",
       "Bash(uvx:*)",
       "Bash(uv tool:*)",
-
       "Bash(go:*)",
       "Bash(java:*)",
       "Bash(python:*)",
       "Bash(python3:*)",
       "Bash(node -e:*)",
-
       "Bash(docker:*)",
       "Bash(terraform:*)",
-
       "Bash(golangci-lint:*)",
       "Bash(editorconfig-checker:*)",
-
       "Bash(xh:*)",
       "Bash(grepai:*)",
-
       "Bash(agent-browser:*)",
       "Bash(katana:*)",
-
       "Bash(tbls version:*)",
-
       "Bash(copilot:*)",
       "Bash(gemini:*)",
       "Bash(claude:*)",
       "Bash(notebooklm:*)",
-
       "Bash(keeper version:*)",
-
       "Bash(mise:*)",
       "Bash(brew:*)",
       "Bash(chezmoi:*)",
       "Bash(ollama:*)",
-
       "Bash(tmux:*)",
       "Bash(tmuxinator:*)",
       "Bash(TMUX=\"\" tmuxinator start:*)",
@@ -67,7 +56,6 @@
       "Bash(nvim:*)",
       "Bash(nvr:*)",
       "Bash(wezterm cli list:*)",
-
       "Bash(ls:*)",
       "Bash(find:*)",
       "Bash(grep:*)",
@@ -100,14 +88,12 @@
       "Bash(zsh:*)",
       "Bash(pbcopy)",
       "Bash(env)",
-
       "Bash(ps:*)",
       "Bash(lsof:*)",
       "Bash(pkill:*)",
       "Bash(pgrep:*)",
       "Bash(kill:*)",
       "Bash(task --list)",
-
       "Bash(mdfind:*)",
       "Bash(osascript:*)",
       "Bash(defaults read:*)",
@@ -116,19 +102,15 @@
       "Bash(exiftool:*)",
       "Bash(sips:*)",
       "Bash(xattr:*)",
-
       "Bash(dig:*)",
       "Bash(nslookup:*)",
       "Bash(traceroute:*)",
       "Bash(networksetup:*)",
       "Bash(scutil:*)",
-
       "Bash(mo:*)",
       "Bash(arto:*)",
-
       "WebSearch",
       "WebFetch",
-
       "Skill(naming-review)",
       "Skill(session-retrospective)",
       "Skill(url-digest)",
@@ -139,7 +121,6 @@
       "Skill(nvim-plugin-management)",
       "Skill(commit-commands:commit)",
       "Skill(job-support)",
-
       "mcp__chrome-devtools__new_page",
       "mcp__chrome-devtools__list_pages",
       "mcp__chrome-devtools__navigate_page",
@@ -150,18 +131,14 @@
       "mcp__chrome-devtools__evaluate_script",
       "mcp__chrome-devtools__list_network_requests",
       "mcp__chrome-devtools__get_network_request",
-
       "mcp__plugin_serena_serena__list_dir",
       "mcp__plugin_serena_serena__activate_project",
       "mcp__plugin_serena_serena__read_file",
-
       "mcp__database__read_query",
       "mcp__database__list_tables",
-
       "mcp__plugin_slack_slack__slack_read_channel",
       "mcp__plugin_slack_slack__slack_search_channels",
       "mcp__plugin_slack_slack__slack_search_public",
-
       "mcp__docbase__getPost",
       "mcp__docbase__createPost",
       "mcp__docbase__updatePost"
@@ -170,7 +147,7 @@
       "Bash(rm -rf:*)",
       "Bash(rm --recursive --force:*)"
     ],
-    "defaultMode": "acceptEdits"
+    "defaultMode": "auto"
   },
   "hooks": {
     "PostToolUse": [
@@ -304,5 +281,6 @@
   },
   "outputStyle": "Explanatory",
   "language": "Japanese",
-  "effortLevel": "high"
+  "effortLevel": "high",
+  "skipAutoPermissionPrompt": true
 }
