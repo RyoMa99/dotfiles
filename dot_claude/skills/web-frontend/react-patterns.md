@@ -573,6 +573,48 @@ const handleClick = () => {
 };
 ```
 
+### デバウンス（Transition 対応）
+
+検索入力など API 呼び出しを間引きたい場面では、デバウンスを **Transition の一部** として設計する。`setTimeout` で別管理すると `isPending` がデバウンス期間をカバーせず、Transition と非同期処理が分離してしまう。
+
+```tsx
+// BAD: 従来のデバウンス（Transition 非対応）
+const [text, setText] = useState('');
+const [debouncedText, setDebouncedText] = useState('');
+useEffect(() => {
+  const id = setTimeout(() => setDebouncedText(text), 500);
+  return () => clearTimeout(id);
+}, [text]);
+// → isPending で「入力中～API 完了まで」を一貫して表現できない
+
+// GOOD: Transition の中で sleep してから state 更新
+const [isPending, startSearchTransition] = useTransition();
+const debouncedText = useDebouncedValue(text, {
+  intervalMs: 500,
+  startTransition: startSearchTransition, // 外から注入して isPending を共有
+});
+const result = cachedApi(debouncedText); // Suspense 対応フェッチ
+```
+
+**実装上の核心**（`useDebouncedValue` の内部）:
+
+```tsx
+startTransition(async () => {
+  await sleep(intervalMs, signal);     // デバウンス待機も transition の一部
+  startTransition(() => {              // ★ 内側でネスト必須
+    setDebouncedValue(value);
+  });
+});
+```
+
+- **外側**: 非同期 `startTransition` でデバウンス待機を囲む
+- **内側**: `await` 後の state 更新は **別の `startTransition` でネスト**する必要がある
+  - 理由: JS 言語仕様上、`await` 後のマイクロタスクは外側の `startTransition` のスコープを引き継がない
+
+**API 設計の原則**: `useDebouncedValue` が `startTransition` を引数で受け取ることで、同じ transition ID を複数の state 更新（テキスト + ラジオボタン等）で共有できる。戻り値を `[value, isPending]` タプルにせず、transition の共有を明示的にするのがこの設計の核心。
+
+参考: [uhyo - Async React時代の宣言的UI 2: トランジション対応のuseDebouncedフックを作る](https://zenn.dev/uhyo/articles/async-react-debounce-2)
+
 ### Action パターン（汎用コンポーネント設計）
 
 汎用コンポーネントが `action` prop を受け取り、内部で `startTransition` を適用。アプリ全体で一貫した非同期 UX を実現する。命名を `onClick` ではなく `action` にすることで「Transition として実行される」契約を型レベルで表現する。

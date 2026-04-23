@@ -6,7 +6,7 @@ disable-model-invocation: false
 
 参照ファイル:
 - `react-patterns.md` — React 固有の State 管理、Hooks、Async React、React Hook Form
-- `component-design.md` — テスト戦略、フォームバリデーション、パフォーマンス、Storybook
+- `component-design.md` — テスト戦略、フィードバック UI の使い分け、フォームバリデーション、パフォーマンス、Storybook
 - `css-layout.md` — CSS レイアウト、レスポンシブ、Design Tokens
 - `japanese-typography.md` — 日本語組版（行間・字間・和欧混植・禁則処理・コンテキスト別設定）
 
