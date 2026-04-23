@@ -85,9 +85,13 @@ PR body に含まれる Dependabot のリリースノート抜粋を活用する
 
 #### Step 3: アクション実行
 
+> **コメント投稿の書式**: 複数行・Markdown を含むレビューコメントは `--body-file -` で stdin から渡す。`--body` は単一行の文字列用フラグで、`--body "..."` にサブシェル `$(...)` や heredoc を埋め込むとクォートの扱いが壊れやすい。`--body -` と書くと **フラグ引数として「-」1 文字が渡り、本文が破損する**（エラーは出ないので見逃しやすい）。詳細は「注意事項」参照。
+
 **patch の場合:**
 ```bash
-gh pr comment <number> --body "<レビュー結果のサマリ>"
+gh pr comment <number> --body-file - <<'EOF'
+<レビュー結果のサマリ（Markdown 可）>
+EOF
 gh pr review <number> --approve
 gh pr merge <number> --auto --merge
 # auto merge が無効なリポジトリでは失敗する → approve のみで止め、ユーザーに報告
@@ -95,7 +99,9 @@ gh pr merge <number> --auto --merge
 
 **minor で問題なしの場合:**
 ```bash
-gh pr comment <number> --body "<レビュー結果のサマリ>"
+gh pr comment <number> --body-file - <<'EOF'
+<レビュー結果のサマリ（Markdown 可）>
+EOF
 gh pr review <number> --approve
 gh pr merge <number> --auto --merge
 # auto merge が無効なリポジトリでは失敗する → approve のみで止め、ユーザーに報告
@@ -103,13 +109,17 @@ gh pr merge <number> --auto --merge
 
 **minor で懸念ありの場合:**
 ```bash
-gh pr comment <number> --body "<懸念点の詳細>"
+gh pr comment <number> --body-file - <<'EOF'
+<懸念点の詳細>
+EOF
 ```
 → マージしない。ユーザーに判断を委ねる。
 
 **major の場合:**
 ```bash
-gh pr comment <number> --body "<詳細なレビューコメント>"
+gh pr comment <number> --body-file - <<'EOF'
+<詳細なレビューコメント>
+EOF
 ```
 → マージしない。approve もしない。
 
@@ -163,4 +173,9 @@ gh pr comment <number> --body "<詳細なレビューコメント>"
 - `--auto` フラグを使うため、branch protection rules の required checks を通過するまで実際のマージは発生しない
 - **Auto merge 無効時**: `gh pr merge --auto` が `Pull request Auto merge is not allowed for this repository` で失敗した場合、approve のみ実行しマージはスキップする。サマリ報告で「Auto merge 無効のため approve のみ。リポジトリの Settings > General > Allow auto-merge の有効化を推奨」と報告する
 - 同一パッケージの複数バージョン更新がある場合、最新の PR のみ処理し、古い PR はスキップする
-- **同一 lockfile のコンフリクト**: 同じ `go.mod` / `package.json` 等を変更する PR は、1件マージすると残りがコンフリクトする。コンフリクトした PR には `@dependabot rebase` をコメントし、サマリで rebase 待ちと報告する
+- **同一 lockfile のコンフリクト**: 同じ `go.mod` / `package.json` 等を変更する PR は、1件マージすると残りがコンフリクトする。全件に `--auto` をセットしておけば Dependabot が自動 rebase → CI 再走 → 順次マージしてくれる。長時間 rebase されない場合のみ `@dependabot rebase` を手動コメントする
+- **`gh pr comment` の stdin 読み込み**: 長文・複数行のコメント本文は `--body-file -` + heredoc で渡す。`--body` は単一行文字列用のフラグ。誤って `--body -` と書くと **フラグ値として「-」1 文字が渡り、本文が壊れる**（エラーは出ず投稿も成功するため発見が遅れる）。投稿後に `gh api /repos/{owner}/{repo}/issues/comments/{id} -q '.body'` で本文を検証することを推奨
+  - ❌ BAD: `gh pr comment 42 --body - <<'EOF' ... EOF`（本文が「-」になる）
+  - ❌ BAD: `gh pr comment 42 --body "$(cat <<'EOF' ... EOF)"`（heredoc ネストでパース不具合）
+  - ✅ GOOD: `gh pr comment 42 --body-file - <<'EOF' ... EOF`
+- **投稿後の検証**: 長文コメント投稿後は URL を出力した後に `gh api /repos/{owner}/{repo}/issues/comments/{id} -q '.body' | head -5` で本文先頭を確認し、破損がないかチェックする習慣を付ける
