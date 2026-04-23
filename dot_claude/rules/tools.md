@@ -23,16 +23,54 @@ xh POST http://localhost:8788/v1/logs Authorization:"Bearer token" --raw '{"reso
 
 ---
 
-## Web ページ取得: WebFetch / jina.ai
+## Web ページ取得: WebFetch / jina.ai / agent-browser
 
-- 基本は WebFetch ツールを使用
-- note など、WebFetch で本文が取得できないサイト（HTML/CSS のみ返る）は `r.jina.ai` を経由
+フォールバックチェーン（上から順に試す）。**重要: r.jina.ai で不完全取得だった場合に即「取れない」と諦めない**。Step 3 の DOM 調査を1回は必ず行う。
+
+### Step 1: WebFetch
+
+基本は WebFetch ツール。SSR された HTML や静的ページはここで完結する。
+
+### Step 2: r.jina.ai
+
+WebFetch で本文が取得できない（HTML/CSS のみ返る、JS レンダリング後の内容が欠ける）場合、`r.jina.ai` を経由。
 
 ```
 https://r.jina.ai/[元のURL]
 ```
 
-jina.ai の Reader API が JavaScript レンダリング後のコンテンツをマークダウン形式で返す。
+jina.ai の Reader API が JavaScript レンダリング後のコンテンツをマークダウン形式で返す。note などで有効。
+
+### Step 3: agent-browser で DOM 構造を探る
+
+r.jina.ai でも本文が不完全な場合（画像のみ、セリフが画像化されたフォトコミック、SPA で iframe 内配信、API 経由のデータ等）は、agent-browser で DOM 構造を調査して本文の在処を特定する。
+
+```bash
+agent-browser open <url> && agent-browser wait --load networkidle
+```
+
+以下を eval で確認:
+
+- **iframe**: `document.querySelectorAll('iframe')` — 本文が別ドメイン / 別 HTML に分離されているか
+- **API エンドポイント**: `performance.getEntriesByType('resource')` で `api` / `article` / `json` を含むリクエスト — データが JSON API 経由で取れるか
+- **background-image**: `getComputedStyle(el).backgroundImage` が `none` でない要素
+- **記事ルート要素**: `[class*="article"]`, `[class*="detail"]`, `[class*="content"]` 等で本文コンテナを特定し innerText / innerHTML を取る
+
+### Step 4: Step 3 で判明したソースを直接取得
+
+- **iframe の src**: r.jina.ai 経由で取得し直す（静的 HTML なら大抵取れる）
+- **API エンドポイント**: `xh --ignore-stdin GET <api-url>` で直接叩く（JSON データ）
+- **innerHTML が取れる場合**: agent-browser eval で直接ダンプ
+
+### Step 5: 画像ベースが残る場合
+
+セリフや本文の一部が完全に画像化されている場合は、`agent-browser screenshot --full` で該当領域をキャプチャして Read で画像として読む。全文取得を諦める判断は、Step 3-4 を経てから行う。
+
+### 判断基準
+
+- **「r.jina.ai で取れない = 取得不可」は短絡**。Step 3 の DOM 調査を省かない
+- 記事が画像 / 動画 / Canvas で描画されていることが確定してから諦める
+- ただし Step 3-4 に15分以上かかる場合はユーザーに状況を共有して判断を仰ぐ（闇雲に探り続けない）
 
 ---
 
