@@ -613,6 +613,8 @@ startTransition(async () => {
 
 **API 設計の原則**: `useDebouncedValue` が `startTransition` を引数で受け取ることで、同じ transition ID を複数の state 更新（テキスト + ラジオボタン等）で共有できる。戻り値を `[value, isPending]` タプルにせず、transition の共有を明示的にするのがこの設計の核心。
 
+**`isPending` 中の UX**: 古い結果を残したままインタラクションを抑制するには、結果エリアに `aria-busy={isPending}` + CSS で `opacity: 0.5; pointer-events: none;` を適用する（Suspense フォールバックへの切替は中速域では不要。「ネットワーク速度と UX の自動分岐」節を参照）。
+
 参考: [uhyo - Async React時代の宣言的UI 2: トランジション対応のuseDebouncedフックを作る](https://zenn.dev/uhyo/articles/async-react-debounce-2)
 
 ### Action パターン（汎用コンポーネント設計）
