@@ -277,10 +277,23 @@
     "sentry@claude-plugins-official": true,
     "claude-md-management@claude-plugins-official": true,
     "slack@claude-plugins-official": true,
-    "coderabbit@claude-plugins-official": true
+    "coderabbit@claude-plugins-official": true,
+    "tmux-agent-sidebar@hiroppy": true
+  },
+  "extraKnownMarketplaces": {
+    "hiroppy": {
+      "source": {
+        "source": "directory",
+        "path": "/Users/rym/.tmux/plugins/tmux-agent-sidebar"
+      }
+    }
   },
   "outputStyle": "Explanatory",
   "language": "Japanese",
   "effortLevel": "high",
+  "theme": "dark-daltonized",
+  "teammateMode": "auto",
+  "remoteControlAtStartup": false,
+  "agentPushNotifEnabled": true,
   "skipAutoPermissionPrompt": true
 }

@@ -1,13 +1,15 @@
 name: private
 root: ~/
 
+# main 以外の window は claude + 空ペイン (zsh) の 2 ペイン構成。
+# main window のみ tmux-agent-sidebar の create-only コマンドで左にサイドバーを足す。
 on_project_start: tmux set-option -g main-pane-width 80%
 
 windows:
   - main:
       layout: main-vertical
       panes:
-        - claude
+        - "$(tmux show-option -gqv @agent_sidebar_bin) toggle --create-only $(tmux display-message -p '#{window_id}') \"$(pwd)\" >/dev/null 2>&1; claude"
         -
   - ideas:
       root: ~/repo/github.com/RyoMa99/ideas
