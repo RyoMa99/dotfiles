@@ -7,10 +7,8 @@ on_project_start: tmux set-option -g main-pane-width 80%
 
 windows:
   - main:
-      layout: main-vertical
       panes:
         - "$(tmux show-option -gqv @agent_sidebar_bin) toggle --create-only $(tmux display-message -p '#{window_id}') \"$(pwd)\" >/dev/null 2>&1; claude"
-        -
   - ideas:
       root: ~/repo/github.com/RyoMa99/ideas
       layout: main-vertical
